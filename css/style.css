@@ -1,0 +1,178 @@
+:root {
+  --paper: #EDF1F5;
+  --paper-line: #D7DFE8;
+  --ink: #1B2A4A;
+  --ink-soft: #4A5A78;
+  --margin-red: #C1443B;
+  --gold: #D4A017;
+  --card-bg: #FFFFFF;
+  --shadow: 0 24px 60px -20px rgba(27, 42, 74, 0.25);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Inter', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.page {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 24px;
+}
+
+/* Ambient ruled-paper background lines */
+.ruled-bg {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 39px,
+    var(--paper-line) 40px
+  );
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.login-card {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  background: var(--card-bg);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  padding: 56px 44px 40px 56px;
+  overflow: hidden;
+}
+
+/* Signature element: red notebook margin rule */
+.margin-rule {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 34px;
+  width: 2px;
+  background: var(--margin-red);
+  opacity: 0.75;
+}
+
+/* Spiral binding holes along the top-left */
+.hole-punch {
+  position: absolute;
+  left: 12px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: inset 0 2px 4px rgba(27,42,74,0.25);
+}
+.hole-1 { top: 40px; }
+.hole-2 { top: 50%; transform: translateY(-50%); }
+.hole-3 { bottom: 40px; }
+
+.card-content { position: relative; }
+
+.eyebrow {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--margin-red);
+  margin: 0 0 14px;
+}
+
+h1 {
+  font-family: 'Zilla Slab', serif;
+  font-weight: 700;
+  font-size: 34px;
+  line-height: 1.15;
+  margin: 0 0 16px;
+  color: var(--ink);
+}
+
+.subtext {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin: 0 0 32px;
+  max-width: 360px;
+}
+
+.google-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  background: #fff;
+  border: 1.5px solid #DCE3EC;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.google-btn:hover {
+  border-color: var(--ink);
+  box-shadow: 0 4px 14px rgba(27,42,74,0.12);
+}
+
+.google-btn:active {
+  transform: scale(0.98);
+}
+
+.google-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.google-btn:focus-visible {
+  outline: 2px solid var(--margin-red);
+  outline-offset: 2px;
+}
+
+.login-status {
+  min-height: 20px;
+  font-size: 13px;
+  color: var(--margin-red);
+  margin: 14px 0 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.login-status.visible { opacity: 1; }
+
+.fine-print {
+  font-size: 12px;
+  color: var(--ink-soft);
+  opacity: 0.7;
+  margin: 28px 0 0;
+  line-height: 1.5;
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    padding: 48px 28px 32px 44px;
+  }
+  h1 { font-size: 28px; }
+  .margin-rule { left: 22px; }
+  .hole-punch { left: 8px; width: 10px; height: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .google-btn { transition: none; }
+}

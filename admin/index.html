@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Admin — Classwork Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper-bg:#EDF1F5;--paper-card:#fff;--paper2:#F5F7FA;
+  --ink:#1B2A4A;--ink-soft:#4A5A7A;--rule:#DDE4EC;
+  --red:#C1443B;--red2:rgba(193,68,59,.10);
+  --gold:#D4A017;--gold2:rgba(212,160,23,.12);
+  --green:#1EA15A;--green2:rgba(30,161,90,.10);
+  --font:'Inter',sans-serif;--font-h:'Zilla Slab',serif;
+  --sh:0 2px 14px rgba(27,42,74,.06);--shl:0 8px 28px rgba(27,42,74,.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);color:var(--ink);background:var(--paper-bg);min-height:100vh}
+
+/* ── LOGIN ── */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
+.login-box{background:#fff;border-radius:14px;padding:2.4rem;width:100%;max-width:380px;box-shadow:var(--shl);position:relative}
+.login-box::before{content:"";position:absolute;left:22px;top:0;bottom:0;width:2px;background:var(--red);opacity:.6}
+.login-box{padding-left:44px}
+.login-logo{font-family:var(--font-h);font-size:1.6rem;font-weight:700;text-align:center;margin-bottom:.2rem}
+.login-sub{color:var(--ink-soft);text-align:center;font-size:.85rem;margin-bottom:1.8rem}
+.btn-google{width:100%;padding:.8rem;background:#fff;border:1px solid var(--rule);color:var(--ink);border-radius:8px;font-family:var(--font);font-size:.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.6rem}
+.btn-google:hover{background:var(--paper2)}
+.btn-google:disabled{opacity:.6;cursor:not-allowed}
+.err{color:var(--red);font-size:.82rem;text-align:center;margin-top:.8rem;min-height:1.2em}
+
+/* ── LAYOUT ── */
+.dash{display:none;flex-direction:row;min-height:100vh}
+.sidebar{width:220px;flex-shrink:0;background:#fff;border-right:1px solid var(--rule);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.sb-logo{padding:1.3rem 1.1rem 1rem;border-bottom:1px solid var(--rule);font-family:var(--font-h);font-size:1.15rem;font-weight:700}
+.sb-nav{padding:.8rem 0;flex:1}
+.sb-item{display:flex;align-items:center;gap:.65rem;padding:.6rem 1.1rem;font-size:.85rem;font-weight:500;color:var(--ink-soft);cursor:pointer;border-left:3px solid transparent}
+.sb-item:hover{color:var(--ink);background:var(--paper2)}
+.sb-item.active{color:var(--red);background:var(--red2);border-left-color:var(--red);font-weight:600}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;border-radius:20px;padding:.05rem .45rem;font-size:.66rem;font-weight:700}
+.sb-foot{padding:1rem 1.1rem;border-top:1px solid var(--rule)}
+.admin-name{font-size:.75rem;color:var(--ink-soft);margin-bottom:.5rem;text-align:center}
+.btn-logout{width:100%;padding:.55rem;background:var(--red2);border:1px solid rgba(193,68,59,.25);color:var(--red);border-radius:7px;font-size:.78rem;font-weight:600;cursor:pointer}
+.btn-logout:hover{background:var(--red);color:#fff}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{background:#fff;border-bottom:1px solid var(--rule);padding:1rem 1.6rem;position:sticky;top:0;z-index:5}
+.page-title{font-family:var(--font-h);font-size:1.2rem;font-weight:600}
+.content{padding:1.5rem;flex:1}
+
+.panel{display:none}
+.panel.active{display:block}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.6rem}
+.stat-card{background:#fff;border-radius:12px;padding:1.2rem;box-shadow:var(--sh)}
+.stat-label{font-size:.72rem;font-weight:600;letter-spacing:.5px;color:var(--ink-soft);text-transform:uppercase}
+.stat-val{font-family:var(--font-h);font-size:1.9rem;font-weight:700;margin-top:.2rem}
+
+.sec-title{font-family:var(--font-h);font-size:1.1rem;font-weight:600;margin-bottom:.9rem}
+
+/* ── TABLE ── */
+.table-wrap{background:#fff;border-radius:12px;overflow:hidden;box-shadow:var(--sh)}
+table{width:100%;border-collapse:collapse}
+thead tr{background:var(--paper2)}
+th{font-size:.68rem;font-weight:600;letter-spacing:.8px;color:var(--ink-soft);text-transform:uppercase;padding:.75rem .9rem;text-align:left;white-space:nowrap}
+td{padding:.75rem .9rem;font-size:.85rem;border-top:1px solid var(--rule)}
+tbody tr:hover{background:var(--paper2)}
+.empty-row td{text-align:center;color:var(--ink-soft);padding:2rem}
+
+/* ── BUTTONS ── */
+.btn{padding:.4rem .85rem;border-radius:6px;font-size:.78rem;font-weight:600;cursor:pointer;border:none}
+.btn-green{background:var(--green2);border:1px solid rgba(30,161,90,.3);color:var(--green)}
+.btn-green:hover{background:rgba(30,161,90,.2)}
+.btn-red{background:var(--red2);border:1px solid rgba(193,68,59,.3);color:var(--red)}
+.btn-red:hover{background:rgba(193,68,59,.2)}
+.btn-row{display:flex;gap:.5rem}
+
+.badge{display:inline-block;padding:.15rem .55rem;border-radius:20px;font-size:.7rem;font-weight:600}
+.badge-pending{background:var(--gold2);color:var(--gold)}
+.badge-approved{background:var(--green2);color:var(--green)}
+
+/* ── LOG ── */
+.log-item{display:flex;gap:.7rem;padding:.7rem .9rem;border-top:1px solid var(--rule);font-size:.83rem}
+.log-item:first-child{border-top:none}
+.log-time{color:var(--ink-soft);font-size:.72rem;white-space:nowrap}
+
+.loading-msg{text-align:center;color:var(--ink-soft);padding:2rem;font-size:.85rem}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div class="login-wrap" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">📓 Classwork Hub</div>
+    <div class="login-sub">Admin access</div>
+    <button class="btn-google" id="adminGoogleBtn">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.706c-.18-.54-.282-1.117-.282-1.706s.102-1.166.282-1.706V4.962H.957C.347 6.175 0 7.55 0 9s.348 2.826.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/></svg>
+      Continue with Google
+    </button>
+    <p class="err" id="loginErr"></p>
+  </div>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div class="dash" id="dashboard">
+  <div class="sidebar">
+    <div class="sb-logo">📓 Admin</div>
+    <div class="sb-nav">
+      <div class="sb-item active" data-panel="dashboard">📊 Dashboard</div>
+      <div class="sb-item" data-panel="pending">⏳ Pending Schools <span class="sb-badge" id="sbPending" hidden>0</span></div>
+      <div class="sb-item" data-panel="schools">🏫 All Schools</div>
+      <div class="sb-item" data-panel="users">👥 Users</div>
+      <div class="sb-item" data-panel="logs">📝 Activity Log</div>
+    </div>
+    <div class="sb-foot">
+      <div class="admin-name" id="adminWelcome"></div>
+      <button class="btn-logout" id="adminLogout">Sign out</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar"><div class="page-title" id="pageTitle">Dashboard</div></div>
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="panel active" id="panel-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-label">Pending Schools</div><div class="stat-val" id="statPending">–</div></div>
+          <div class="stat-card"><div class="stat-label">Approved Schools</div><div class="stat-val" id="statApproved">–</div></div>
+          <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-val" id="statUsers">–</div></div>
+        </div>
+        <p style="color:var(--ink-soft);font-size:.85rem">Approve new schools from the <b>Pending Schools</b> tab so students can join them.</p>
+      </div>
+
+      <!-- PENDING SCHOOLS -->
+      <div class="panel" id="panel-pending">
+        <div class="sec-title">Pending Schools</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>School</th><th>City</th><th>Requested By</th><th>Requested</th><th>Action</th></tr></thead>
+            <tbody id="pendingTableBody"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ALL SCHOOLS -->
+      <div class="panel" id="panel-schools">
+        <div class="sec-title">All Approved Schools</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>School</th><th>City</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="schoolsTableBody"><tr class="empty-row"><td colspan="4">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div class="panel" id="panel-users">
+        <div class="sec-title">Users</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>School</th><th>Class</th><th>XP</th><th>Rank</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="usersTableBody"><tr class="empty-row"><td colspan="8">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- LOGS -->
+      <div class="panel" id="panel-logs">
+        <div class="sec-title">Activity Log <span style="font-weight:400;font-size:.75rem;color:var(--ink-soft)">(this device only)</span></div>
+        <div class="table-wrap" id="logList"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   ACTION NEEDED: paste your Classwork Hub Firebase config below
+   (Firebase Console → Project Settings → Your apps → SDK config).
+   This is a separate, self-contained page — same approach as your
+   SellThead admin/index.html — so it doesn't depend on whatever
+   export style js/firebase-config.js on the main site uses.
+   ══════════════════════════════════════════════════════════════ */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAGTm2APrJKpufnCCp3oOeL4oMmOBgntlA",
+  authDomain: "classwork-hub.firebaseapp.com",
+  projectId: "classwork-hub",
+  storageBucket: "classwork-hub.firebasestorage.app",
+  messagingSenderId: "487906365721",
+  appId: "1:487906365721:web:1c5d769ab9cf43e5a33588"
+};
+
+let db, auth;
+let currentAdminUid = null;
+let logs = JSON.parse(localStorage.getItem("cwhAdminLogs") || "[]");
+
+/* ── Load Firebase compat SDK from CDN, same pattern as your other projects ── */
+(function loadFirebase(){
+  const scripts = [
+    "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
+    "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js",
+    "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"
+  ];
+  function loadNext(i){
+    if (i >= scripts.length) { init(); return; }
+    const s = document.createElement("script");
+    s.src = scripts[i];
+    s.onload = () => loadNext(i + 1);
+    s.onerror = () => loadNext(i + 1);
+    document.head.appendChild(s);
+  }
+  loadNext(0);
+})();
+
+function init(){
+  firebase.initializeApp(FIREBASE_CONFIG);
+  db = firebase.firestore();
+  auth = firebase.auth();
+
+  document.getElementById("adminGoogleBtn").addEventListener("click", doGoogleLogin);
+  document.getElementById("adminLogout").addEventListener("click", () => auth.signOut());
+  document.querySelectorAll(".sb-item").forEach(item => {
+    item.addEventListener("click", () => switchPanel(item.dataset.panel));
+  });
+
+  auth.onAuthStateChanged(async user => {
+    if (!user) {
+      document.getElementById("loginScreen").style.display = "flex";
+      document.getElementById("dashboard").style.display = "none";
+      return;
+    }
+    try {
+      const snap = await db.collection("users").doc(user.uid).get();
+      if (snap.exists && snap.data().role === "admin") {
+        currentAdminUid = user.uid;
+        showDashboard(user.displayName || user.email);
+      } else {
+        await auth.signOut();
+        document.getElementById("loginErr").textContent = "Access denied — this Google account isn't an admin.";
+      }
+    } catch (e) {
+      console.error(e);
+      document.getElementById("loginErr").textContent = "Connection error — check your internet and refresh.";
+    }
+  });
+
+  renderLogs();
+}
+
+async function doGoogleLogin(){
+  const btn = document.getElementById("adminGoogleBtn");
+  const errEl = document.getElementById("loginErr");
+  btn.disabled = true;
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    const cred = await auth.signInWithPopup(provider);
+    const snap = await db.collection("users").doc(cred.user.uid).get();
+    if (!snap.exists || snap.data().role !== "admin") {
+      await auth.signOut();
+      errEl.textContent = "Access denied — this Google account isn't an admin.";
+    }
+    // onAuthStateChanged handles showing the dashboard on success
+  } catch (e) {
+    errEl.textContent = e.code === "auth/popup-blocked"
+      ? "Popup blocked — allow popups for this site and try again."
+      : "Sign-in failed. Try again.";
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function showDashboard(name){
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("dashboard").style.display = "flex";
+  document.getElementById("adminWelcome").textContent = name;
+  loadAll();
+}
+
+function switchPanel(name){
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.getElementById("panel-" + name).classList.add("active");
+  document.querySelectorAll(".sb-item").forEach(i => i.classList.toggle("active", i.dataset.panel === name));
+  const titles = { dashboard:"Dashboard", pending:"Pending Schools", schools:"All Schools", users:"Users", logs:"Activity Log" };
+  document.getElementById("pageTitle").textContent = titles[name] || name;
+}
+
+/* ── LOAD DATA ── */
+async function loadAll(){
+  await Promise.all([loadPending(), loadApprovedSchools(), loadUsers()]);
+}
+
+async function loadPending(){
+  const snap = await db.collection("schools").where("status", "==", "pending").get();
+  const body = document.getElementById("pendingTableBody");
+  const badge = document.getElementById("sbPending");
+  document.getElementById("statPending").textContent = snap.size;
+
+  if (snap.empty) {
+    body.innerHTML = '<tr class="empty-row"><td colspan="5">No pending requests 🎉</td></tr>';
+    badge.hidden = true;
+    return;
+  }
+  badge.hidden = false;
+  badge.textContent = snap.size;
+
+  body.innerHTML = "";
+  snap.forEach(doc => {
+    const d = doc.data();
+    const when = d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toLocaleDateString() : "—";
+    const requester = d.requestedByName || d.requestedByEmail
+      ? `${escapeHtml(d.requestedByName || "")}${d.requestedByEmail ? `<br><span style="color:var(--ink-soft);font-size:.75rem">${escapeHtml(d.requestedByEmail)}</span>` : ""}`
+      : "—";
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${escapeHtml(d.name)}</td><td>${escapeHtml(d.city || "")}</td><td>${requester}</td><td>${when}</td>
+      <td class="btn-row">
+        <button class="btn btn-green" data-approve="${doc.id}">Approve</button>
+        <button class="btn btn-red" data-reject="${doc.id}">Reject</button>
+      </td>`;
+    body.appendChild(tr);
+  });
+
+  body.querySelectorAll("[data-approve]").forEach(b => b.addEventListener("click", () => approveSchool(b.dataset.approve)));
+  body.querySelectorAll("[data-reject]").forEach(b => b.addEventListener("click", () => rejectSchool(b.dataset.reject)));
+}
+
+async function loadApprovedSchools(){
+  const snap = await db.collection("schools").where("status", "==", "approved").get();
+  const body = document.getElementById("schoolsTableBody");
+  document.getElementById("statApproved").textContent = snap.size;
+
+  if (snap.empty) {
+    body.innerHTML = '<tr class="empty-row"><td colspan="4">No approved schools yet.</td></tr>';
+    return;
+  }
+  body.innerHTML = "";
+  snap.forEach(doc => {
+    const d = doc.data();
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${escapeHtml(d.name)}</td><td>${escapeHtml(d.city || "")}</td>
+      <td><span class="badge badge-approved">Approved</span></td>
+      <td><button class="btn btn-red" data-remove="${doc.id}">Remove</button></td>`;
+    body.appendChild(tr);
+  });
+  body.querySelectorAll("[data-remove]").forEach(b => b.addEventListener("click", () => removeSchool(b.dataset.remove, b.closest("tr").children[0].textContent)));
+}
+
+async function loadUsers(){
+  const snap = await db.collection("users").get();
+  const body = document.getElementById("usersTableBody");
+  document.getElementById("statUsers").textContent = snap.size;
+
+  if (snap.empty) {
+    body.innerHTML = '<tr class="empty-row"><td colspan="8">No users yet.</td></tr>';
+    return;
+  }
+  body.innerHTML = "";
+  snap.forEach(doc => {
+    const d = doc.data();
+    const banned = d.banned === true;
+    const isSelf = doc.id === currentAdminUid;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${escapeHtml(d.name || "—")}</td><td>${escapeHtml(d.email || "—")}</td>
+      <td>${escapeHtml(d.schoolName || "—")}</td><td>${escapeHtml(d.classId || "—")}</td>
+      <td>${d.xp ?? 0}</td><td>${escapeHtml(d.rank || "Bronze")}</td>
+      <td>${banned ? '<span class="badge" style="background:var(--red2);color:var(--red)">Blocked</span>' : '<span class="badge badge-approved">Active</span>'}</td>
+      <td>${isSelf ? "—" : `<button class="btn ${banned ? "btn-green" : "btn-red"}" data-toggle-ban="${doc.id}" data-banned="${banned}">${banned ? "Unblock" : "Block"}</button>`}</td>`;
+    body.appendChild(tr);
+  });
+  body.querySelectorAll("[data-toggle-ban]").forEach(b => b.addEventListener("click", () =>
+    toggleBan(b.dataset.toggleBan, b.dataset.banned === "true", b.closest("tr").children[0].textContent)));
+}
+
+async function toggleBan(uid, currentlyBanned, name){
+  const action = currentlyBanned ? "unblock" : "block";
+  if (!confirm(`${currentlyBanned ? "Unblock" : "Block"} ${name.trim() || "this user"}? ${currentlyBanned ? "They'll regain access." : "They won't be able to view or upload classwork until unblocked."}`)) return;
+  await db.collection("users").doc(uid).update({ banned: !currentlyBanned });
+  addLog(currentlyBanned ? "✅" : "🚫", `${currentlyBanned ? "Unblocked" : "Blocked"} user: ${name.trim() || uid}`);
+  loadUsers();
+}
+
+/* ── ACTIONS ── */
+async function approveSchool(id){
+  await db.collection("schools").doc(id).update({ status: "approved" });
+  addLog("✅", "Approved a pending school");
+  loadPending();
+  loadApprovedSchools();
+}
+
+async function rejectSchool(id){
+  if (!confirm("Reject and delete this school request?")) return;
+  await db.collection("schools").doc(id).delete();
+  addLog("❌", "Rejected a pending school");
+  loadPending();
+}
+
+async function removeSchool(id, name){
+  if (!confirm(`Remove "${name.trim()}"? Students already in it will lose access to its data.`)) return;
+  await db.collection("schools").doc(id).delete();
+  addLog("🗑️", `Removed school: ${name.trim()}`);
+  loadApprovedSchools();
+}
+
+/* ── LOCAL ACTIVITY LOG (this device only — not a synced audit trail) ── */
+function addLog(icon, text){
+  logs.unshift({ icon, text, time: new Date().toLocaleString() });
+  logs = logs.slice(0, 50);
+  localStorage.setItem("cwhAdminLogs", JSON.stringify(logs));
+  renderLogs();
+}
+
+function renderLogs(){
+  const el = document.getElementById("logList");
+  if (!logs.length) { el.innerHTML = '<div class="empty-row" style="padding:2rem;text-align:center;color:var(--ink-soft)">No activity yet.</div>'; return; }
+  el.innerHTML = logs.map(l => `<div class="log-item"><span>${l.icon}</span><span style="flex:1">${escapeHtml(l.text)}</span><span class="log-time">${l.time}</span></div>`).join("");
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // BASELINE ONLY — this just requires sign-in for any read/write, closing off
+    // the wide-open Firebase test-mode default (anyone on the internet, no login).
+    //
+    // It does NOT yet check "is this photo actually from your own class" — that
+    // needs your real upload path structure, which isn't finalized until we build
+    // the upload flow on dashboard.html. Once that's built (e.g. paths look like
+    // notebooks/{schoolId}/{classId}/{subjectId}/{file}), come back here and we'll
+    // tighten this to match, the same way the Firestore rules check inClass().
+    match /{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Select Your School — Classwork Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/school-select.css" />
+</head>
+<body>
+
+  <!-- Top bar: logo + signed-in user -->
+  <header class="topbar">
+    <div class="logo">📓 Classwork Hub</div>
+    <div class="user-box" id="userBox">
+      <img id="userPhoto" class="user-photo" src="" alt="" />
+      <span id="userName"></span>
+      <button id="signOutBtn" class="link-btn">Sign out</button>
+    </div>
+  </header>
+
+  <main class="page">
+
+    <!-- STEP 1: Find / request school -->
+    <section id="step-school" class="notebook-card step">
+      <h1>Find your school</h1>
+      <p class="sub">Search below, or add it if it's not listed yet.</p>
+
+      <input
+        type="text"
+        id="schoolSearch"
+        class="ruled-input"
+        placeholder="Start typing your school name…"
+        autocomplete="off"
+      />
+
+      <ul id="schoolResults" class="school-list"></ul>
+      <p id="schoolEmptyMsg" class="empty-msg" hidden>No matches yet — you can request it below.</p>
+
+      <button id="toggleRequestForm" class="text-btn">
+        + Can't find your school? Add it
+      </button>
+
+      <form id="requestSchoolForm" class="request-form" hidden>
+        <input type="text" id="newSchoolName" class="ruled-input" placeholder="School name" required />
+        <input type="text" id="newSchoolCity" class="ruled-input" placeholder="City" required />
+        <button type="submit" class="primary-btn">Add & Continue</button>
+      </form>
+
+      <p id="schoolError" class="error-msg" hidden></p>
+    </section>
+
+    <!-- STEP 2: Class + Section -->
+    <section id="step-class" class="notebook-card step" hidden>
+      <h1>Which class are you in?</h1>
+      <p class="sub" id="chosenSchoolLabel"></p>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="classInput">Class</label>
+          <select id="classInput" class="ruled-input">
+            <option value="">Select</option>
+            <option>6</option><option>7</option><option>8</option><option>9</option>
+            <option>10</option><option>11</option><option>12</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="sectionInput">Section</label>
+          <input type="text" id="sectionInput" class="ruled-input" placeholder="e.g. F" maxlength="3" />
+        </div>
+      </div>
+
+      <p id="classError" class="error-msg" hidden></p>
+
+      <div class="btn-row">
+        <button id="backToSchool" class="text-btn">← Back</button>
+        <button id="saveClassBtn" class="primary-btn">Continue to Dashboard</button>
+      </div>
+    </section>
+
+    <p id="loadingMsg" class="loading-msg">Loading…</p>
+  </main>
+
+  <!-- Firebase (CDN, modular SDK) -->
+  <script type="module" src="js/firebase-config.js"></script>
+  <script type="module" src="js/school-select.js"></script>
+</body>
+</html>

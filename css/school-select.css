@@ -1,0 +1,239 @@
+/* ============================================
+   Classwork Hub — "The Notebook" theme
+   Same palette as the login page:
+   paper blue-grey / ink navy / margin-rule red / gold (XP only)
+   ============================================ */
+
+:root {
+  --paper-bg: #EDF1F5;
+  --paper-card: #FFFFFF;
+  --ink-navy: #1B2A4A;
+  --ink-navy-soft: #4A5A7A;
+  --margin-red: #C1443B;
+  --gold: #D4A017;
+  --rule-line: #DDE4EC;
+  --font-heading: 'Zilla Slab', serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--ink-navy);
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 27px,
+      var(--rule-line) 28px
+    ),
+    var(--paper-bg);
+  min-height: 100vh;
+}
+
+/* ---------- Top bar ---------- */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 28px;
+  background: var(--paper-card);
+  border-bottom: 3px solid var(--margin-red);
+}
+
+.logo {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--ink-navy);
+}
+
+.user-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+}
+
+.user-photo {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--margin-red);
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--ink-navy-soft);
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+}
+
+/* ---------- Page layout ---------- */
+.page {
+  max-width: 520px;
+  margin: 48px auto;
+  padding: 0 20px;
+}
+
+/* ---------- Notebook card (matches login page's signature look) ---------- */
+.notebook-card {
+  position: relative;
+  background: var(--paper-card);
+  border-radius: 10px;
+  padding: 36px 32px 32px 44px;
+  box-shadow: 0 6px 24px rgba(27, 42, 74, 0.08);
+}
+
+/* red vertical margin rule down the left, like ruled paper */
+.notebook-card::before {
+  content: "";
+  position: absolute;
+  left: 22px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--margin-red);
+  opacity: 0.6;
+}
+
+.notebook-card h1 {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  margin: 0 0 6px;
+}
+
+.sub {
+  color: var(--ink-navy-soft);
+  font-size: 0.92rem;
+  margin: 0 0 22px;
+}
+
+/* ---------- Inputs ---------- */
+.ruled-input {
+  width: 100%;
+  padding: 11px 14px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  border: none;
+  border-bottom: 2px solid var(--rule-line);
+  background: transparent;
+  color: var(--ink-navy);
+  outline: none;
+  margin-bottom: 14px;
+  transition: border-color 0.15s ease;
+}
+
+.ruled-input:focus {
+  border-bottom-color: var(--margin-red);
+}
+
+/* ---------- School search results ---------- */
+.school-list {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.school-list li {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--rule-line);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.15s ease;
+}
+
+.school-list li:hover {
+  background: var(--paper-bg);
+}
+
+.school-list .school-city {
+  font-size: 0.8rem;
+  color: var(--ink-navy-soft);
+}
+
+.empty-msg, .error-msg, .loading-msg {
+  font-size: 0.85rem;
+  color: var(--ink-navy-soft);
+}
+
+.error-msg { color: var(--margin-red); }
+
+.loading-msg {
+  text-align: center;
+  margin-top: 24px;
+}
+
+/* ---------- Buttons ---------- */
+.text-btn {
+  background: none;
+  border: none;
+  color: var(--margin-red);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  padding: 6px 0;
+  margin-top: 4px;
+}
+
+.primary-btn {
+  background: var(--ink-navy);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 22px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.primary-btn:hover { background: var(--margin-red); }
+
+.primary-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- Request-school form ---------- */
+.request-form {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--rule-line);
+}
+
+/* ---------- Step 2: class/section ---------- */
+.field-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.field { flex: 1; }
+
+.field label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--ink-navy-soft);
+  margin-bottom: 4px;
+}
+
+.btn-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 18px;
+}
+
+[hidden] { display: none !important; }
