@@ -1,0 +1,123 @@
+/* ==========================================================
+   Classwork Hub — shared design tokens
+   Dark cyan glassmorphism theme
+   ========================================================== */
+:root {
+  --bg: #05090c;
+  --bg-glow-1: #0a2a30;
+  --bg-glow-2: #062024;
+  --surface: rgba(18, 30, 34, 0.55);
+  --surface-solid: #0d1518;
+  --surface-hover: rgba(34, 54, 60, 0.65);
+  --border: rgba(103, 232, 249, 0.14);
+  --border-strong: rgba(103, 232, 249, 0.3);
+
+  --text: #eaf6f8;
+  --text-soft: #9db3b8;
+  --text-faint: #5f7a80;
+
+  --cyan: #22d3ee;
+  --cyan-bright: #67e8f9;
+  --cyan-dim: #0e7490;
+  --gold: #f5c451;
+  --red: #f26d6d;
+  --green: #4ade80;
+
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 9px;
+
+  --shadow-card: 0 24px 60px -24px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 0 1px var(--border), 0 20px 50px -20px rgba(34, 211, 238, 0.15);
+
+  --blur: blur(18px);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 15% -10%, var(--bg-glow-1), transparent 60%),
+    radial-gradient(900px 500px at 110% 20%, var(--bg-glow-2), transparent 55%),
+    var(--bg);
+  background-attachment: fixed;
+}
+
+/* Reusable glass card */
+.glass {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+}
+
+/* Reusable pill badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.badge-cyan   { background: rgba(34, 211, 238, 0.12); color: var(--cyan-bright); }
+.badge-gold   { background: rgba(245, 196, 81, 0.14); color: var(--gold); }
+.badge-red    { background: rgba(242, 109, 109, 0.14); color: var(--red); }
+.badge-green  { background: rgba(74, 222, 128, 0.14); color: var(--green); }
+.badge-approved { background: rgba(74, 222, 128, 0.14); color: var(--green); }
+
+/* Reusable buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.5; cursor: default; }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--cyan), var(--cyan-dim));
+  color: #04191c;
+}
+.btn-primary:hover { box-shadow: 0 8px 24px -8px rgba(34, 211, 238, 0.5); }
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text-soft);
+}
+.btn-ghost:hover { border-color: var(--border-strong); color: var(--text); }
+
+.btn-green { background: rgba(74, 222, 128, 0.12); color: var(--green); border-color: rgba(74,222,128,0.25); }
+.btn-green:hover { background: rgba(74, 222, 128, 0.2); }
+
+.btn-red { background: rgba(242, 109, 109, 0.12); color: var(--red); border-color: rgba(242,109,109,0.25); }
+.btn-red:hover { background: rgba(242, 109, 109, 0.2); }
+
+::selection { background: var(--cyan-dim); color: #fff; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; }

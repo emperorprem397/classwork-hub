@@ -8,46 +8,55 @@
 <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --paper-bg:#EDF1F5;--paper-card:#fff;--paper2:#F5F7FA;
-  --ink:#1B2A4A;--ink-soft:#4A5A7A;--rule:#DDE4EC;
-  --red:#C1443B;--red2:rgba(193,68,59,.10);
-  --gold:#D4A017;--gold2:rgba(212,160,23,.12);
-  --green:#1EA15A;--green2:rgba(30,161,90,.10);
+  --paper-bg:#05090c;--paper-card:rgba(18,30,34,.6);--paper2:rgba(34,54,60,.55);
+  --ink:#eaf6f8;--ink-soft:#9db3b8;--rule:rgba(103,232,249,.14);
+  --red:#f26d6d;--red2:rgba(242,109,109,.12);
+  --gold:#f5c451;--gold2:rgba(245,196,81,.14);
+  --green:#4ade80;--green2:rgba(74,222,128,.12);
+  --cyan:#22d3ee;--cyan-bright:#67e8f9;--cyan-dim:#0e7490;--cyan2:rgba(34,211,238,.12);
   --font:'Inter',sans-serif;--font-h:'Zilla Slab',serif;
-  --sh:0 2px 14px rgba(27,42,74,.06);--shl:0 8px 28px rgba(27,42,74,.10);
+  --sh:0 2px 14px rgba(0,0,0,.35);--shl:0 20px 50px -20px rgba(34,211,238,.15), 0 0 0 1px var(--rule);
+  --blur:blur(18px);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font);color:var(--ink);background:var(--paper-bg);min-height:100vh}
+body{
+  font-family:var(--font);color:var(--ink);min-height:100vh;
+  background:
+    radial-gradient(1200px 600px at 15% -10%, #0a2a30, transparent 60%),
+    radial-gradient(900px 500px at 110% 20%, #062024, transparent 55%),
+    var(--paper-bg);
+  background-attachment:fixed;
+}
 
 /* ── LOGIN ── */
 .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
-.login-box{background:#fff;border-radius:14px;padding:2.4rem;width:100%;max-width:380px;box-shadow:var(--shl);position:relative}
-.login-box::before{content:"";position:absolute;left:22px;top:0;bottom:0;width:2px;background:var(--red);opacity:.6}
+.login-box{background:var(--paper-card);border:1px solid var(--rule);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-radius:14px;padding:2.4rem;width:100%;max-width:380px;box-shadow:var(--shl);position:relative}
+.login-box::before{content:"";position:absolute;left:22px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--cyan),transparent);opacity:.8}
 .login-box{padding-left:44px}
-.login-logo{font-family:var(--font-h);font-size:1.6rem;font-weight:700;text-align:center;margin-bottom:.2rem}
+.login-logo{font-family:var(--font-h);font-size:1.6rem;font-weight:700;text-align:center;margin-bottom:.2rem;color:var(--ink)}
 .login-sub{color:var(--ink-soft);text-align:center;font-size:.85rem;margin-bottom:1.8rem}
-.btn-google{width:100%;padding:.8rem;background:#fff;border:1px solid var(--rule);color:var(--ink);border-radius:8px;font-family:var(--font);font-size:.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.6rem}
-.btn-google:hover{background:var(--paper2)}
+.btn-google{width:100%;padding:.8rem;background:rgba(255,255,255,.04);border:1px solid var(--rule);color:var(--ink);border-radius:8px;font-family:var(--font);font-size:.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.6rem}
+.btn-google:hover{border-color:var(--cyan-bright);box-shadow:0 4px 20px rgba(34,211,238,.15)}
 .btn-google:disabled{opacity:.6;cursor:not-allowed}
 .err{color:var(--red);font-size:.82rem;text-align:center;margin-top:.8rem;min-height:1.2em}
 
 /* ── LAYOUT ── */
 .dash{display:none;flex-direction:row;min-height:100vh}
-.sidebar{width:220px;flex-shrink:0;background:#fff;border-right:1px solid var(--rule);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
-.sb-logo{padding:1.3rem 1.1rem 1rem;border-bottom:1px solid var(--rule);font-family:var(--font-h);font-size:1.15rem;font-weight:700}
+.sidebar{width:220px;flex-shrink:0;background:rgba(13,21,24,.7);border-right:1px solid var(--rule);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.sb-logo{padding:1.3rem 1.1rem 1rem;border-bottom:1px solid var(--rule);font-family:var(--font-h);font-size:1.15rem;font-weight:700;color:var(--ink)}
 .sb-nav{padding:.8rem 0;flex:1}
 .sb-item{display:flex;align-items:center;gap:.65rem;padding:.6rem 1.1rem;font-size:.85rem;font-weight:500;color:var(--ink-soft);cursor:pointer;border-left:3px solid transparent}
 .sb-item:hover{color:var(--ink);background:var(--paper2)}
-.sb-item.active{color:var(--red);background:var(--red2);border-left-color:var(--red);font-weight:600}
+.sb-item.active{color:var(--cyan-bright);background:var(--cyan2);border-left-color:var(--cyan);font-weight:600}
 .sb-badge{margin-left:auto;background:var(--red);color:#fff;border-radius:20px;padding:.05rem .45rem;font-size:.66rem;font-weight:700}
 .sb-foot{padding:1rem 1.1rem;border-top:1px solid var(--rule)}
 .admin-name{font-size:.75rem;color:var(--ink-soft);margin-bottom:.5rem;text-align:center}
-.btn-logout{width:100%;padding:.55rem;background:var(--red2);border:1px solid rgba(193,68,59,.25);color:var(--red);border-radius:7px;font-size:.78rem;font-weight:600;cursor:pointer}
+.btn-logout{width:100%;padding:.55rem;background:var(--red2);border:1px solid rgba(242,109,109,.25);color:var(--red);border-radius:7px;font-size:.78rem;font-weight:600;cursor:pointer}
 .btn-logout:hover{background:var(--red);color:#fff}
 
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
-.topbar{background:#fff;border-bottom:1px solid var(--rule);padding:1rem 1.6rem;position:sticky;top:0;z-index:5}
-.page-title{font-family:var(--font-h);font-size:1.2rem;font-weight:600}
+.topbar{background:rgba(13,21,24,.7);border-bottom:1px solid var(--rule);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);padding:1rem 1.6rem;position:sticky;top:0;z-index:5}
+.page-title{font-family:var(--font-h);font-size:1.2rem;font-weight:600;color:var(--ink)}
 .content{padding:1.5rem;flex:1}
 
 .panel{display:none}
@@ -55,27 +64,41 @@ body{font-family:var(--font);color:var(--ink);background:var(--paper-bg);min-hei
 
 /* ── STATS ── */
 .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.6rem}
-.stat-card{background:#fff;border-radius:12px;padding:1.2rem;box-shadow:var(--sh)}
+.stat-card{background:var(--paper-card);border:1px solid var(--rule);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-radius:12px;padding:1.2rem;box-shadow:var(--sh)}
 .stat-label{font-size:.72rem;font-weight:600;letter-spacing:.5px;color:var(--ink-soft);text-transform:uppercase}
-.stat-val{font-family:var(--font-h);font-size:1.9rem;font-weight:700;margin-top:.2rem}
+.stat-val{font-family:var(--font-h);font-size:1.9rem;font-weight:700;margin-top:.2rem;color:var(--cyan-bright)}
 
-.sec-title{font-family:var(--font-h);font-size:1.1rem;font-weight:600;margin-bottom:.9rem}
+.sec-title{font-family:var(--font-h);font-size:1.1rem;font-weight:600;margin-bottom:.9rem;color:var(--ink)}
 
 /* ── TABLE ── */
-.table-wrap{background:#fff;border-radius:12px;overflow:hidden;box-shadow:var(--sh)}
+.table-wrap{background:var(--paper-card);border:1px solid var(--rule);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-radius:12px;overflow:hidden;box-shadow:var(--sh)}
 table{width:100%;border-collapse:collapse}
 thead tr{background:var(--paper2)}
 th{font-size:.68rem;font-weight:600;letter-spacing:.8px;color:var(--ink-soft);text-transform:uppercase;padding:.75rem .9rem;text-align:left;white-space:nowrap}
-td{padding:.75rem .9rem;font-size:.85rem;border-top:1px solid var(--rule)}
+td{padding:.75rem .9rem;font-size:.85rem;border-top:1px solid var(--rule);color:var(--ink)}
 tbody tr:hover{background:var(--paper2)}
 .empty-row td{text-align:center;color:var(--ink-soft);padding:2rem}
 
+/* ── FORM ELEMENTS (Subjects tab) ── */
+select,input[type=text]{
+  font-family:var(--font);font-size:.85rem;color:var(--ink);
+  background:rgba(255,255,255,.04);border:1px solid var(--rule);border-radius:7px;
+  padding:.55rem .7rem;outline:none;
+}
+select:focus,input[type=text]:focus{border-color:var(--cyan)}
+select option{background:#0d1518;color:var(--ink)}
+.form-row{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
+.form-row label{font-size:.75rem;color:var(--ink-soft);margin-right:.3rem}
+.hint{color:var(--ink-soft);font-size:.8rem;margin-top:.5rem}
+
 /* ── BUTTONS ── */
-.btn{padding:.4rem .85rem;border-radius:6px;font-size:.78rem;font-weight:600;cursor:pointer;border:none}
-.btn-green{background:var(--green2);border:1px solid rgba(30,161,90,.3);color:var(--green)}
-.btn-green:hover{background:rgba(30,161,90,.2)}
-.btn-red{background:var(--red2);border:1px solid rgba(193,68,59,.3);color:var(--red)}
-.btn-red:hover{background:rgba(193,68,59,.2)}
+.btn{padding:.4rem .85rem;border-radius:6px;font-size:.78rem;font-weight:600;cursor:pointer;border:none;font-family:var(--font)}
+.btn-green{background:var(--green2);border:1px solid rgba(74,222,128,.3);color:var(--green)}
+.btn-green:hover{background:rgba(74,222,128,.2)}
+.btn-red{background:var(--red2);border:1px solid rgba(242,109,109,.3);color:var(--red)}
+.btn-red:hover{background:rgba(242,109,109,.2)}
+.btn-cyan{background:linear-gradient(135deg,var(--cyan),var(--cyan-dim));border:none;color:#04191c}
+.btn-cyan:hover{box-shadow:0 6px 18px -6px rgba(34,211,238,.5)}
 .btn-row{display:flex;gap:.5rem}
 
 .badge{display:inline-block;padding:.15rem .55rem;border-radius:20px;font-size:.7rem;font-weight:600}
@@ -83,7 +106,7 @@ tbody tr:hover{background:var(--paper2)}
 .badge-approved{background:var(--green2);color:var(--green)}
 
 /* ── LOG ── */
-.log-item{display:flex;gap:.7rem;padding:.7rem .9rem;border-top:1px solid var(--rule);font-size:.83rem}
+.log-item{display:flex;gap:.7rem;padding:.7rem .9rem;border-top:1px solid var(--rule);font-size:.83rem;color:var(--ink)}
 .log-item:first-child{border-top:none}
 .log-time{color:var(--ink-soft);font-size:.72rem;white-space:nowrap}
 
@@ -115,6 +138,7 @@ tbody tr:hover{background:var(--paper2)}
       <div class="sb-item" data-panel="pending">⏳ Pending Schools <span class="sb-badge" id="sbPending" hidden>0</span></div>
       <div class="sb-item" data-panel="schools">🏫 All Schools</div>
       <div class="sb-item" data-panel="users">👥 Users</div>
+      <div class="sb-item" data-panel="subjects">📚 Subjects</div>
       <div class="sb-item" data-panel="logs">📝 Activity Log</div>
     </div>
     <div class="sb-foot">
@@ -170,6 +194,31 @@ tbody tr:hover{background:var(--paper2)}
         </div>
       </div>
 
+      <!-- SUBJECTS -->
+      <div class="panel" id="panel-subjects">
+        <div class="sec-title">Manage Subjects</div>
+        <div class="form-row">
+          <label for="subjSchoolSelect">School</label>
+          <select id="subjSchoolSelect"><option value="">Select a school…</option></select>
+          <label for="subjClassSelect">Class</label>
+          <select id="subjClassSelect" disabled><option value="">Select school first…</option></select>
+        </div>
+
+        <form id="addSubjectForm" class="form-row" hidden>
+          <input type="text" id="newSubjectName" placeholder="Subject name (e.g. Physics)" required />
+          <input type="text" id="newSubjectTeacher" placeholder="Teacher (optional)" />
+          <button type="submit" class="btn btn-cyan">+ Add Subject</button>
+        </form>
+
+        <div class="table-wrap" id="subjectsTableWrap" hidden>
+          <table>
+            <thead><tr><th>Subject</th><th>Teacher</th><th>Action</th></tr></thead>
+            <tbody id="subjectsTableBody"></tbody>
+          </table>
+        </div>
+        <p class="hint" id="subjectsHint">Pick a school and class above to view or add its subjects.</p>
+      </div>
+
       <!-- LOGS -->
       <div class="panel" id="panel-logs">
         <div class="sec-title">Activity Log <span style="font-weight:400;font-size:.75rem;color:var(--ink-soft)">(this device only)</span></div>
@@ -200,6 +249,14 @@ const FIREBASE_CONFIG = {
 let db, auth;
 let currentAdminUid = null;
 let logs = JSON.parse(localStorage.getItem("cwhAdminLogs") || "[]");
+let selectedSubjSchoolId = null;
+let selectedSubjClassId = null;
+
+const subjSchoolSelect = document.getElementById("subjSchoolSelect");
+const subjClassSelect = document.getElementById("subjClassSelect");
+const addSubjectForm = document.getElementById("addSubjectForm");
+const subjectsTableWrap = document.getElementById("subjectsTableWrap");
+const subjectsHint = document.getElementById("subjectsHint");
 
 /* ── Load Firebase compat SDK from CDN, same pattern as your other projects ── */
 (function loadFirebase(){
@@ -229,6 +286,9 @@ function init(){
   document.querySelectorAll(".sb-item").forEach(item => {
     item.addEventListener("click", () => switchPanel(item.dataset.panel));
   });
+  subjSchoolSelect.addEventListener("change", onSubjSchoolChange);
+  subjClassSelect.addEventListener("change", onSubjClassChange);
+  addSubjectForm.addEventListener("submit", onAddSubject);
 
   auth.onAuthStateChanged(async user => {
     if (!user) {
@@ -288,8 +348,9 @@ function switchPanel(name){
   document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
   document.getElementById("panel-" + name).classList.add("active");
   document.querySelectorAll(".sb-item").forEach(i => i.classList.toggle("active", i.dataset.panel === name));
-  const titles = { dashboard:"Dashboard", pending:"Pending Schools", schools:"All Schools", users:"Users", logs:"Activity Log" };
+  const titles = { dashboard:"Dashboard", pending:"Pending Schools", schools:"All Schools", users:"Users", subjects:"Subjects", logs:"Activity Log" };
   document.getElementById("pageTitle").textContent = titles[name] || name;
+  if (name === "subjects" && subjSchoolSelect.options.length <= 1) loadSchoolsForSubjects();
 }
 
 /* ── LOAD DATA ── */
@@ -420,6 +481,119 @@ function renderLogs(){
   const el = document.getElementById("logList");
   if (!logs.length) { el.innerHTML = '<div class="empty-row" style="padding:2rem;text-align:center;color:var(--ink-soft)">No activity yet.</div>'; return; }
   el.innerHTML = logs.map(l => `<div class="log-item"><span>${l.icon}</span><span style="flex:1">${escapeHtml(l.text)}</span><span class="log-time">${l.time}</span></div>`).join("");
+}
+
+/* ── SUBJECTS TAB ── */
+async function loadSchoolsForSubjects(){
+  const snap = await db.collection("schools").where("status", "==", "approved").get();
+  subjSchoolSelect.innerHTML = '<option value="">Select a school…</option>';
+  snap.forEach(doc => {
+    const opt = document.createElement("option");
+    opt.value = doc.id;
+    opt.textContent = doc.data().name;
+    subjSchoolSelect.appendChild(opt);
+  });
+}
+
+async function onSubjSchoolChange(){
+  selectedSubjSchoolId = subjSchoolSelect.value;
+  selectedSubjClassId = null;
+  subjClassSelect.innerHTML = '<option value="">Select a class…</option>';
+  addSubjectForm.hidden = true;
+  subjectsTableWrap.hidden = true;
+
+  if (!selectedSubjSchoolId) {
+    subjClassSelect.disabled = true;
+    subjClassSelect.innerHTML = '<option value="">Select school first…</option>';
+    subjectsHint.hidden = false;
+    subjectsHint.textContent = "Pick a school and class above to view or add its subjects.";
+    return;
+  }
+
+  subjClassSelect.disabled = false;
+  const snap = await db.collection("schools").doc(selectedSubjSchoolId).collection("classes").get();
+  if (snap.empty) {
+    subjClassSelect.innerHTML = '<option value="">No classes yet — students create these by joining</option>';
+    subjectsHint.hidden = false;
+    subjectsHint.textContent = "No students have joined a class at this school yet, so there's nothing to add subjects to.";
+    return;
+  }
+  snap.forEach(doc => {
+    const opt = document.createElement("option");
+    opt.value = doc.id;
+    opt.textContent = doc.data().name || doc.id;
+    subjClassSelect.appendChild(opt);
+  });
+}
+
+async function onSubjClassChange(){
+  selectedSubjClassId = subjClassSelect.value;
+  if (!selectedSubjClassId) {
+    addSubjectForm.hidden = true;
+    subjectsTableWrap.hidden = true;
+    subjectsHint.hidden = false;
+    return;
+  }
+  addSubjectForm.hidden = false;
+  subjectsHint.hidden = true;
+  await loadSubjects();
+}
+
+function subjectsRef(){
+  return db.collection("schools").doc(selectedSubjSchoolId)
+    .collection("classes").doc(selectedSubjClassId)
+    .collection("subjects");
+}
+
+async function loadSubjects(){
+  const snap = await subjectsRef().orderBy("name").get();
+  const body = document.getElementById("subjectsTableBody");
+  if (snap.empty) {
+    subjectsTableWrap.hidden = true;
+    subjectsHint.hidden = false;
+    subjectsHint.textContent = "No subjects added for this class yet — add the first one above.";
+    return;
+  }
+  subjectsTableWrap.hidden = false;
+  subjectsHint.hidden = true;
+  body.innerHTML = "";
+  snap.forEach(doc => {
+    const d = doc.data();
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${escapeHtml(d.name)}</td><td>${escapeHtml(d.teacher || "—")}</td>
+      <td><button class="btn btn-red" data-del-subject="${doc.id}">Remove</button></td>`;
+    body.appendChild(tr);
+  });
+  body.querySelectorAll("[data-del-subject]").forEach(b => b.addEventListener("click", () =>
+    deleteSubject(b.dataset.delSubject, b.closest("tr").children[0].textContent)));
+}
+
+async function onAddSubject(e){
+  e.preventDefault();
+  const nameEl = document.getElementById("newSubjectName");
+  const teacherEl = document.getElementById("newSubjectTeacher");
+  const name = nameEl.value.trim();
+  if (!name) return;
+  const btn = addSubjectForm.querySelector("button");
+  btn.disabled = true;
+  try {
+    await subjectsRef().add({ name, teacher: teacherEl.value.trim(), createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    addLog("📚", `Added subject "${name}" to ${subjClassSelect.selectedOptions[0].textContent}`);
+    nameEl.value = ""; teacherEl.value = "";
+    await loadSubjects();
+  } catch (e) {
+    console.error(e);
+    alert("Couldn't add subject — check your connection and try again.");
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function deleteSubject(id, name){
+  if (!confirm(`Remove "${name.trim()}"? Any uploads already made for it will remain but won't be linked to a visible subject.`)) return;
+  await subjectsRef().doc(id).delete();
+  addLog("🗑️", `Removed subject: ${name.trim()}`);
+  loadSubjects();
 }
 
 function escapeHtml(str){

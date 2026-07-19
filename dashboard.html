@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard — Classwork Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sb-logo"><span class="dot"></span> Classwork Hub</div>
+    <nav class="sb-nav">
+      <div class="sb-item active" data-nav="dashboard">🏠 Dashboard</div>
+      <div class="sb-item sb-soon" data-nav="subjects">📚 Subjects <span class="soon">soon</span></div>
+      <div class="sb-item sb-soon" data-nav="uploads">📤 Uploads <span class="soon">soon</span></div>
+      <div class="sb-item sb-soon" data-nav="homework">✅ Homework <span class="soon">soon</span></div>
+      <div class="sb-item sb-soon" data-nav="leaderboard">🏆 Leaderboard <span class="soon">soon</span></div>
+      <div class="sb-item sb-soon" data-nav="profile">👤 Profile <span class="soon">soon</span></div>
+    </nav>
+    <div class="sb-foot">
+      <button id="signOutBtn" class="btn btn-ghost" style="width:100%">Sign out</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <div class="page-title">Today's Work</div>
+        <div class="page-sub" id="classLabel">—</div>
+      </div>
+      <div class="user-box">
+        <img id="userPhoto" class="user-photo" src="" alt="" />
+        <span id="userName"></span>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- Profile / XP summary -->
+      <section class="glass profile-card">
+        <img id="profilePhoto" class="profile-photo" src="" alt="" />
+        <div class="profile-info">
+          <div class="profile-name" id="profileName">—</div>
+          <div class="profile-meta" id="profileMeta">—</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-num" id="statXp">0</div>
+          <div class="stat-label">XP</div>
+        </div>
+        <div class="stat-block">
+          <span class="badge badge-gold" id="statRank">Bronze</span>
+          <div class="stat-label">Rank</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-num">🔥 <span id="statStreak">0</span></div>
+          <div class="stat-label">Day Streak</div>
+        </div>
+      </section>
+
+      <!-- Today's work -->
+      <section>
+        <div class="section-head">
+          <h2>Today's Work</h2>
+          <span class="section-sub" id="todayDate"></span>
+        </div>
+
+        <div id="subjectsGrid" class="subjects-grid"></div>
+
+        <div id="emptyState" class="glass empty-state" hidden>
+          <p class="empty-title">No subjects added for your class yet.</p>
+          <p class="empty-sub">Ask your class admin to add subjects from the admin panel — once they do, they'll show up here automatically.</p>
+        </div>
+
+        <p id="loadingMsg" class="loading-msg">Loading your class…</p>
+      </section>
+
+    </div>
+  </main>
+
+</div>
+
+<script type="module" src="js/firebase-config.js"></script>
+<script type="module" src="js/dashboard.js"></script>
+</body>
+</html>

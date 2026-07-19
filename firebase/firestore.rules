@@ -89,7 +89,8 @@ service cloud.firestore {
         // .../subjects/{subjectId}
         // ========================================================
         match /subjects/{subjectId} {
-          allow read, write: if inClass(schoolId, classId) || isAdmin();
+          allow read: if inClass(schoolId, classId) || isAdmin();
+          allow write: if isAdmin();
 
           // ======================================================
           // .../chapters/{chapterId}

@@ -1,36 +1,7 @@
-/* ============================================
-   Classwork Hub — "The Notebook" theme
-   Same palette as the login page:
-   paper blue-grey / ink navy / margin-rule red / gold (XP only)
-   ============================================ */
-
-:root {
-  --paper-bg: #EDF1F5;
-  --paper-card: #FFFFFF;
-  --ink-navy: #1B2A4A;
-  --ink-navy-soft: #4A5A7A;
-  --margin-red: #C1443B;
-  --gold: #D4A017;
-  --rule-line: #DDE4EC;
-  --font-heading: 'Zilla Slab', serif;
-  --font-body: 'Inter', sans-serif;
-}
-
-* { box-sizing: border-box; }
+/* Select-school / class page — dark cyan glass, uses theme.css tokens */
 
 body {
-  margin: 0;
-  font-family: var(--font-body);
-  color: var(--ink-navy);
-  background:
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0px,
-      transparent 27px,
-      var(--rule-line) 28px
-    ),
-    var(--paper-bg);
-  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
 }
 
 /* ---------- Top bar ---------- */
@@ -39,15 +10,31 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 16px 28px;
-  background: var(--paper-card);
-  border-bottom: 3px solid var(--margin-red);
+  background: rgba(13, 21, 24, 0.7);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .logo {
-  font-family: var(--font-heading);
+  font-family: 'Zilla Slab', serif;
   font-weight: 700;
   font-size: 1.3rem;
-  color: var(--ink-navy);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.logo::before {
+  content: "";
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 10px 2px rgba(34,211,238,0.7);
+  display: inline-block;
 }
 
 .user-box {
@@ -55,24 +42,26 @@ body {
   align-items: center;
   gap: 10px;
   font-size: 0.9rem;
+  color: var(--text-soft);
 }
 
 .user-photo {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 2px solid var(--margin-red);
+  border: 2px solid var(--cyan-dim);
 }
 
 .link-btn {
   background: none;
   border: none;
-  color: var(--ink-navy-soft);
+  color: var(--text-soft);
   text-decoration: underline;
   cursor: pointer;
-  font-family: var(--font-body);
+  font-family: 'Inter', sans-serif;
   font-size: 0.85rem;
 }
+.link-btn:hover { color: var(--red); }
 
 /* ---------- Page layout ---------- */
 .page {
@@ -81,16 +70,19 @@ body {
   padding: 0 20px;
 }
 
-/* ---------- Notebook card (matches login page's signature look) ---------- */
+/* ---------- Card (matches login page's signature look) ---------- */
 .notebook-card {
   position: relative;
-  background: var(--paper-card);
-  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   padding: 36px 32px 32px 44px;
-  box-shadow: 0 6px 24px rgba(27, 42, 74, 0.08);
+  box-shadow: var(--shadow-glow);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
 }
 
-/* red vertical margin rule down the left, like ruled paper */
+/* cyan vertical accent rule down the left */
 .notebook-card::before {
   content: "";
   position: absolute;
@@ -98,18 +90,19 @@ body {
   top: 0;
   bottom: 0;
   width: 2px;
-  background: var(--margin-red);
-  opacity: 0.6;
+  background: linear-gradient(to bottom, var(--cyan), transparent);
+  opacity: 0.8;
 }
 
 .notebook-card h1 {
-  font-family: var(--font-heading);
+  font-family: 'Zilla Slab', serif;
   font-size: 1.6rem;
   margin: 0 0 6px;
+  color: var(--text);
 }
 
 .sub {
-  color: var(--ink-navy-soft);
+  color: var(--text-soft);
   font-size: 0.92rem;
   margin: 0 0 22px;
 }
@@ -118,19 +111,25 @@ body {
 .ruled-input {
   width: 100%;
   padding: 11px 14px;
-  font-family: var(--font-body);
+  font-family: 'Inter', sans-serif;
   font-size: 0.95rem;
   border: none;
-  border-bottom: 2px solid var(--rule-line);
+  border-bottom: 2px solid var(--border);
   background: transparent;
-  color: var(--ink-navy);
+  color: var(--text);
   outline: none;
   margin-bottom: 14px;
   transition: border-color 0.15s ease;
 }
+.ruled-input::placeholder { color: var(--text-faint); }
 
 .ruled-input:focus {
-  border-bottom-color: var(--margin-red);
+  border-bottom-color: var(--cyan);
+}
+
+select.ruled-input option {
+  background: var(--surface-solid);
+  color: var(--text);
 }
 
 /* ---------- School search results ---------- */
@@ -144,29 +143,30 @@ body {
 
 .school-list li {
   padding: 12px 14px;
-  border-bottom: 1px solid var(--rule-line);
+  border-bottom: 1px solid var(--border);
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
   transition: background 0.15s ease;
+  border-radius: var(--radius-sm);
 }
 
 .school-list li:hover {
-  background: var(--paper-bg);
+  background: var(--surface-hover);
 }
 
 .school-list .school-city {
   font-size: 0.8rem;
-  color: var(--ink-navy-soft);
+  color: var(--text-soft);
 }
 
 .empty-msg, .error-msg, .loading-msg {
   font-size: 0.85rem;
-  color: var(--ink-navy-soft);
+  color: var(--text-soft);
 }
 
-.error-msg { color: var(--margin-red); }
+.error-msg { color: var(--red); }
 
 .loading-msg {
   text-align: center;
@@ -177,29 +177,31 @@ body {
 .text-btn {
   background: none;
   border: none;
-  color: var(--margin-red);
-  font-family: var(--font-body);
+  color: var(--cyan-bright);
+  font-family: 'Inter', sans-serif;
   font-weight: 600;
   font-size: 0.88rem;
   cursor: pointer;
   padding: 6px 0;
   margin-top: 4px;
 }
+.text-btn:hover { color: var(--cyan); }
 
 .primary-btn {
-  background: var(--ink-navy);
-  color: #fff;
+  background: linear-gradient(135deg, var(--cyan), var(--cyan-dim));
+  color: #04191c;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   padding: 12px 22px;
-  font-family: var(--font-body);
-  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: box-shadow 0.15s ease, transform 0.1s ease;
 }
 
-.primary-btn:hover { background: var(--margin-red); }
+.primary-btn:hover { box-shadow: 0 8px 24px -8px rgba(34,211,238,0.5); }
+.primary-btn:active { transform: scale(0.98); }
 
 .primary-btn:disabled {
   opacity: 0.5;
@@ -210,7 +212,7 @@ body {
 .request-form {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px dashed var(--rule-line);
+  border-top: 1px dashed var(--border);
 }
 
 /* ---------- Step 2: class/section ---------- */
@@ -225,7 +227,7 @@ body {
 .field label {
   display: block;
   font-size: 0.8rem;
-  color: var(--ink-navy-soft);
+  color: var(--text-soft);
   margin-bottom: 4px;
 }
 
