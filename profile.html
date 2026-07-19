@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Profile — Classwork Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/profile.css">
+</head>
+<body>
+
+<div class="shell">
+
+  <aside class="sidebar">
+    <div class="sb-logo"><span class="dot"></span> Classwork Hub</div>
+    <nav class="sb-nav">
+      <a class="sb-item" href="dashboard.html">🏠 Dashboard</a>
+      <a class="sb-item" href="leaderboard.html">🏆 Leaderboard</a>
+      <a class="sb-item active" href="profile.html">👤 Profile</a>
+    </nav>
+    <div class="sb-foot">
+      <button id="signOutBtn" class="btn btn-ghost" style="width:100%">Sign out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <div class="page-title">Profile</div>
+        <div class="page-sub" id="classLabel">—</div>
+      </div>
+      <div class="user-box">
+        <img id="userPhoto" class="user-photo" src="" alt="" />
+        <span id="userName"></span>
+      </div>
+    </header>
+
+    <div class="content">
+      <section class="glass profile-hero">
+        <img id="heroPhoto" class="hero-photo" src="" alt="" />
+        <div class="hero-name" id="heroName">—</div>
+        <div class="hero-meta" id="heroMeta">—</div>
+
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="hero-stat-num" id="statXp">0</div><div class="hero-stat-label">Total XP</div></div>
+          <div class="hero-stat"><div class="hero-stat-num" id="statStreak">0</div><div class="hero-stat-label">Day streak</div></div>
+          <div class="hero-stat"><div class="hero-stat-num" id="statUploads">0</div><div class="hero-stat-label">Uploads shared</div></div>
+        </div>
+
+        <div class="rank-block">
+          <div class="rank-row">
+            <span class="badge badge-gold" id="rankCurrent">Bronze</span>
+            <span class="rank-next" id="rankNext"></span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+</div>
+
+<script type="module" src="js/firebase-config.js"></script>
+<script type="module" src="js/profile.js"></script>
+</body>
+</html>

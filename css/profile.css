@@ -1,0 +1,20 @@
+.profile-hero {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 2.2rem 1.8rem;
+  text-align: center;
+}
+.hero-photo { width: 84px; height: 84px; border-radius: 50%; border: 3px solid var(--cyan-dim); margin-bottom: 1rem; }
+.hero-name { font-family: 'Zilla Slab', serif; font-size: 1.35rem; font-weight: 700; color: var(--text); }
+.hero-meta { font-size: 0.85rem; color: var(--text-soft); margin-top: 3px; margin-bottom: 1.6rem; }
+
+.hero-stats { display: flex; justify-content: center; gap: 2.2rem; margin-bottom: 1.8rem; }
+.hero-stat-num { font-family: 'Zilla Slab', serif; font-size: 1.5rem; font-weight: 700; color: var(--cyan-bright); }
+.hero-stat-label { font-size: 0.68rem; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+
+.rank-block { text-align: left; }
+.rank-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.rank-next { font-size: 0.78rem; color: var(--text-soft); }
+
+.progress-track { height: 8px; border-radius: 999px; background: rgba(255,255,255,0.06); overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--cyan-dim), var(--cyan-bright)); border-radius: 999px; transition: width 0.4s ease; }

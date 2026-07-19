@@ -10,18 +10,10 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Reads the caller's own profile doc. Only works once users/{uid} exists —
-    // that's fine, it just means "no profile yet" = no access to class-scoped data,
-    // which is the correct behavior during onboarding.
     function myProfile() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
 
-    // >>> ACTION NEEDED: in Firebase Console -> Firestore -> users -> your own
-    // uid doc, manually add a field: role (string) = "admin". That's what
-    // makes you the admin — nobody else can set this on their own profile
-    // because the write rule below only lets a user edit their OWN doc, and
-    // there's no client-side path that sets role.
     function isAdmin() {
       return isSignedIn() && myProfile().role == "admin";
     }
@@ -37,16 +29,26 @@ service cloud.firestore {
         && myProfile().banned != true;
     }
 
+    // Same school + class as the profile doc being read — this is what lets
+    // the leaderboard query (users where schoolId==X && classId==Y) actually
+    // return results; without it, classmates couldn't see each other's XP/rank.
+    function sameClassAsTarget(targetData) {
+      return isSignedIn()
+        && myProfile().schoolId == targetData.schoolId
+        && myProfile().classId == targetData.classId
+        && myProfile().banned != true;
+    }
+
     // ============================================================
     // users/{uid}
     // ============================================================
     match /users/{uid} {
-      // You can read your own profile; admin can read anyone's.
-      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
-      // First-time profile creation on login (own doc only).
+      allow read: if isSignedIn() && (
+        request.auth.uid == uid ||
+        isAdmin() ||
+        sameClassAsTarget(resource.data)
+      );
       allow create: if isSignedIn() && request.auth.uid == uid;
-      // Own profile updates are allowed EXCEPT the `banned` field — only admin
-      // can flip that, so a blocked user can't just un-ban themselves client-side.
       allow update: if isSignedIn() && (
         isAdmin() ||
         (request.auth.uid == uid &&
@@ -59,11 +61,8 @@ service cloud.firestore {
     // schools/{schoolId}
     // ============================================================
     match /schools/{schoolId} {
-      // Any signed-in user can browse the school directory (needed for search).
       allow read: if isSignedIn();
 
-      // Any signed-in user can request a new school, but it comes in as
-      // "pending" — only isAdmin() (via update, below) can flip it to "approved".
       allow create: if isSignedIn()
                     && request.resource.data.status == "pending"
                     && request.resource.data.name is string
@@ -75,11 +74,8 @@ service cloud.firestore {
       // schools/{schoolId}/classes/{classId}
       // ==========================================================
       match /classes/{classId} {
-        allow read: if inSchool(schoolId) || isAdmin();
+        allow read: if isSignedIn();
 
-        // Created once, by whichever student joins first. Not gated on inClass()
-        // because their profile doesn't have this classId saved yet at this point
-        // in the sign-up flow (chicken-and-egg) — shape check keeps it safe instead.
         allow create: if isSignedIn()
                       && request.resource.data.name is string
                       && request.resource.data.session is string;
@@ -94,23 +90,21 @@ service cloud.firestore {
           allow write: if isAdmin();
 
           // ======================================================
-          // .../chapters/{chapterId}
+          // .../entries/{entryId}  <- day-by-day uploads, one doc
+          // per subject per date (id = "YYYY-MM-DD"), collaboratively
+          // added to by any classmate. Chapters layer dropped for MVP —
+          // easy to reintroduce later if per-chapter grouping is needed.
           // ======================================================
-          match /chapters/{chapterId} {
-            allow read, write: if inClass(schoolId, classId) || isAdmin();
-
-            // ====================================================
-            // .../entries/{entryId}  <- the actual day-by-day uploads
-            // ====================================================
-            match /entries/{entryId} {
-              allow read: if inClass(schoolId, classId) || isAdmin();
-              allow create: if inClass(schoolId, classId);
-              // Only the classmate who uploaded an entry (or admin) can edit/delete it —
-              // stops anyone from deleting someone else's shared notes.
-              allow update, delete: if isAdmin()
-                                     || (inClass(schoolId, classId)
-                                         && request.auth.uid in resource.data.uploadedBy);
-            }
+          match /entries/{entryId} {
+            allow read: if inClass(schoolId, classId) || isAdmin();
+            allow create: if inClass(schoolId, classId)
+                          && request.auth.uid in request.resource.data.uploadedBy;
+            // Collaborative: any classmate can update (append their own photos/uid),
+            // not just the original uploader — that's the whole point of the shared
+            // entry doc. We can't easily enforce "only appended, not removed" with
+            // rules alone here, so this trusts class membership as the boundary.
+            allow update: if inClass(schoolId, classId) || isAdmin();
+            allow delete: if isAdmin();
           }
         }
       }

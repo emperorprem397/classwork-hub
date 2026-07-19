@@ -21,8 +21,8 @@
       <div class="sb-item sb-soon" data-nav="subjects">📚 Subjects <span class="soon">soon</span></div>
       <div class="sb-item sb-soon" data-nav="uploads">📤 Uploads <span class="soon">soon</span></div>
       <div class="sb-item sb-soon" data-nav="homework">✅ Homework <span class="soon">soon</span></div>
-      <div class="sb-item sb-soon" data-nav="leaderboard">🏆 Leaderboard <span class="soon">soon</span></div>
-      <div class="sb-item sb-soon" data-nav="profile">👤 Profile <span class="soon">soon</span></div>
+      <a class="sb-item" href="leaderboard.html">🏆 Leaderboard</a>
+      <a class="sb-item" href="profile.html">👤 Profile</a>
     </nav>
     <div class="sb-foot">
       <button id="signOutBtn" class="btn btn-ghost" style="width:100%">Sign out</button>
@@ -85,6 +85,26 @@
     </div>
   </main>
 
+</div>
+
+<!-- Upload modal -->
+<div id="uploadModal" class="modal-overlay" hidden>
+  <div class="modal glass">
+    <button id="modalClose" class="modal-close" aria-label="Close">✕</button>
+    <h3 id="modalSubjectName" class="modal-title">Subject</h3>
+    <p id="modalDate" class="modal-date"></p>
+
+    <div id="modalExisting" hidden></div>
+
+    <label class="file-drop" for="fileInput">
+      <span>📷 Choose notebook photos (up to 6)</span>
+      <input type="file" id="fileInput" accept="image/*" multiple hidden />
+    </label>
+    <div id="previewRow" class="thumb-row"></div>
+
+    <button id="uploadSubmit" class="btn btn-primary" style="width:100%; margin-top: 1rem;">Upload photos</button>
+    <p id="uploadStatus" class="upload-status"></p>
+  </div>
 </div>
 
 <script type="module" src="js/firebase-config.js"></script>

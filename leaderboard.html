@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Leaderboard — Classwork Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/leaderboard.css">
+</head>
+<body>
+
+<div class="shell">
+
+  <aside class="sidebar">
+    <div class="sb-logo"><span class="dot"></span> Classwork Hub</div>
+    <nav class="sb-nav">
+      <a class="sb-item" href="dashboard.html">🏠 Dashboard</a>
+      <a class="sb-item active" href="leaderboard.html">🏆 Leaderboard</a>
+      <a class="sb-item" href="profile.html">👤 Profile</a>
+    </nav>
+    <div class="sb-foot">
+      <button id="signOutBtn" class="btn btn-ghost" style="width:100%">Sign out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <div class="page-title">Leaderboard</div>
+        <div class="page-sub" id="classLabel">—</div>
+      </div>
+      <div class="user-box">
+        <img id="userPhoto" class="user-photo" src="" alt="" />
+        <span id="userName"></span>
+      </div>
+    </header>
+
+    <div class="content">
+      <p id="loadingMsg" class="loading-msg">Loading leaderboard…</p>
+      <div id="lbList" class="lb-list"></div>
+      <div id="emptyState" class="glass empty-state" hidden>
+        <p class="empty-title">No one's uploaded yet.</p>
+        <p class="empty-sub">Be the first — upload today's notes from the dashboard and claim the top spot.</p>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<script type="module" src="js/firebase-config.js"></script>
+<script type="module" src="js/leaderboard.js"></script>
+</body>
+</html>
