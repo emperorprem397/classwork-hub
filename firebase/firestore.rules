@@ -49,7 +49,8 @@ service cloud.firestore {
       // can flip that, so a blocked user can't just un-ban themselves client-side.
       allow update: if isSignedIn() && (
         isAdmin() ||
-        (request.auth.uid == uid && request.resource.data.banned == resource.data.banned)
+        (request.auth.uid == uid &&
+         request.resource.data.get('banned', false) == resource.data.get('banned', false))
       );
       allow delete: if isAdmin();
     }
