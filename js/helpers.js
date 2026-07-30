@@ -59,6 +59,24 @@ export function formatDateLabel(dateId) {
   return date.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
 }
 
+// Given a signed day offset from today (0 = today, -1 = yesterday, etc.),
+// returns "YYYY-MM-DD" in local time. Generic version of yesterdayId(),
+// used by the Subjects history page to build a rolling week view.
+export function dateIdOffset(offsetDays) {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+export function shortDayLabel(dateId) {
+  const [y, m, d] = dateId.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.toLocaleDateString(undefined, { weekday: "short" });
+}
+
 export function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, (c) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"

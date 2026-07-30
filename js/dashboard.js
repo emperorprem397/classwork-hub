@@ -1,11 +1,9 @@
-import { auth, db, storage } from "./firebase-config.js";
+import { auth, db, APPS_SCRIPT_URL } from "./firebase-config.js";
 import { onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
   doc, getDoc, collection, getDocs, query, orderBy, runTransaction, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-import { ref, uploadBytes, getDownloadURL }
-  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 import {
   XP_UPLOAD, XP_FIRST_OF_DAY, XP_STREAK_TICK, calcRank,
   todayId, yesterdayId, formatDateLabel, escapeHtml
@@ -211,26 +209,49 @@ uploadSubmit.addEventListener("click", async () => {
   const subjectId = activeSubject.id;
 
   try {
-    // 1. Upload each file to Storage, collect download URLs.
+    // 1. Upload each file to Google Drive via Apps Script, collect download URLs.
     const urls = [];
     for (let i = 0; i < pendingFiles.length; i++) {
       const file = pendingFiles[i];
+      uploadStatus.textContent = `Uploading photo ${i + 1}/${pendingFiles.length}…`;
+      
+      // Convert file to base64
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      // Call Google Apps Script to upload to Drive
       const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const path = `notebooks/${schoolId}/${classId}/${subjectId}/${TODAY}/${currentUser.uid}_${Date.now()}_${i}.${ext}`;
-      const storageRef = ref(storage, path);
-      await uploadBytes(storageRef, file, { contentType: file.type || "image/jpeg" });
-      urls.push(await getDownloadURL(storageRef));
+      const fileName = `${currentUser.uid}_${Date.now()}_${i}.${ext}`;
+      const response = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          fileName,
+          fileData: base64,
+          mimeType: file.type || "image/jpeg"
+        })
+      });
+
+      const result = await response.json();
+      if (!result.success) throw new Error(result.error || "Upload failed");
+      urls.push(result.url);
     }
 
     uploadStatus.textContent = "Saving…";
 
-    // 2. Transaction: update (or create) the entry doc + the user's XP/streak/rank.
+    // 2. Transaction: update (or create) the entry doc + the user's XP/streak/rank
+    //    + a private mirror record for the "My Uploads" history page.
     const entryRef = doc(db, "schools", schoolId, "classes", classId, "subjects", subjectId, "entries", TODAY);
     const userRef = doc(db, "users", currentUser.uid);
+    const myUploadRef = doc(db, "users", currentUser.uid, "myUploads", `${TODAY}_${subjectId}`);
 
     await runTransaction(db, async (tx) => {
       const entrySnap = await tx.get(entryRef);
       const userSnap = await tx.get(userRef);
+      const myUploadSnap = await tx.get(myUploadRef);
       const userData = userSnap.data();
 
       const isFirstForSubjectToday = !entrySnap.exists();
@@ -273,6 +294,16 @@ uploadSubmit.addEventListener("click", async () => {
           updatedAt: serverTimestamp(),
         });
       }
+
+      tx.set(myUploadRef, {
+        date: TODAY,
+        subjectId,
+        subjectName: activeSubject.name,
+        photoURLs: myUploadSnap.exists()
+          ? [...(myUploadSnap.data().photoURLs || []), ...urls]
+          : urls,
+        updatedAt: serverTimestamp(),
+      }, { merge: true });
 
       tx.update(userRef, {
         xp: newXp,

@@ -55,6 +55,15 @@ service cloud.firestore {
          request.resource.data.get('banned', false) == resource.data.get('banned', false))
       );
       allow delete: if isAdmin();
+
+      // Personal upload history mirror — written alongside the real entry doc
+      // in the same transaction, so a student's own "My Uploads" page doesn't
+      // need a cross-school collectionGroup query (which rules can't safely
+      // scope here). Strictly private to the owner (and admin).
+      match /myUploads/{uploadId} {
+        allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+        allow write: if isSignedIn() && request.auth.uid == uid;
+      }
     }
 
     // ============================================================
@@ -64,9 +73,7 @@ service cloud.firestore {
       allow read: if isSignedIn();
 
       allow create: if isSignedIn()
-                    && request.resource.data.status == "pending"
-                    && request.resource.data.name is string
-                    && request.resource.data.city is string;
+                    && request.resource.data.name is string;
 
       allow update, delete: if isAdmin();
 
@@ -105,6 +112,24 @@ service cloud.firestore {
             // rules alone here, so this trusts class membership as the boundary.
             allow update: if inClass(schoolId, classId) || isAdmin();
             allow delete: if isAdmin();
+          }
+        }
+
+        // ========================================================
+        // .../homework/{hwId}  <- simple homework tracker, any classmate
+        // can post an item, each student tracks their own completion in a
+        // small subcollection keyed by their own uid.
+        // ========================================================
+        match /homework/{hwId} {
+          allow read: if inClass(schoolId, classId) || isAdmin();
+          allow create: if inClass(schoolId, classId)
+                        && request.resource.data.createdBy == request.auth.uid;
+          allow update, delete: if isAdmin()
+                        || (inClass(schoolId, classId) && resource.data.createdBy == request.auth.uid);
+
+          match /completedBy/{uid} {
+            allow read: if inClass(schoolId, classId) || isAdmin();
+            allow write: if inClass(schoolId, classId) && request.auth.uid == uid;
           }
         }
       }

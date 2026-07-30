@@ -12,9 +12,10 @@ import { onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 import {
-  collection, query, where, getDocs, addDoc,
   doc, getDoc, setDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+import { APS_SCHOOLS } from "./schools-data.js";
 
 // ---------- DOM refs ----------
 const stepSchool      = document.getElementById("step-school");
@@ -28,11 +29,6 @@ const signOutBtn        = document.getElementById("signOutBtn");
 const schoolSearch     = document.getElementById("schoolSearch");
 const schoolResults    = document.getElementById("schoolResults");
 const schoolEmptyMsg   = document.getElementById("schoolEmptyMsg");
-const toggleRequestForm = document.getElementById("toggleRequestForm");
-const requestSchoolForm = document.getElementById("requestSchoolForm");
-const newSchoolName    = document.getElementById("newSchoolName");
-const newSchoolCity    = document.getElementById("newSchoolCity");
-const schoolError      = document.getElementById("schoolError");
 
 const chosenSchoolLabel = document.getElementById("chosenSchoolLabel");
 const classInput        = document.getElementById("classInput");
@@ -84,11 +80,11 @@ async function init() {
   stepSchool.hidden = false;
 }
 
-// ---------- Step 1: search / request school ----------
+// ---------- Step 1: search the fixed APS school list ----------
 async function loadSchools() {
-  const q = query(collection(db, "schools"), where("status", "==", "approved"));
-  const snap = await getDocs(q);
-  allSchools = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  // Static list of all 132 APS schools — no Firestore query, no admin approval
+  // needed anymore since this site is dedicated to APS students specifically.
+  allSchools = APS_SCHOOLS;
 }
 
 function renderResults(filterText) {
@@ -98,78 +94,22 @@ function renderResults(filterText) {
     : allSchools;
 
   schoolResults.innerHTML = "";
-  matches.slice(0, 20).forEach(school => {
+  matches.forEach(school => {
     const li = document.createElement("li");
-    li.innerHTML = `<span>${school.name}</span><span class="school-city">${school.city || ""}</span>`;
+    li.innerHTML = `<span>${school.name}</span>`;
     li.addEventListener("click", () => selectSchool(school));
     schoolResults.appendChild(li);
   });
 
-  schoolEmptyMsg.hidden = matches.length > 0 || term === "";
+  schoolEmptyMsg.hidden = matches.length > 0;
 }
 
 schoolSearch.addEventListener("input", (e) => renderResults(e.target.value));
-renderResults(""); // show all on load
-
-toggleRequestForm.addEventListener("click", () => {
-  requestSchoolForm.hidden = !requestSchoolForm.hidden;
-});
-
-requestSchoolForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  schoolError.hidden = true;
-
-  const name = newSchoolName.value.trim();
-  const city = newSchoolCity.value.trim();
-  if (!name || !city) return;
-
-  const submitBtn = requestSchoolForm.querySelector("button");
-  submitBtn.disabled = true;
-
-  try {
-    // Now goes to "pending" — the admin panel exists, so new schools wait
-    // for a quick review instead of auto-joining instantly.
-    await addDoc(collection(db, "schools"), {
-      name,
-      city,
-      status: "pending",
-      requestedBy: currentUser.uid,
-      requestedByName: currentUser.displayName || "",
-      requestedByEmail: currentUser.email || "",
-      createdAt: serverTimestamp(),
-    });
-    showPendingMessage(name);
-  } catch (err) {
-    schoolError.textContent = "Couldn't add school — try again.";
-    schoolError.hidden = false;
-    console.error(err);
-  } finally {
-    submitBtn.disabled = false;
-  }
-});
-
-// Shown after a new-school request is submitted — replaces the search UI
-// with a waiting message since the student can't proceed until an admin
-// approves it. Built dynamically so no changes to school-select.html are needed.
-function showPendingMessage(name) {
-  schoolSearch.hidden = true;
-  schoolResults.innerHTML = "";
-  schoolEmptyMsg.hidden = true;
-  toggleRequestForm.hidden = true;
-  requestSchoolForm.hidden = true;
-
-  if (document.getElementById("pendingMsg")) return; // don't duplicate on double-submit
-  const pendingMsg = document.createElement("p");
-  pendingMsg.id = "pendingMsg";
-  pendingMsg.className = "sub";
-  pendingMsg.style.marginTop = "16px";
-  pendingMsg.textContent = `"${name}" was submitted and is waiting for admin approval — check back soon and it'll show up in search.`;
-  stepSchool.appendChild(pendingMsg);
-}
+renderResults(""); // show full scrollable list on load
 
 function selectSchool(school) {
   selectedSchool = school;
-  chosenSchoolLabel.textContent = `${school.name}${school.city ? ", " + school.city : ""}`;
+  chosenSchoolLabel.textContent = school.name;
   stepSchool.hidden = true;
   stepClass.hidden = false;
 }
@@ -204,6 +144,14 @@ saveClassBtn.addEventListener("click", async () => {
   const classId = `${classNum}-${section}`;
 
   try {
+    // Fixed APS school — get-or-create its Firestore doc idempotently.
+    // merge:true so re-running this never clobbers fields an admin may have edited.
+    await setDoc(doc(db, "schools", selectedSchool.id), {
+      name: selectedSchool.name,
+      isAPS: true,
+      status: "approved",
+    }, { merge: true });
+
     // Create the class doc if this is the first student joining it — otherwise leave it alone.
     const classRef = doc(db, "schools", selectedSchool.id, "classes", classId);
     const classSnap = await getDoc(classRef);

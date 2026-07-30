@@ -1,0 +1,30 @@
+.uploads-list { display: flex; flex-direction: column; gap: 0.8rem; }
+
+.upload-row {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.2rem;
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+}
+
+.upload-row-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.upload-subject { font-weight: 600; color: var(--text); font-size: 0.95rem; }
+.upload-date { font-size: 0.78rem; color: var(--text-faint); }
+
+.upload-count-badge {
+  font-size: 0.72rem;
+  color: var(--cyan-bright);
+  background: rgba(34, 211, 238, 0.1);
+  border: 1px solid var(--cyan-dim);
+  border-radius: 999px;
+  padding: 2px 10px;
+  margin-left: 8px;
+}
