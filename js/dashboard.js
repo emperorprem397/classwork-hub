@@ -1,4 +1,4 @@
-import { auth, db, APPS_SCRIPT_URL } from "./firebase-config.js";
+import { auth, db, CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from "./firebase-config.js";
 import { onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
@@ -39,6 +39,38 @@ let currentProfile = null;
 let activeSubject = null; // { id, name, entry }
 let pendingFiles = [];
 const TODAY = todayId();
+
+// Resizes to a max dimension of 1600px and re-encodes as JPEG at 82% quality.
+// Notebook photos are usually 3-5MB straight off a phone camera — this
+// typically brings them down to 200-500KB with no real loss of readability,
+// which matters a lot on Cloudinary's free storage/bandwidth tier.
+function compressImage(file, maxDimension = 1600, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > maxDimension || height > maxDimension) {
+        const scale = maxDimension / Math.max(width, height);
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => (blob ? resolve(blob) : reject(new Error("Compression failed"))),
+        "image/jpeg",
+        quality
+      );
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
 
 signOutBtn.addEventListener("click", () => signOut(auth));
 todayDate.textContent = formatDateLabel(TODAY);
@@ -209,35 +241,27 @@ uploadSubmit.addEventListener("click", async () => {
   const subjectId = activeSubject.id;
 
   try {
-    // 1. Upload each file to Google Drive via Apps Script, collect download URLs.
+    // 1. Compress, then upload each file directly to Cloudinary (unsigned preset).
+    //    No backend involved — the browser talks to Cloudinary's API directly.
     const urls = [];
     for (let i = 0; i < pendingFiles.length; i++) {
       const file = pendingFiles[i];
-      uploadStatus.textContent = `Uploading photo ${i + 1}/${pendingFiles.length}…`;
-      
-      // Convert file to base64
-      const base64 = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result.split(",")[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
+      uploadStatus.textContent = `Compressing photo ${i + 1}/${pendingFiles.length}…`;
+      const compressed = await compressImage(file);
 
-      // Call Google Apps Script to upload to Drive
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const fileName = `${currentUser.uid}_${Date.now()}_${i}.${ext}`;
-      const response = await fetch(APPS_SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          fileName,
-          fileData: base64,
-          mimeType: file.type || "image/jpeg"
-        })
-      });
+      uploadStatus.textContent = `Uploading photo ${i + 1}/${pendingFiles.length}…`;
+      const formData = new FormData();
+      formData.append("file", compressed);
+      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        { method: "POST", body: formData }
+      );
 
       const result = await response.json();
-      if (!result.success) throw new Error(result.error || "Upload failed");
-      urls.push(result.url);
+      if (!result.secure_url) throw new Error(result.error?.message || "Upload failed");
+      urls.push(result.secure_url);
     }
 
     uploadStatus.textContent = "Saving…";
