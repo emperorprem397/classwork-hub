@@ -68,15 +68,19 @@
       <!-- Today's work -->
       <section>
         <div class="section-head">
-          <h2>Today's Work</h2>
-          <span class="section-sub" id="todayDate"></span>
+          <div>
+            <h2>Today's Work</h2>
+            <span class="section-sub" id="todayDate"></span>
+          </div>
+          <button id="addSubjectBtn" class="btn btn-ghost btn-sm">+ Add subject</button>
         </div>
 
         <div id="subjectsGrid" class="subjects-grid"></div>
 
         <div id="emptyState" class="glass empty-state" hidden>
           <p class="empty-title">No subjects added for your class yet.</p>
-          <p class="empty-sub">Ask your class admin to add subjects from the admin panel — once they do, they'll show up here automatically.</p>
+          <p class="empty-sub">You can add the first one yourself — no need to wait for the admin.</p>
+          <button id="addSubjectBtnEmpty" class="btn btn-primary btn-sm" style="margin-top:10px;">+ Add subject</button>
         </div>
 
         <p id="loadingMsg" class="loading-msg">Loading your class…</p>
@@ -117,6 +121,27 @@
 
     <button id="uploadSubmit" class="btn btn-primary" style="width:100%; margin-top: 1rem;">Upload photos</button>
     <p id="uploadStatus" class="upload-status"></p>
+  </div>
+</div>
+
+<!-- Add subject modal -->
+<div id="addSubjectModal" class="modal-overlay" hidden>
+  <div class="modal glass">
+    <button id="addSubjectClose" class="modal-close" aria-label="Close">✕</button>
+    <h3 class="modal-title">Add a subject</h3>
+    <p class="modal-date">For your class only — everyone will see it right away.</p>
+
+    <div class="field-group">
+      <label class="field-label" for="subjectNameInput">Subject name</label>
+      <input type="text" id="subjectNameInput" class="text-input" placeholder="e.g. Chemistry" maxlength="40" />
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="subjectTeacherInput">Teacher <span class="optional-tag">(optional)</span></label>
+      <input type="text" id="subjectTeacherInput" class="text-input" placeholder="e.g. Mrs. Sharma" maxlength="40" />
+    </div>
+
+    <button id="addSubjectSubmit" class="btn btn-primary" style="width:100%; margin-top: 1rem;">Add subject</button>
+    <p id="addSubjectStatus" class="upload-status"></p>
   </div>
 </div>
 

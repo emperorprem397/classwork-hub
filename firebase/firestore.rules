@@ -91,10 +91,18 @@ service cloud.firestore {
 
         // ========================================================
         // .../subjects/{subjectId}
+        // CHANGED: any signed-in classmate can now ADD a subject
+        // (self-service — no need to wait on the admin panel).
+        // Editing/removing an existing subject stays admin-only, so
+        // one student can't rename or delete a subject the whole
+        // class depends on.
         // ========================================================
         match /subjects/{subjectId} {
           allow read: if inClass(schoolId, classId) || isAdmin();
-          allow write: if isAdmin();
+          allow create: if inClass(schoolId, classId)
+                        && request.resource.data.name is string
+                        && request.resource.data.name.size() > 0;
+          allow update, delete: if isAdmin();
 
           // ======================================================
           // .../entries/{entryId}  <- day-by-day uploads, one doc

@@ -45,6 +45,12 @@ Refer to this file before making changes — it's the single source of truth for
 
 ---
 
+## 🔧 This round's fixes
+
+- **Students can now add subjects themselves** — a "+ Add subject" button on the dashboard (also shown in the empty state) opens a small modal for name + optional teacher. Previously subject creation was admin-only in the Firestore rules, which is why the dashboard showed no upload option until a subject existed. Editing/deleting a subject is still admin-only.
+- **"Missing or insufficient permissions" on upload** — the rules that allow the *collaborative multi-photo upload with per-student title/type* (the `entries` and `users/{uid}/myUploads` rules) were written in an earlier round but most likely never got republished in the Firebase Console after that round — the console was probably still running an older rules version. **`firebase/firestore.rules` in this zip must be republished** (Firestore Database → Rules → paste → Publish) for both this fix and the subject self-add fix to take effect.
+- Noted separately, not a bug: if testing in Brave, you may see red `ERR_BLOCKED_BY_CLIENT` lines in the console on Firestore's realtime "Listen" channel — that's Brave Shields' ad-blocker misfiring on Firestore's long-polling URL pattern, unrelated to the permission error. Safe to ignore, or turn Shields off for the site to silence it.
+
 ## ⏳ Pending / not built yet
 
 - Comments on uploads

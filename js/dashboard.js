@@ -2,7 +2,7 @@ import { auth, db, CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from "./fir
 import { onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
-  doc, getDoc, collection, getDocs, query, orderBy, runTransaction, serverTimestamp
+  doc, getDoc, collection, getDocs, addDoc, query, orderBy, runTransaction, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import {
   XP_UPLOAD, XP_FIRST_OF_DAY, XP_STREAK_TICK, calcRank,
@@ -36,11 +36,21 @@ const uploadSubmit  = document.getElementById("uploadSubmit");
 const modalClose    = document.getElementById("modalClose");
 const uploadStatus  = document.getElementById("uploadStatus");
 
+const addSubjectBtn      = document.getElementById("addSubjectBtn");
+const addSubjectBtnEmpty = document.getElementById("addSubjectBtnEmpty");
+const addSubjectModal    = document.getElementById("addSubjectModal");
+const addSubjectClose    = document.getElementById("addSubjectClose");
+const subjectNameInput   = document.getElementById("subjectNameInput");
+const subjectTeacherInput = document.getElementById("subjectTeacherInput");
+const addSubjectSubmit   = document.getElementById("addSubjectSubmit");
+const addSubjectStatus   = document.getElementById("addSubjectStatus");
+
 let currentUser = null;
 let currentProfile = null;
 let activeSubject = null; // { id, name, entry }
 let pendingFiles = [];
 let selectedType = null; // "classwork" | "homework" | null — fully optional
+let loadedSubjects = []; // kept in sync by loadSubjects(), used for the duplicate-name check
 const TODAY = todayId();
 
 // Resizes to a max dimension of 1600px and re-encodes as JPEG at 82% quality.
@@ -124,6 +134,7 @@ async function loadSubjects() {
     loadingMsg.hidden = true;
 
     if (snap.empty) {
+      loadedSubjects = [];
       emptyState.hidden = false;
       return;
     }
@@ -132,6 +143,7 @@ async function loadSubjects() {
 
     // Fetch today's entry doc for every subject in parallel.
     const subjects = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    loadedSubjects = subjects;
     const entrySnaps = await Promise.all(
       subjects.map((s) =>
         getDoc(doc(db, "schools", schoolId, "classes", classId, "subjects", s.id, "entries", TODAY))
@@ -264,6 +276,58 @@ function closeModal() {
 }
 modalClose.addEventListener("click", closeModal);
 modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+
+// ---------- Add subject (self-service, no admin needed) ----------
+function openAddSubjectModal() {
+  subjectNameInput.value = "";
+  subjectTeacherInput.value = "";
+  addSubjectStatus.textContent = "";
+  addSubjectSubmit.disabled = false;
+  addSubjectModal.hidden = false;
+  subjectNameInput.focus();
+}
+function closeAddSubjectModal() {
+  addSubjectModal.hidden = true;
+}
+addSubjectBtn.addEventListener("click", openAddSubjectModal);
+addSubjectBtnEmpty.addEventListener("click", openAddSubjectModal);
+addSubjectClose.addEventListener("click", closeAddSubjectModal);
+addSubjectModal.addEventListener("click", (e) => { if (e.target === addSubjectModal) closeAddSubjectModal(); });
+
+addSubjectSubmit.addEventListener("click", async () => {
+  const name = subjectNameInput.value.trim();
+  const teacher = subjectTeacherInput.value.trim();
+
+  if (!name) {
+    addSubjectStatus.textContent = "Give the subject a name first.";
+    return;
+  }
+  // Light duplicate guard — case-insensitive check against what's already loaded.
+  if (loadedSubjects.some((s) => (s.name || "").toLowerCase() === name.toLowerCase())) {
+    addSubjectStatus.textContent = `"${name}" is already on your list.`;
+    return;
+  }
+
+  addSubjectSubmit.disabled = true;
+  addSubjectStatus.textContent = "Adding…";
+
+  try {
+    const { schoolId, classId } = currentProfile;
+    const subjectsCol = collection(db, "schools", schoolId, "classes", classId, "subjects");
+    await addDoc(subjectsCol, {
+      name,
+      teacher: teacher || null,
+      createdBy: currentUser.uid,
+      createdAt: serverTimestamp(),
+    });
+    closeAddSubjectModal();
+    await loadSubjects();
+  } catch (err) {
+    console.error(err);
+    addSubjectStatus.textContent = "Couldn't add it — check your connection and try again.";
+    addSubjectSubmit.disabled = false;
+  }
+});
 
 fileInput.addEventListener("change", () => {
   pendingFiles = Array.from(fileInput.files || []).slice(0, 6); // cap at 6 photos per upload
