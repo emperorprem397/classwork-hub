@@ -1,6 +1,7 @@
 import { auth, googleProvider, db } from "./firebase-config.js";
 import {
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
@@ -17,16 +18,13 @@ const statusEl = document.getElementById("login-status");
 loginBtn.addEventListener("click", async () => {
   setLoading(true);
   try {
-    const result = await signInWithPopup(auth, googleProvider);
-    const user = result.user;
-    const profile = await ensureUserProfile(user);
-    if (profile.banned === true) {
-      await signOut(auth);
-      showStatus("This account has been blocked by an admin. Contact your school admin if you think this is a mistake.");
-      setLoading(false);
-      return;
-    }
-    window.location.href = "school-select.html";
+    // Redirect-based sign-in instead of a popup — popups frequently get
+    // blocked or broken by mobile browsers (Brave Shields, Safari ITP,
+    // in-app webviews) because they block the cross-window messaging a
+    // popup needs to report back. Redirect just navigates away to Google
+    // and back, which works everywhere. getRedirectResult() below picks
+    // up the result once the browser lands back on this page.
+    await signInWithRedirect(auth, googleProvider);
   } catch (err) {
     console.error(err);
     showStatus(getFriendlyError(err.code));
@@ -34,8 +32,34 @@ loginBtn.addEventListener("click", async () => {
   }
 });
 
-// If already logged in, skip straight past login — but re-check banned status
-// first, in case they were blocked after their last session started.
+// Runs once on every load of this page. If the page just loaded because
+// Google redirected back here, this resolves with the signed-in user.
+// If it's a normal fresh visit to the login page, result is null and
+// nothing happens here.
+(async () => {
+  try {
+    const result = await getRedirectResult(auth);
+    if (result && result.user) {
+      setLoading(true);
+      const profile = await ensureUserProfile(result.user);
+      if (profile.banned === true) {
+        await signOut(auth);
+        showStatus("This account has been blocked by an admin. Contact your school admin if you think this is a mistake.");
+        setLoading(false);
+        return;
+      }
+      window.location.href = "school-select.html";
+    }
+  } catch (err) {
+    console.error(err);
+    showStatus(getFriendlyError(err.code));
+    setLoading(false);
+  }
+})();
+
+// If already logged in (e.g. returning visit, session still valid), skip
+// straight past login — but re-check banned status first, in case they
+// were blocked after their last session started.
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     const snap = await getDoc(doc(db, "users", user.uid));
