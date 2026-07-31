@@ -1,7 +1,6 @@
 import { auth, googleProvider, db } from "./firebase-config.js";
 import {
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
@@ -18,44 +17,32 @@ const statusEl = document.getElementById("login-status");
 loginBtn.addEventListener("click", async () => {
   setLoading(true);
   try {
-    // Redirect-based sign-in instead of a popup — popups frequently get
-    // blocked or broken by mobile browsers (Brave Shields, Safari ITP,
-    // in-app webviews) because they block the cross-window messaging a
-    // popup needs to report back. Redirect just navigates away to Google
-    // and back, which works everywhere. getRedirectResult() below picks
-    // up the result once the browser lands back on this page.
-    await signInWithRedirect(auth, googleProvider);
+    // Popup-based sign-in — same approach already working reliably in
+    // admin/index.html on both desktop and mobile. Turns out the earlier
+    // "Something went wrong signing in" errors were actually caused by the
+    // Firestore rules mix-up (Storage rules pasted into the Firestore rules
+    // tab), not by popup sign-in itself — popup was never the problem.
+    // Redirect-based sign-in was tried as a fix but introduced a new issue:
+    // it needs a background iframe handshake with classwork-hub.firebaseapp.com
+    // that triggers Brave's (and similar browsers') third-party cookie prompt.
+    // Popup avoids that handshake entirely, matching the admin panel's
+    // already-working behavior.
+    const result = await signInWithPopup(auth, googleProvider);
+    const user = result.user;
+    const profile = await ensureUserProfile(user);
+    if (profile.banned === true) {
+      await signOut(auth);
+      showStatus("This account has been blocked by an admin. Contact your school admin if you think this is a mistake.");
+      setLoading(false);
+      return;
+    }
+    window.location.href = "school-select.html";
   } catch (err) {
     console.error(err);
     showStatus(getFriendlyError(err.code));
     setLoading(false);
   }
 });
-
-// Runs once on every load of this page. If the page just loaded because
-// Google redirected back here, this resolves with the signed-in user.
-// If it's a normal fresh visit to the login page, result is null and
-// nothing happens here.
-(async () => {
-  try {
-    const result = await getRedirectResult(auth);
-    if (result && result.user) {
-      setLoading(true);
-      const profile = await ensureUserProfile(result.user);
-      if (profile.banned === true) {
-        await signOut(auth);
-        showStatus("This account has been blocked by an admin. Contact your school admin if you think this is a mistake.");
-        setLoading(false);
-        return;
-      }
-      window.location.href = "school-select.html";
-    }
-  } catch (err) {
-    console.error(err);
-    showStatus(getFriendlyError(err.code));
-    setLoading(false);
-  }
-})();
 
 // If already logged in (e.g. returning visit, session still valid), skip
 // straight past login — but re-check banned status first, in case they
@@ -111,6 +98,8 @@ function getFriendlyError(code) {
   switch (code) {
     case "auth/popup-closed-by-user":
       return "Sign-in was cancelled. Try again when you're ready.";
+    case "auth/popup-blocked":
+      return "Your browser blocked the sign-in popup. Please allow popups for this site and try again.";
     case "auth/network-request-failed":
       return "Network issue — check your connection and try again.";
     default:
