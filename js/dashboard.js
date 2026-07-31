@@ -99,6 +99,18 @@ onAuthStateChanged(auth, async (user) => {
   if (!snap.exists()) { window.location.href = "school-select.html"; return; }
   currentProfile = snap.data();
 
+  // ---- TEMP DIAGNOSTIC — remove once the permission issue is confirmed fixed ----
+  console.log("%c[classwork-hub debug] profile check", "color:#22d3ee;font-weight:bold", {
+    uid: user.uid,
+    schoolId: currentProfile.schoolId,
+    classId: currentProfile.classId,
+    banned: currentProfile.banned,
+    role: currentProfile.role,
+    schoolIdType: typeof currentProfile.schoolId,
+    classIdType: typeof currentProfile.classId,
+  });
+  // ---- END TEMP DIAGNOSTIC ----
+
   if (currentProfile.banned === true) {
     await signOut(auth);
     alert("This account has been blocked by an admin. Contact your school admin if you think this is a mistake.");
@@ -313,6 +325,11 @@ addSubjectSubmit.addEventListener("click", async () => {
 
   try {
     const { schoolId, classId } = currentProfile;
+    // ---- TEMP DIAGNOSTIC ----
+    console.log("%c[classwork-hub debug] add-subject attempt", "color:#22d3ee;font-weight:bold", {
+      writingAsUid: currentUser.uid, schoolId, classId, name,
+    });
+    // ---- END TEMP DIAGNOSTIC ----
     const subjectsCol = collection(db, "schools", schoolId, "classes", classId, "subjects");
     await addDoc(subjectsCol, {
       name,
@@ -323,7 +340,7 @@ addSubjectSubmit.addEventListener("click", async () => {
     closeAddSubjectModal();
     await loadSubjects();
   } catch (err) {
-    console.error(err);
+    console.error("%c[classwork-hub debug] add-subject FAILED", "color:#f43f5e;font-weight:bold", err.code, err.message, err);
     addSubjectStatus.textContent = "Couldn't add it — check your connection and try again.";
     addSubjectSubmit.disabled = false;
   }
@@ -398,6 +415,12 @@ uploadSubmit.addEventListener("click", async () => {
     const entryRef = doc(db, "schools", schoolId, "classes", classId, "subjects", subjectId, "entries", TODAY);
     const userRef = doc(db, "users", currentUser.uid);
     const myUploadRef = doc(db, "users", currentUser.uid, "myUploads", `${TODAY}_${subjectId}`);
+
+    // ---- TEMP DIAGNOSTIC ----
+    console.log("%c[classwork-hub debug] upload attempt", "color:#22d3ee;font-weight:bold", {
+      writingAsUid: currentUser.uid, schoolId, classId, subjectId,
+    });
+    // ---- END TEMP DIAGNOSTIC ----
 
     await runTransaction(db, async (tx) => {
       const entrySnap = await tx.get(entryRef);
@@ -481,7 +504,7 @@ uploadSubmit.addEventListener("click", async () => {
     closeModal();
     await loadSubjects();
   } catch (err) {
-    console.error(err);
+    console.error("%c[classwork-hub debug] upload FAILED", "color:#f43f5e;font-weight:bold", err.code, err.message, err);
     uploadStatus.textContent = "Upload failed — check your connection and try again.";
     uploadSubmit.disabled = false;
   }
