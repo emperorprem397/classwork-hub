@@ -6,7 +6,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import {
   XP_UPLOAD, XP_FIRST_OF_DAY, XP_STREAK_TICK, calcRank,
-  todayId, yesterdayId, formatDateLabel, escapeHtml
+  todayId, yesterdayId, formatDateLabel, escapeHtml, typeBadgeHtml
 } from "./helpers.js";
 
 const userPhoto     = document.getElementById("userPhoto");
@@ -28,6 +28,8 @@ const modal         = document.getElementById("uploadModal");
 const modalSubject  = document.getElementById("modalSubjectName");
 const modalDate     = document.getElementById("modalDate");
 const modalExisting = document.getElementById("modalExisting");
+const typePillsWrap = document.getElementById("typePills");
+const titleInput    = document.getElementById("titleInput");
 const fileInput     = document.getElementById("fileInput");
 const previewRow    = document.getElementById("previewRow");
 const uploadSubmit  = document.getElementById("uploadSubmit");
@@ -38,6 +40,7 @@ let currentUser = null;
 let currentProfile = null;
 let activeSubject = null; // { id, name, entry }
 let pendingFiles = [];
+let selectedType = null; // "classwork" | "homework" | null — fully optional
 const TODAY = todayId();
 
 // Resizes to a max dimension of 1600px and re-encodes as JPEG at 82% quality.
@@ -155,12 +158,18 @@ function renderSubjectCard(subject, entry) {
   const alreadyMine = uploaded && entry.uploadedBy?.includes(currentUser.uid);
   const uploaderCount = uploaded ? entry.uploadedBy.length : 0;
 
+  // If any submission today carries a title, surface the most recent one as
+  // a small subtitle — gives absent students a hint of what's inside before
+  // they even open it. Purely cosmetic; falls back to nothing if unset.
+  const latest = uploaded && entry.uploads?.length ? entry.uploads[entry.uploads.length - 1] : null;
+
   card.innerHTML = `
     <div class="subject-name">${escapeHtml(subject.name)}</div>
     <div class="subject-teacher">${subject.teacher ? escapeHtml(subject.teacher) : "Teacher not set"}</div>
     ${uploaded
       ? `<span class="badge badge-green">✓ Uploaded by ${uploaderCount} classmate${uploaderCount > 1 ? "s" : ""}</span>`
       : `<span class="badge badge-cyan">No upload yet today</span>`}
+    ${latest?.title ? `<div class="subject-last-title">"${escapeHtml(latest.title)}"</div>` : ""}
     <div class="card-actions">
       <button class="btn btn-ghost btn-sm" data-action="view">${uploaded ? "View" : "Nothing yet"}</button>
       <button class="btn btn-primary btn-sm" data-action="upload" ${alreadyMine ? "disabled" : ""}>
@@ -179,24 +188,62 @@ function renderSubjectCard(subject, entry) {
   return card;
 }
 
+// Type pills (Classwork / Homework) — tap to select, tap again to clear.
+// Both fully optional, so nothing is pre-selected and nothing is required.
+typePillsWrap.querySelectorAll(".type-pill").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const wasSelected = btn.classList.contains("selected");
+    typePillsWrap.querySelectorAll(".type-pill").forEach((b) => b.classList.remove("selected"));
+    if (wasSelected) {
+      selectedType = null;
+    } else {
+      btn.classList.add("selected");
+      selectedType = btn.dataset.type;
+    }
+  });
+});
+
 function openModal(subject, entry) {
   activeSubject = { id: subject.id, name: subject.name, entry };
   pendingFiles = [];
+  selectedType = null;
   fileInput.value = "";
   previewRow.innerHTML = "";
   uploadStatus.textContent = "";
+  titleInput.value = "";
+  typePillsWrap.querySelectorAll(".type-pill").forEach((b) => b.classList.remove("selected"));
   modalSubject.textContent = subject.name;
   modalDate.textContent = formatDateLabel(TODAY);
 
   if (entry) {
-    const names = Object.values(entry.uploaderNames || {}).join(", ") || "classmates";
     modalExisting.hidden = false;
-    modalExisting.innerHTML = `
-      <p class="modal-existing-label">Already uploaded today by ${escapeHtml(names)}:</p>
-      <div class="thumb-row">
-        ${(entry.photoURLs || []).map((url) => `<a href="${url}" target="_blank" rel="noopener"><img src="${url}" class="thumb" /></a>`).join("")}
-      </div>
-    `;
+    if (entry.uploads?.length) {
+      // New-style entry: render each submission with its own type badge/title.
+      modalExisting.innerHTML = `
+        <p class="modal-existing-label">Already shared today:</p>
+        ${entry.uploads.map((u) => `
+          <div class="upload-group">
+            <div class="upload-group-head">
+              <span class="upload-group-name">${escapeHtml(u.name || "Classmate")}</span>
+              ${typeBadgeHtml(u.type)}
+            </div>
+            ${u.title ? `<div class="upload-group-title">"${escapeHtml(u.title)}"</div>` : ""}
+            <div class="thumb-row">
+              ${(u.photoURLs || []).map((url) => `<a href="${url}" target="_blank" rel="noopener"><img src="${url}" class="thumb" /></a>`).join("")}
+            </div>
+          </div>
+        `).join("")}
+      `;
+    } else {
+      // Backward compatibility for entries created before type/title existed.
+      const names = Object.values(entry.uploaderNames || {}).join(", ") || "classmates";
+      modalExisting.innerHTML = `
+        <p class="modal-existing-label">Already uploaded today by ${escapeHtml(names)}:</p>
+        <div class="thumb-row">
+          ${(entry.photoURLs || []).map((url) => `<a href="${url}" target="_blank" rel="noopener"><img src="${url}" class="thumb" /></a>`).join("")}
+        </div>
+      `;
+    }
   } else {
     modalExisting.hidden = true;
     modalExisting.innerHTML = "";
@@ -213,6 +260,7 @@ function closeModal() {
   modal.hidden = true;
   activeSubject = null;
   pendingFiles = [];
+  selectedType = null;
 }
 modalClose.addEventListener("click", closeModal);
 modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
@@ -239,6 +287,8 @@ uploadSubmit.addEventListener("click", async () => {
 
   const { schoolId, classId } = currentProfile;
   const subjectId = activeSubject.id;
+  const title = titleInput.value.trim().slice(0, 80); // optional, capped for display sanity
+  const type = selectedType; // optional — "classwork" | "homework" | null
 
   try {
     // 1. Compress, then upload each file directly to Cloudinary (unsigned preset).
@@ -265,6 +315,19 @@ uploadSubmit.addEventListener("click", async () => {
     }
 
     uploadStatus.textContent = "Saving…";
+
+    // This submission's own record — type/title are optional metadata, blank
+    // string / null when the student skipped them. uploadedAt is a plain ISO
+    // string (not serverTimestamp()) because Firestore doesn't allow the
+    // serverTimestamp() sentinel inside array elements.
+    const uploadRecord = {
+      uid: currentUser.uid,
+      name: currentUser.displayName || currentUser.email,
+      type: type || null,
+      title: title || "",
+      photoURLs: urls,
+      uploadedAt: new Date().toISOString(),
+    };
 
     // 2. Transaction: update (or create) the entry doc + the user's XP/streak/rank
     //    + a private mirror record for the "My Uploads" history page.
@@ -302,6 +365,7 @@ uploadSubmit.addEventListener("click", async () => {
           uploadedBy: [currentUser.uid],
           uploaderNames: { [currentUser.uid]: currentUser.displayName || currentUser.email },
           photoURLs: urls,
+          uploads: [uploadRecord],
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         });
@@ -315,6 +379,7 @@ uploadSubmit.addEventListener("click", async () => {
             [currentUser.uid]: currentUser.displayName || currentUser.email,
           },
           photoURLs: [...(existing.photoURLs || []), ...urls],
+          uploads: [...(existing.uploads || []), uploadRecord],
           updatedAt: serverTimestamp(),
         });
       }
@@ -326,6 +391,9 @@ uploadSubmit.addEventListener("click", async () => {
         photoURLs: myUploadSnap.exists()
           ? [...(myUploadSnap.data().photoURLs || []), ...urls]
           : urls,
+        uploads: myUploadSnap.exists()
+          ? [...(myUploadSnap.data().uploads || []), uploadRecord]
+          : [uploadRecord],
         updatedAt: serverTimestamp(),
       }, { merge: true });
 

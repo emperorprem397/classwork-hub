@@ -1,5 +1,5 @@
-// Shared helpers used by dashboard.js, leaderboard.js, profile.js
-// so rank/XP/date logic isn't duplicated three times.
+// Shared helpers used by dashboard.js, subjects.js, myuploads.js, leaderboard.js, profile.js
+// so rank/XP/date/type-badge logic isn't duplicated across pages.
 
 export const XP_UPLOAD          = 10; // any photo added to an existing day's entry
 export const XP_FIRST_OF_DAY    = 5;  // bonus for being the one who starts today's entry for a subject
@@ -81,4 +81,19 @@ export function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, (c) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   }[c]));
+}
+
+// ---------- Upload type metadata (NEW) ----------
+// A single upload can optionally be tagged as Classwork or Homework, and
+// given a short optional title (e.g. "Chapter 5 — Photosynthesis notes").
+// Both are fully optional — students can leave them blank.
+export const TYPE_META = {
+  classwork: { icon: "📓", label: "Classwork" },
+  homework:  { icon: "📝", label: "Homework" },
+};
+
+export function typeBadgeHtml(type) {
+  if (!type || !TYPE_META[type]) return "";
+  const t = TYPE_META[type];
+  return `<span class="badge badge-cyan type-badge">${t.icon} ${t.label}</span>`;
 }

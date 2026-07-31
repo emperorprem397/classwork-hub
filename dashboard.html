@@ -96,6 +96,19 @@
 
     <div id="modalExisting" hidden></div>
 
+    <!-- Optional metadata — student can skip both and just upload photos -->
+    <div class="field-group">
+      <label class="field-label">What is this? <span class="optional-tag">(optional)</span></label>
+      <div class="type-pills" id="typePills">
+        <button type="button" class="type-pill" data-type="classwork">📓 Classwork</button>
+        <button type="button" class="type-pill" data-type="homework">📝 Homework</button>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="titleInput">Title <span class="optional-tag">(optional)</span></label>
+      <input type="text" id="titleInput" class="text-input" placeholder="e.g. Chapter 5 — Photosynthesis notes" maxlength="80" />
+    </div>
+
     <label class="file-drop" for="fileInput">
       <span>📷 Choose notebook photos (up to 6)</span>
       <input type="file" id="fileInput" accept="image/*" multiple hidden />

@@ -224,3 +224,73 @@ body { font-family: 'Inter', sans-serif; }
   .sb-item.active { border-left-color: transparent; border-bottom-color: var(--cyan); }
 }
 
+
+/* ---------- Optional upload metadata (type + title) ---------- */
+.field-group { margin-top: 1rem; }
+.field-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-soft);
+  margin-bottom: 6px;
+}
+.optional-tag {
+  font-weight: 400;
+  color: var(--text-faint);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.type-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.type-pill {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+.type-pill:hover { border-color: var(--border-strong); color: var(--text); }
+.type-pill.selected {
+  border-color: var(--cyan);
+  color: var(--cyan-bright);
+  background: rgba(34, 211, 238, 0.1);
+  font-weight: 600;
+}
+
+.text-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 0.86rem;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+}
+.text-input:focus { outline: none; border-color: var(--cyan); }
+.text-input::placeholder { color: var(--text-faint); }
+
+.subject-last-title {
+  font-size: 0.78rem;
+  color: var(--text-soft);
+  font-style: italic;
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.type-badge { margin-left: 6px; font-size: 0.72rem; padding: 3px 8px; }
+
+.upload-group {
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+  margin-top: 10px;
+}
+.upload-group:first-of-type { border-top: none; margin-top: 0; padding-top: 0; }
+.upload-group-head { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+.upload-group-name { font-size: 0.84rem; font-weight: 600; color: var(--text); }
+.upload-group-title { font-size: 0.8rem; color: var(--text-soft); font-style: italic; margin-top: 2px; }

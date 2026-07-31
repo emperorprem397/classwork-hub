@@ -3,7 +3,7 @@ import { onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { doc, getDoc, collection, getDocs, query, orderBy }
   from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-import { escapeHtml, dateIdOffset, shortDayLabel, formatDateLabel, todayId } from "./helpers.js";
+import { escapeHtml, dateIdOffset, shortDayLabel, formatDateLabel, todayId, typeBadgeHtml } from "./helpers.js";
 
 const userPhoto   = document.getElementById("userPhoto");
 const userNameEl  = document.getElementById("userName");
@@ -107,14 +107,35 @@ function renderSubjectRow(subject, entrySnaps) {
 function openViewModal(subject, dateId, entryData) {
   viewDaySubject.textContent = subject.name;
   viewDayDate.textContent = formatDateLabel(dateId);
-  const names = Object.values(entryData.uploaderNames || {}).join(", ") || "classmates";
-  viewDayBody.innerHTML = `
-    <p class="modal-existing-label">Uploaded by ${escapeHtml(names)}:</p>
-    <div class="thumb-row">
-      ${(entryData.photoURLs || []).map((url) =>
-        `<a href="${url}" target="_blank" rel="noopener"><img src="${url}" class="thumb" /></a>`
-      ).join("")}
-    </div>
-  `;
+
+  if (entryData.uploads?.length) {
+    // New-style entry: one block per submission, each with its own optional
+    // type badge and title.
+    viewDayBody.innerHTML = entryData.uploads.map((u) => `
+      <div class="upload-group">
+        <div class="upload-group-head">
+          <span class="upload-group-name">${escapeHtml(u.name || "Classmate")}</span>
+          ${typeBadgeHtml(u.type)}
+        </div>
+        ${u.title ? `<div class="upload-group-title">"${escapeHtml(u.title)}"</div>` : ""}
+        <div class="thumb-row">
+          ${(u.photoURLs || []).map((url) =>
+            `<a href="${url}" target="_blank" rel="noopener"><img src="${url}" class="thumb" /></a>`
+          ).join("")}
+        </div>
+      </div>
+    `).join("");
+  } else {
+    // Backward compatibility for entries created before type/title existed.
+    const names = Object.values(entryData.uploaderNames || {}).join(", ") || "classmates";
+    viewDayBody.innerHTML = `
+      <p class="modal-existing-label">Uploaded by ${escapeHtml(names)}:</p>
+      <div class="thumb-row">
+        ${(entryData.photoURLs || []).map((url) =>
+          `<a href="${url}" target="_blank" rel="noopener"><img src="${url}" class="thumb" /></a>`
+        ).join("")}
+      </div>
+    `;
+  }
   viewDayModal.hidden = false;
 }
