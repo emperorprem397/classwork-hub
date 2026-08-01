@@ -40,6 +40,27 @@
       <p id="schoolEmptyMsg" class="empty-msg" hidden>No matching APS school found — check your spelling.</p>
 
       <p id="schoolError" class="error-msg" hidden></p>
+
+      <div class="add-school-block">
+        <p class="add-school-prompt">Can't find your school? <button type="button" id="addSchoolToggleBtn" class="text-btn">+ Add your school</button></p>
+        <div id="addSchoolForm" class="add-school-form" hidden>
+          <div class="field-row">
+            <div class="field">
+              <label for="newSchoolName">School name</label>
+              <input type="text" id="newSchoolName" class="ruled-input" placeholder="e.g. St. Xavier's School" maxlength="80" />
+            </div>
+            <div class="field">
+              <label for="newSchoolCity">City <span class="optional">(optional)</span></label>
+              <input type="text" id="newSchoolCity" class="ruled-input" placeholder="e.g. Jodhpur" maxlength="40" />
+            </div>
+          </div>
+          <p id="addSchoolStatus" class="error-msg" hidden></p>
+          <div class="btn-row">
+            <button id="addSchoolCancelBtn" class="text-btn" type="button">Cancel</button>
+            <button id="addSchoolSubmitBtn" class="primary-btn" type="button">Add school &amp; continue</button>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- STEP 2: Class + Section -->

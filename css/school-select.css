@@ -239,3 +239,22 @@ select.ruled-input option {
 }
 
 [hidden] { display: none !important; }
+
+/* Edit-mode banner shown when a student arrives via Settings → "Change school / class" */
+.edit-mode-banner {
+  background: rgba(34, 211, 238, 0.08);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+/* Self-serve "Add your school" (when it's not in the fixed APS list) */
+.add-school-block { margin-top: 1.2rem; padding-top: 1rem; border-top: 1px dashed var(--border); }
+.add-school-prompt { font-size: 0.86rem; color: var(--text-soft); margin: 0; }
+.add-school-form { margin-top: 0.8rem; }
+.add-school-form .field-row { margin-bottom: 0.6rem; }
+.optional { font-weight: 400; color: var(--text-faint); }

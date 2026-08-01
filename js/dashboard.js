@@ -2,7 +2,7 @@ import { auth, db, CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from "./fir
 import { onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
-  doc, getDoc, collection, getDocs, addDoc, query, orderBy, runTransaction, serverTimestamp
+  doc, getDoc, updateDoc, collection, getDocs, addDoc, query, orderBy, runTransaction, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import {
   XP_UPLOAD, XP_FIRST_OF_DAY, XP_STREAK_TICK, calcRank,
@@ -23,6 +23,8 @@ const subjectsGrid  = document.getElementById("subjectsGrid");
 const emptyState    = document.getElementById("emptyState");
 const loadingMsg    = document.getElementById("loadingMsg");
 const signOutBtn    = document.getElementById("signOutBtn");
+const onboardingBanner  = document.getElementById("onboardingBanner");
+const onboardingDismiss = document.getElementById("onboardingDismiss");
 
 const modal         = document.getElementById("uploadModal");
 const modalSubject  = document.getElementById("modalSubjectName");
@@ -113,6 +115,30 @@ onAuthStateChanged(auth, async (user) => {
 
   renderProfile();
   await loadSubjects();
+
+  // First-time onboarding banner — keyed by uid (not just a flat flag) so
+  // it doesn't bleed across accounts on a shared device, and shown at most
+  // once per account since it's just a one-time orientation, not a nag.
+  const onboardingKey = `ch_onboarded_${user.uid}`;
+  if (!localStorage.getItem(onboardingKey)) {
+    onboardingBanner.hidden = false;
+  }
+  onboardingDismiss.addEventListener("click", () => {
+    onboardingBanner.hidden = true;
+    localStorage.setItem(onboardingKey, "1");
+  });
+
+  // Keep the Firestore mirror of name/photo in sync with the live Google
+  // account — the leaderboard and admin panel read this stored copy (they
+  // can't call the Firebase Auth API for other users), so without this a
+  // name change made in Settings would never show up anywhere but your own
+  // pages. Silent, fire-and-forget, runs at most once per session change.
+  if (currentProfile.name !== user.displayName || currentProfile.photoURL !== user.photoURL) {
+    updateDoc(doc(db, "users", user.uid), {
+      name: user.displayName || currentProfile.name || "",
+      photoURL: user.photoURL || "",
+    }).catch((err) => console.error("Background profile sync failed:", err));
+  }
 });
 
 function renderProfile() {

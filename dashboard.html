@@ -23,6 +23,7 @@
       <a class="sb-item" href="homework.html">✅ Homework</a>
       <a class="sb-item" href="leaderboard.html">🏆 Leaderboard</a>
       <a class="sb-item" href="profile.html">👤 Profile</a>
+      <a class="sb-item" href="settings.html">⚙️ Settings</a>
     </nav>
     <div class="sb-foot">
       <button id="signOutBtn" class="btn btn-ghost" style="width:100%">Sign out</button>
@@ -43,6 +44,20 @@
     </header>
 
     <div class="content">
+
+      <!-- First-time onboarding — dismissible, shown once per account -->
+      <section id="onboardingBanner" class="glass onboarding-banner" hidden>
+        <button id="onboardingDismiss" class="modal-close" aria-label="Got it, don't show again">✕</button>
+        <p class="onboarding-title">👋 Quick tour</p>
+        <div class="onboarding-grid">
+          <div><span>🏠</span> <b>Dashboard</b> — today's work for each subject, and where you upload</div>
+          <div><span>📚</span> <b>Subjects</b> — catch up on the last 7 days, subject by subject</div>
+          <div><span>📤</span> <b>My Uploads</b> — everything you've personally shared</div>
+          <div><span>✅</span> <b>Homework</b> — assignments the class is tracking, separate from classwork photos</div>
+          <div><span>🏆</span> <b>Leaderboard</b> — where you rank in XP within your class</div>
+          <div><span>⚙️</span> <b>Settings</b> — your name, photo, and class/school</div>
+        </div>
+      </section>
 
       <!-- Profile / XP summary -->
       <section class="glass profile-card">

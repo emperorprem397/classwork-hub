@@ -297,3 +297,33 @@ body { font-family: 'Inter', sans-serif; }
 .upload-group-head { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
 .upload-group-name { font-size: 0.84rem; font-weight: 600; color: var(--text); }
 .upload-group-title { font-size: 0.8rem; color: var(--text-soft); font-style: italic; margin-top: 2px; }
+
+/* First-time onboarding banner */
+.onboarding-banner {
+  position: relative;
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1rem;
+}
+.onboarding-title {
+  font-family: 'Zilla Slab', serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text);
+  margin: 0 0 10px 0;
+}
+.onboarding-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px 18px;
+}
+.onboarding-grid div {
+  font-size: 0.8rem;
+  color: var(--text-soft);
+  line-height: 1.4;
+}
+.onboarding-grid b { color: var(--text); }
+.onboarding-banner .modal-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+}
