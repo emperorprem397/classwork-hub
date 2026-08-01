@@ -5,20 +5,65 @@ body { font-family: 'Inter', sans-serif; }
   min-height: 100vh;
 }
 
-/* ---------- Sidebar ---------- */
+/* ---------- Sidebar (off-canvas, toggled via the ⋮ button) ---------- */
 .sidebar {
-  width: 230px;
+  width: 240px;
   flex-shrink: 0;
-  background: rgba(13, 21, 24, 0.7);
+  background: rgba(11, 18, 21, 0.92);
   border-right: 1px solid var(--border);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
   display: flex;
   flex-direction: column;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
   height: 100vh;
+  z-index: 60;
+  transform: translateX(-100%);
+  transition: transform 0.22s ease;
+  box-shadow: 24px 0 60px -24px rgba(0, 0, 0, 0.6);
 }
+.sidebar.open { transform: translateX(0); }
+
+/* Dims the page behind the sidebar while it's open; clicking it closes the menu */
+.nav-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 8, 0.55);
+  z-index: 55;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.nav-overlay.open { opacity: 1; pointer-events: auto; }
+
+/* Minimal 3-dot menu trigger, lives in the topbar next to the page title */
+.topbar-left { display: flex; align-items: center; gap: 0.9rem; min-width: 0; }
+.nav-toggle {
+  flex-shrink: 0;
+  width: 38px; height: 38px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.nav-toggle span {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--text-soft);
+  transition: background 0.15s ease;
+}
+.nav-toggle:hover { border-color: var(--border-strong); background: var(--surface-hover); }
+.nav-toggle:hover span { background: var(--text); }
+.nav-toggle[aria-expanded="true"] { border-color: var(--cyan); background: rgba(34, 211, 238, 0.1); }
+.nav-toggle[aria-expanded="true"] span { background: var(--cyan-bright); }
 
 .sb-logo {
   padding: 1.4rem 1.2rem 1.1rem;
@@ -160,8 +205,22 @@ body { font-family: 'Inter', sans-serif; }
 }
 .subject-card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
 
+.subject-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
 .subject-name { font-family: 'Zilla Slab', serif; font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
 .subject-teacher { font-size: 0.8rem; color: var(--text-soft); margin-bottom: 14px; }
+.subject-edit-btn {
+  flex-shrink: 0;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  font-size: 0.75rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.subject-edit-btn:hover { border-color: var(--border-strong); color: var(--text); background: var(--surface-hover); }
+.subject-uploaders { font-size: 0.76rem; color: var(--text-faint); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .empty-state { text-align: center; padding: 2.4rem 1.5rem; }
 .empty-title { font-weight: 600; color: var(--text); margin: 0 0 6px; }
@@ -220,11 +279,10 @@ body { font-family: 'Inter', sans-serif; }
 .upload-status { text-align: center; font-size: 0.82rem; color: var(--text-soft); margin-top: 0.6rem; min-height: 1.2em; }
 
 @media (max-width: 720px) {
-  .shell { flex-direction: column; }
-  .sidebar { width: 100%; height: auto; position: static; flex-direction: row; overflow-x: auto; }
-  .sb-nav { display: flex; flex: none; padding: 0.4rem; }
-  .sb-item { border-left: none; border-bottom: 3px solid transparent; white-space: nowrap; }
-  .sb-item.active { border-left-color: transparent; border-bottom-color: var(--cyan); }
+  .sidebar { width: 82vw; max-width: 300px; }
+  .content { padding: 1.2rem; }
+  .topbar { padding: 0.9rem 1.1rem; }
+  .user-box span { display: none; } /* keep just the photo on narrow screens */
 }
 
 

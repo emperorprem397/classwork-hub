@@ -1,7 +1,7 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { doc, getDoc, collection, query, where, orderBy, limit, getDocs }
+import { doc, getDoc, collection, query, where, getDocs }
   from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { escapeHtml } from "./helpers.js";
 
@@ -30,30 +30,37 @@ onAuthStateChanged(auth, async (user) => {
   classLabel.textContent = `Class ${profile.classId}`;
 
   try {
+    // Deliberately NOT using orderBy() here — two equality filters (schoolId,
+    // classId) plus orderBy("xp") requires a manually-created Firestore
+    // composite index, which is exactly why the leaderboard used to fail the
+    // first time it ran on a fresh project. Fetching everyone in the class
+    // (cheap — a class is at most a few dozen students) and sorting in the
+    // browser avoids that requirement entirely, no console/index step needed.
     const usersCol = collection(db, "users");
     const q = query(
       usersCol,
       where("schoolId", "==", profile.schoolId),
-      where("classId", "==", profile.classId),
-      orderBy("xp", "desc"),
-      limit(50)
+      where("classId", "==", profile.classId)
     );
     const results = await getDocs(q);
     loadingMsg.hidden = true;
 
-    if (results.empty) { emptyState.hidden = false; return; }
+    // Every enrolled classmate shows up, even with 0 XP and zero uploads —
+    // they just sort to the bottom. Banned accounts are excluded entirely.
+    const students = results.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .filter((d) => d.banned !== true)
+      .sort((a, b) => (b.xp ?? 0) - (a.xp ?? 0));
+
+    if (students.length === 0) { emptyState.hidden = false; return; }
 
     lbList.innerHTML = "";
-    let pos = 0;
-    results.forEach((docSnap) => {
-      pos++;
-      const d = docSnap.data();
-      if (d.banned === true) return; // skip banned users, don't count toward position display oddly
-      const isMe = docSnap.id === user.uid;
+    students.forEach((d, i) => {
+      const isMe = d.id === user.uid;
       const row = document.createElement("div");
       row.className = "lb-row" + (isMe ? " me" : "");
       row.innerHTML = `
-        <div class="lb-pos">${pos}</div>
+        <div class="lb-pos">${i + 1}</div>
         <img class="lb-photo" src="${d.photoURL || ""}" alt="" />
         <div class="lb-info">
           <div class="lb-name">${escapeHtml(d.name || d.displayName || "Student")}${isMe ? " (you)" : ""}</div>
@@ -69,9 +76,6 @@ onAuthStateChanged(auth, async (user) => {
   } catch (err) {
     console.error(err);
     loadingMsg.hidden = false;
-    // Most likely cause: Firestore needs a composite index for this query
-    // (schoolId ==, classId ==, xp desc). The console error usually contains
-    // a direct link to auto-create it — check the browser console.
-    loadingMsg.textContent = "Couldn't load the leaderboard. If this is the first time this page has run, check the browser console (F12) for a Firestore 'create index' link and click it.";
+    loadingMsg.textContent = "Couldn't load the leaderboard — check your connection and refresh.";
   }
 });

@@ -35,3 +35,47 @@
 .hw-desc { font-size: 0.85rem; color: var(--text-soft); margin-top: 2px; }
 .hw-meta { font-size: 0.75rem; color: var(--text-faint); margin-top: 6px; }
 .hw-meta.overdue-text { color: #f87171; }
+
+/* ---------- Work page tabs (Assignments / Classwork / Homework uploads) ---------- */
+.work-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 1.2rem;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+.work-tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.7rem 0.2rem;
+  margin-right: 1.4rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text-soft);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.work-tab:hover { color: var(--text); }
+.work-tab.active { color: var(--cyan-bright); border-bottom-color: var(--cyan); }
+.work-panel { display: none; }
+.work-panel.active { display: block; }
+
+.upload-feed { display: flex; flex-direction: column; gap: 0.8rem; }
+.upload-feed-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.2rem;
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+}
+.upload-feed-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.upload-feed-subject { font-weight: 700; color: var(--text); font-size: 0.92rem; font-family: 'Zilla Slab', serif; }
+.upload-feed-meta { font-size: 0.75rem; color: var(--text-faint); margin-bottom: 6px; }

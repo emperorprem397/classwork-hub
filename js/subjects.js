@@ -19,8 +19,11 @@ const viewDayDate    = document.getElementById("viewDayDate");
 const viewDayBody    = document.getElementById("viewDayBody");
 
 const TODAY = todayId();
-// Last 7 days, oldest first, so the row reads left-to-right chronologically.
-const WEEK = Array.from({ length: 7 }, (_, i) => dateIdOffset(-(6 - i)));
+// Last 30 days, oldest first, so the row reads left-to-right chronologically.
+// (Widened from 7 -> 30 so older uploads stay easy to find, not just the
+// most recent week — nothing is ever deleted, this just changes how far
+// back the day-chip row looks.)
+const WEEK = Array.from({ length: 30 }, (_, i) => dateIdOffset(-(29 - i)));
 
 let currentProfile = null;
 

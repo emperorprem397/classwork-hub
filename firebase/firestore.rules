@@ -19,14 +19,14 @@ service cloud.firestore {
     }
 
     function inSchool(schoolId) {
-      return isSignedIn() && myProfile().schoolId == schoolId && myProfile().banned != true;
+      return isSignedIn() && myProfile().schoolId == schoolId && myProfile().get('banned', false) != true;
     }
 
     function inClass(schoolId, classId) {
       return isSignedIn()
         && myProfile().schoolId == schoolId
         && myProfile().classId == classId
-        && myProfile().banned != true;
+        && myProfile().get('banned', false) != true;
     }
 
     // Same school + class as the profile doc being read — this is what lets
@@ -36,7 +36,7 @@ service cloud.firestore {
       return isSignedIn()
         && myProfile().schoolId == targetData.schoolId
         && myProfile().classId == targetData.classId
-        && myProfile().banned != true;
+        && myProfile().get('banned', false) != true;
     }
 
     // ============================================================
@@ -91,18 +91,24 @@ service cloud.firestore {
 
         // ========================================================
         // .../subjects/{subjectId}
-        // CHANGED: any signed-in classmate can now ADD a subject
-        // (self-service — no need to wait on the admin panel).
-        // Editing/removing an existing subject stays admin-only, so
-        // one student can't rename or delete a subject the whole
-        // class depends on.
+        // Any signed-in classmate can ADD a subject (self-service) and
+        // can now EDIT its name/teacher too (e.g. filling in a teacher's
+        // name someone left blank) — deleting a subject the whole class
+        // depends on stays admin-only so it can't be removed by mistake.
         // ========================================================
         match /subjects/{subjectId} {
           allow read: if inClass(schoolId, classId) || isAdmin();
-          allow create: if inClass(schoolId, classId)
-                        && request.resource.data.name is string
-                        && request.resource.data.name.size() > 0;
-          allow update, delete: if isAdmin();
+          allow create: if isAdmin() || (
+                          inClass(schoolId, classId)
+                          && request.resource.data.name is string
+                          && request.resource.data.name.size() > 0
+                        );
+          allow update: if isAdmin() || (
+                          inClass(schoolId, classId)
+                          && request.resource.data.name is string
+                          && request.resource.data.name.size() > 0
+                        );
+          allow delete: if isAdmin();
 
           // ======================================================
           // .../entries/{entryId}  <- day-by-day uploads, one doc
@@ -112,8 +118,10 @@ service cloud.firestore {
           // ======================================================
           match /entries/{entryId} {
             allow read: if inClass(schoolId, classId) || isAdmin();
-            allow create: if inClass(schoolId, classId)
-                          && request.auth.uid in request.resource.data.uploadedBy;
+            allow create: if isAdmin() || (
+                            inClass(schoolId, classId)
+                            && request.auth.uid in request.resource.data.uploadedBy
+                          );
             // Collaborative: any classmate can update (append their own photos/uid),
             // not just the original uploader — that's the whole point of the shared
             // entry doc. We can't easily enforce "only appended, not removed" with
@@ -130,8 +138,10 @@ service cloud.firestore {
         // ========================================================
         match /homework/{hwId} {
           allow read: if inClass(schoolId, classId) || isAdmin();
-          allow create: if inClass(schoolId, classId)
-                        && request.resource.data.createdBy == request.auth.uid;
+          allow create: if isAdmin() || (
+                          inClass(schoolId, classId)
+                          && request.resource.data.createdBy == request.auth.uid
+                        );
           allow update, delete: if isAdmin()
                         || (inClass(schoolId, classId) && resource.data.createdBy == request.auth.uid);
 

@@ -5,6 +5,8 @@ Stack: Firebase Auth (Google, popup) + Firestore + Cloudinary (images) + GitHub 
 
 Refer to this file before making changes — it's the single source of truth for what's done, what's pending, and what's next.
 
+> **📦 Consolidation note:** This file's project package (`classwork-hub-FINAL.zip`, 35 files) is a from-scratch merge of every round shipped so far — verified file-by-file against every prior delivery, not just a copy of the latest one. It's meant to be uploaded as a complete replacement to a fresh GitHub repo (or to overwrite the existing one entirely) rather than dragged in piecemeal. In particular, this is the first package where `firebase/firestore.rules` is confirmed to include **both** the collaborative-upload rules **and** the `banned`-field crash fix **and** the self-serve subject/school write permissions — earlier individual zips could easily end up with only some of these if uploaded out of order, which is exactly what caused the permission-denied debugging session earlier in this project.
+
 ---
 
 ## ✅ Completed
@@ -88,17 +90,45 @@ This is the "1st improvement" that was queued after Settings — now built.
 
 No Firestore rules changes needed this round either — schools/classes/subjects creation was already permissive enough (`name is string`), and the existing "Pending Schools" admin workflow already existed and just needed a student-facing entry point.
 
+## 🛠️ Multi-upload fixes, Work section, leaderboard fix, off-canvas nav, new homepage (this round)
+
+Large round covering most of the outstanding bug list plus two structural changes (Work section, nav redesign) and a full homepage rebuild.
+
+**Bug fixes:**
+- **Unlimited photos per upload** — removed the hard-coded 6-photo cap in `dashboard.js`'s file picker.
+- **Multiple uploads per subject per day** — removed the "you've already uploaded" disabled-button lock. A student can now add more photos to the same subject repeatedly in one day; the upload transaction already supported this correctly, only the UI was blocking it.
+- **Leaderboard actually works now** — root cause was the query (`where` + `where` + `orderBy`) requiring a Firestore composite index that never got created. Rewrote it to fetch by the two equality filters only and sort by XP client-side in the browser — this needs **no manual index step**, ever. Every classmate now shows up (even 0-XP, never-uploaded students, sorted to the bottom); banned accounts are excluded.
+- **Subject editing** — any classmate can now edit a subject's name/teacher (✎ button on each dashboard card opens a small modal), not just the admin. Firestore rule updated to match — `create`/`update` now both check `inClass()`, `delete` stays admin-only.
+- **Uploader names visible** — subject cards now list who uploaded (not just a count), pulled from the existing `uploaderNames` map on the entry doc.
+- **"Lost my uploads after switching class" — investigated, not a code bug.** School/class IDs are deterministic for APS schools, so switching back to the same school+class restores the exact same Firestore path — the data was never actually gone. The most likely real cause: the Subjects page only showed a 7-day window, so anything uploaded further back looked "missing." Widened that window to 30 days. If this still happens after this update, it's worth screenshotting exactly which page shows nothing (Dashboard "today" card vs. Subjects day-chip row are two different queries).
+
+**Homework → Work section (structural change):**
+- `homework.html`/`homework.js` (filenames kept, content rebuilt) is now a tabbed **Work** page: **Assignments** (the original due-date tracker, unchanged behavior) + **Classwork Uploads** + **Homework Uploads** — the latter two scan every subject's last 14 days of entries and surface any individual photo submission tagged with that type. This is what makes tagging an upload "Homework" on the Dashboard actually make it appear somewhere under Work, which it never did before.
+- Sidebar label everywhere changed from "✅ Homework" to "🗂️ Work" (same `homework.html` href, just relabeled — no link breakage).
+
+**Off-canvas navigation (structural change):**
+- The sidebar on all 7 app pages (Dashboard, Subjects, My Uploads, Work, Leaderboard, Profile, Settings) is now hidden by default and opens via a minimal 3-dot (⋮) button in the topbar, with a dimmed backdrop and close-on-outside-click/Escape. New shared `js/nav.js` handles this identically on every page. CSS lives in `css/dashboard.css` (already shared by all pages, no per-page CSS files needed).
+
+**New public homepage:**
+- `index.html` (previously just a login card) is now a full monochrome marketing hero page — nav with Home/Features/About/Contact, hero headline + Get Started/Login CTAs, an abstract stacked-notebook illustration built in CSS (no external image), Features/About/Contact sections, footer. All CTA buttons trigger the same Google popup sign-in as before.
+- New dedicated `css/style.css` rewrite for this page only — intentionally not using the dark cyan glass `theme.css` the rest of the app uses, since this is the one page a visitor sees before signing in.
+- `js/auth.js` changed from binding one `#google-login-btn` id to binding every `.google-signin-btn` element, since the new page has three separate sign-in triggers (top-right Login pill, hero Get Started, bottom Get Started).
+
+**Firestore Console step required this round:** yes — republish `firestore.rules` (Firestore Database → Rules → paste → Publish) for the subject-editing permission change. Nothing else needs a console step; the leaderboard fix is pure client-side code, no index to create.
+
 ## ⏳ Pending / not built yet
 
 - Comments on uploads
 - Notifications
 - Search across uploads
-- Composite Firestore index for the leaderboard query (`schoolId` + `classId` + `xp`) — auto-creates the first time the leaderboard errors; click the link Firestore prints in the console
 - Any analytics in the admin panel beyond the basics
 - Known gap, not yet addressed: Firestore rules let a signed-in student update their own `xp`/`rank`/`streak` fields directly (not just `name`/`photoURL`) since the update rule only checks that `banned` is unchanged — fine for now, worth locking down later if it ever matters
-- Admin's "Pending Schools" review UI itself wasn't touched — it already existed from before the APS-only pivot and works as-is, just confirm it still renders correctly now that real pending schools will start flowing into it
+- Admin's "Pending Schools" review UI itself wasn't touched — it already existed from before the APS-only pivot and works as-is
+- Subject editing (✎) was only added to the Dashboard page, not the Subjects (browse) page — could extend there too if it comes up
+- The new homepage's illustration is an abstract CSS-built stack of notebook icons, not a pixel match of the reference screenshot's 3D render — flagging in case an exact visual match still matters
 
 ## ➡️ Next step
 
 Not yet decided — ask Prem what to prioritize from the "Pending" list above, or whether something new has come up.
+
 

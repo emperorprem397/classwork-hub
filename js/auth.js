@@ -11,37 +11,44 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-const loginBtn = document.getElementById("google-login-btn");
+// The new hero landing page has three separate buttons that should all
+// trigger the same Google sign-in (top-right "Login" pill, the "Get
+// Started" hero CTA, and the bottom "Get Started" CTA) — so we bind by
+// class instead of assuming a single #google-login-btn like before.
+const loginBtns = Array.from(document.querySelectorAll(".google-signin-btn"));
 const statusEl = document.getElementById("login-status");
 
-loginBtn.addEventListener("click", async () => {
-  setLoading(true);
-  try {
-    // Popup-based sign-in — same approach already working reliably in
-    // admin/index.html on both desktop and mobile. Turns out the earlier
-    // "Something went wrong signing in" errors were actually caused by the
-    // Firestore rules mix-up (Storage rules pasted into the Firestore rules
-    // tab), not by popup sign-in itself — popup was never the problem.
-    // Redirect-based sign-in was tried as a fix but introduced a new issue:
-    // it needs a background iframe handshake with classwork-hub.firebaseapp.com
-    // that triggers Brave's (and similar browsers') third-party cookie prompt.
-    // Popup avoids that handshake entirely, matching the admin panel's
-    // already-working behavior.
-    const result = await signInWithPopup(auth, googleProvider);
-    const user = result.user;
-    const profile = await ensureUserProfile(user);
-    if (profile.banned === true) {
-      await signOut(auth);
-      showStatus("This account has been blocked by an admin. Contact your school admin if you think this is a mistake.");
-      setLoading(false);
-      return;
+loginBtns.forEach((btn) => {
+  const originalLabel = btn.innerHTML;
+  btn.addEventListener("click", async () => {
+    setLoading(true, originalLabel);
+    try {
+      // Popup-based sign-in — same approach already working reliably in
+      // admin/index.html on both desktop and mobile. Turns out the earlier
+      // "Something went wrong signing in" errors were actually caused by the
+      // Firestore rules mix-up (Storage rules pasted into the Firestore rules
+      // tab), not by popup sign-in itself — popup was never the problem.
+      // Redirect-based sign-in was tried as a fix but introduced a new issue:
+      // it needs a background iframe handshake with classwork-hub.firebaseapp.com
+      // that triggers Brave's (and similar browsers') third-party cookie prompt.
+      // Popup avoids that handshake entirely, matching the admin panel's
+      // already-working behavior.
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      const profile = await ensureUserProfile(user);
+      if (profile.banned === true) {
+        await signOut(auth);
+        showStatus("This account has been blocked by an admin. Contact your school admin if you think this is a mistake.");
+        setLoading(false, originalLabel);
+        return;
+      }
+      window.location.href = "school-select.html";
+    } catch (err) {
+      console.error(err);
+      showStatus(getFriendlyError(err.code));
+      setLoading(false, originalLabel);
     }
-    window.location.href = "school-select.html";
-  } catch (err) {
-    console.error(err);
-    showStatus(getFriendlyError(err.code));
-    setLoading(false);
-  }
+  });
 });
 
 // If already logged in (e.g. returning visit, session still valid), skip
@@ -84,9 +91,11 @@ async function ensureUserProfile(user) {
   return existing.data();
 }
 
-function setLoading(isLoading) {
-  loginBtn.disabled = isLoading;
-  loginBtn.textContent = isLoading ? "Signing in…" : "Continue with Google";
+function setLoading(isLoading, originalLabel) {
+  loginBtns.forEach((btn) => {
+    btn.disabled = isLoading;
+    btn.innerHTML = isLoading ? "Signing in…" : originalLabel;
+  });
 }
 
 function showStatus(message) {

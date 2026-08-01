@@ -4,6 +4,8 @@ import { onAuthStateChanged, signOut }
 import {
   doc, getDoc, updateDoc, collection, getDocs, addDoc, query, orderBy, runTransaction, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+// NOTE: updateDoc above is reused for both the profile-sync background task
+// and the new "edit subject" feature below — no new imports needed.
 import {
   XP_UPLOAD, XP_FIRST_OF_DAY, XP_STREAK_TICK, calcRank,
   todayId, yesterdayId, formatDateLabel, escapeHtml, typeBadgeHtml
@@ -46,6 +48,14 @@ const subjectNameInput   = document.getElementById("subjectNameInput");
 const subjectTeacherInput = document.getElementById("subjectTeacherInput");
 const addSubjectSubmit   = document.getElementById("addSubjectSubmit");
 const addSubjectStatus   = document.getElementById("addSubjectStatus");
+
+const editSubjectModal    = document.getElementById("editSubjectModal");
+const editSubjectClose    = document.getElementById("editSubjectClose");
+const editSubjectNameInput = document.getElementById("editSubjectNameInput");
+const editSubjectTeacherInput = document.getElementById("editSubjectTeacherInput");
+const editSubjectSubmit   = document.getElementById("editSubjectSubmit");
+const editSubjectStatus   = document.getElementById("editSubjectStatus");
+let editingSubjectId = null;
 
 let currentUser = null;
 let currentProfile = null;
@@ -193,8 +203,8 @@ function renderSubjectCard(subject, entry) {
   card.className = "subject-card";
 
   const uploaded = !!entry;
-  const alreadyMine = uploaded && entry.uploadedBy?.includes(currentUser.uid);
-  const uploaderCount = uploaded ? entry.uploadedBy.length : 0;
+  const uploaderCount = uploaded ? (entry.uploadedBy?.length || 0) : 0;
+  const uploaderNames = uploaded ? Object.values(entry.uploaderNames || {}) : [];
 
   // If any submission today carries a title, surface the most recent one as
   // a small subtitle — gives absent students a hint of what's inside before
@@ -202,26 +212,34 @@ function renderSubjectCard(subject, entry) {
   const latest = uploaded && entry.uploads?.length ? entry.uploads[entry.uploads.length - 1] : null;
 
   card.innerHTML = `
-    <div class="subject-name">${escapeHtml(subject.name)}</div>
-    <div class="subject-teacher">${subject.teacher ? escapeHtml(subject.teacher) : "Teacher not set"}</div>
+    <div class="subject-card-head">
+      <div>
+        <div class="subject-name">${escapeHtml(subject.name)}</div>
+        <div class="subject-teacher">${subject.teacher ? escapeHtml(subject.teacher) : "Teacher not set"}</div>
+      </div>
+      <button class="subject-edit-btn" data-action="edit-subject" title="Edit subject">✎</button>
+    </div>
     ${uploaded
       ? `<span class="badge badge-green">✓ Uploaded by ${uploaderCount} classmate${uploaderCount > 1 ? "s" : ""}</span>`
       : `<span class="badge badge-cyan">No upload yet today</span>`}
+    ${uploaderNames.length ? `<div class="subject-uploaders">${escapeHtml(uploaderNames.join(", "))}</div>` : ""}
     ${latest?.title ? `<div class="subject-last-title">"${escapeHtml(latest.title)}"</div>` : ""}
     <div class="card-actions">
       <button class="btn btn-ghost btn-sm" data-action="view">${uploaded ? "View" : "Nothing yet"}</button>
-      <button class="btn btn-primary btn-sm" data-action="upload" ${alreadyMine ? "disabled" : ""}>
-        ${alreadyMine ? "Already added ✓" : uploaded ? "Add your photos" : "Upload"}
+      <button class="btn btn-primary btn-sm" data-action="upload">
+        ${uploaded ? "Add more photos" : "Upload"}
       </button>
     </div>
   `;
 
   const viewBtn = card.querySelector('[data-action="view"]');
   const uploadBtn = card.querySelector('[data-action="upload"]');
+  const editBtn = card.querySelector('[data-action="edit-subject"]');
 
   if (!uploaded) viewBtn.disabled = true;
   viewBtn.addEventListener("click", () => openModal(subject, entry));
-  if (!alreadyMine) uploadBtn.addEventListener("click", () => openModal(subject, entry));
+  uploadBtn.addEventListener("click", () => openModal(subject, entry));
+  editBtn.addEventListener("click", () => openEditSubjectModal(subject));
 
   return card;
 }
@@ -288,8 +306,8 @@ function openModal(subject, entry) {
   }
 
   const alreadyMine = entry?.uploadedBy?.includes(currentUser.uid);
-  uploadSubmit.disabled = !!alreadyMine;
-  uploadSubmit.textContent = alreadyMine ? "You've already added photos today" : "Upload photos";
+  uploadSubmit.disabled = false;
+  uploadSubmit.textContent = alreadyMine ? "Add more photos" : "Upload photos";
 
   modal.hidden = false;
 }
@@ -355,8 +373,50 @@ addSubjectSubmit.addEventListener("click", async () => {
   }
 });
 
+// ---------- Edit subject (any classmate — e.g. filling in a missing teacher name) ----------
+function openEditSubjectModal(subject) {
+  editingSubjectId = subject.id;
+  editSubjectNameInput.value = subject.name || "";
+  editSubjectTeacherInput.value = subject.teacher || "";
+  editSubjectStatus.textContent = "";
+  editSubjectSubmit.disabled = false;
+  editSubjectModal.hidden = false;
+  editSubjectNameInput.focus();
+}
+function closeEditSubjectModal() {
+  editSubjectModal.hidden = true;
+  editingSubjectId = null;
+}
+editSubjectClose.addEventListener("click", closeEditSubjectModal);
+editSubjectModal.addEventListener("click", (e) => { if (e.target === editSubjectModal) closeEditSubjectModal(); });
+
+editSubjectSubmit.addEventListener("click", async () => {
+  const name = editSubjectNameInput.value.trim();
+  const teacher = editSubjectTeacherInput.value.trim();
+
+  if (!name) {
+    editSubjectStatus.textContent = "Subject name can't be empty.";
+    return;
+  }
+
+  editSubjectSubmit.disabled = true;
+  editSubjectStatus.textContent = "Saving…";
+
+  try {
+    const { schoolId, classId } = currentProfile;
+    const subjectRef = doc(db, "schools", schoolId, "classes", classId, "subjects", editingSubjectId);
+    await updateDoc(subjectRef, { name, teacher: teacher || null });
+    closeEditSubjectModal();
+    await loadSubjects();
+  } catch (err) {
+    console.error(err);
+    editSubjectStatus.textContent = "Couldn't save — check your connection and try again.";
+    editSubjectSubmit.disabled = false;
+  }
+});
+
 fileInput.addEventListener("change", () => {
-  pendingFiles = Array.from(fileInput.files || []).slice(0, 6); // cap at 6 photos per upload
+  pendingFiles = Array.from(fileInput.files || []); // no cap — pick as many notebook photos as needed
   previewRow.innerHTML = "";
   pendingFiles.forEach((file) => {
     const img = document.createElement("img");

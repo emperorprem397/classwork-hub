@@ -4,7 +4,7 @@ import { onAuthStateChanged, signOut }
 import {
   doc, getDoc, setDoc, deleteDoc, collection, addDoc, query, orderBy, getDocs, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-import { escapeHtml } from "./helpers.js";
+import { escapeHtml, dateIdOffset, formatDateLabel, typeBadgeHtml } from "./helpers.js";
 
 const userPhoto   = document.getElementById("userPhoto");
 const userNameEl  = document.getElementById("userName");
@@ -23,9 +23,35 @@ const hwDueDate    = document.getElementById("hwDueDate");
 const hwSubmit     = document.getElementById("hwSubmit");
 const hwStatus     = document.getElementById("hwStatus");
 
+// ---------- Upload feed tabs (Classwork Uploads / Homework Uploads) ----------
+const tabButtons = document.querySelectorAll(".work-tab");
+const panels = {
+  assignments: document.getElementById("panel-assignments"),
+  classwork:   document.getElementById("panel-classwork"),
+  homework:    document.getElementById("panel-homework"),
+};
+const feedEls = {
+  classwork: {
+    loading: document.getElementById("classworkLoadingMsg"),
+    feed:    document.getElementById("classworkFeed"),
+    empty:   document.getElementById("classworkEmptyState"),
+    loaded:  false,
+  },
+  homework: {
+    loading: document.getElementById("homeworkLoadingMsg"),
+    feed:    document.getElementById("homeworkFeed"),
+    empty:   document.getElementById("homeworkEmptyState"),
+    loaded:  false,
+  },
+};
+
 let currentUser = null;
 let currentProfile = null;
 let subjects = [];
+
+// Look back 14 days for the upload feeds — recent enough to be useful,
+// small enough to stay fast (subjects × 14 reads, done in parallel).
+const FEED_DAYS = Array.from({ length: 14 }, (_, i) => dateIdOffset(-(13 - i)));
 
 signOutBtn.addEventListener("click", () => signOut(auth));
 
@@ -50,6 +76,20 @@ onAuthStateChanged(auth, async (user) => {
   await loadHomework();
 });
 
+// ---------- Tab switching ----------
+tabButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const tab = btn.dataset.tab;
+    tabButtons.forEach((b) => b.classList.toggle("active", b === btn));
+    Object.entries(panels).forEach(([key, el]) => el.classList.toggle("active", key === tab));
+
+    if ((tab === "classwork" || tab === "homework") && !feedEls[tab].loaded) {
+      loadUploadFeed(tab);
+    }
+  });
+});
+
+// ---------- Assignments tracker (unchanged behaviour, existing feature) ----------
 async function loadSubjects() {
   const { schoolId, classId } = currentProfile;
   const subjectsCol = collection(db, "schools", schoolId, "classes", classId, "subjects");
@@ -73,7 +113,6 @@ async function loadHomework() {
 
     const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
-    // Check current user's completion status for each item in parallel.
     const completionSnaps = await Promise.all(
       items.map((item) =>
         getDoc(doc(db, "schools", schoolId, "classes", classId, "homework", item.id, "completedBy", currentUser.uid))
@@ -125,7 +164,6 @@ async function toggleComplete(hwId, currentlyDone) {
   }
 }
 
-// ---------- Add homework modal ----------
 addHwBtn.addEventListener("click", () => {
   hwStatus.textContent = "";
   hwDescription.value = "";
@@ -168,3 +206,81 @@ hwSubmit.addEventListener("click", async () => {
     hwSubmit.disabled = false;
   }
 });
+
+// ---------- NEW: Classwork / Homework upload feeds ----------
+// Scans every subject's entries for the last 14 days and pulls out the
+// individual submissions tagged with the given type — this is what makes
+// a photo upload tagged "Homework" on the Dashboard actually show up
+// somewhere under Work, instead of only living on that subject's card.
+async function loadUploadFeed(type) {
+  const els = feedEls[type];
+  const { schoolId, classId } = currentProfile;
+
+  els.loading.hidden = false;
+  els.empty.hidden = true;
+  els.feed.innerHTML = "";
+
+  try {
+    if (subjects.length === 0) {
+      els.loading.hidden = true;
+      els.empty.hidden = false;
+      els.loaded = true;
+      return;
+    }
+
+    // Fetch every subject's entries for every day in the window, in parallel.
+    const results = await Promise.all(
+      subjects.flatMap((subject) =>
+        FEED_DAYS.map((dateId) =>
+          getDoc(doc(db, "schools", schoolId, "classes", classId, "subjects", subject.id, "entries", dateId))
+            .then((snap) => ({ subject, dateId, snap }))
+        )
+      )
+    );
+
+    // Flatten into individual submissions matching this tab's type.
+    const items = [];
+    results.forEach(({ subject, dateId, snap }) => {
+      if (!snap.exists()) return;
+      const data = snap.data();
+      (data.uploads || []).forEach((u) => {
+        if (u.type === type) {
+          items.push({ ...u, subjectName: subject.name, dateId });
+        }
+      });
+    });
+
+    // Newest first.
+    items.sort((a, b) => (b.uploadedAt || "").localeCompare(a.uploadedAt || ""));
+
+    els.loading.hidden = true;
+
+    if (items.length === 0) {
+      els.empty.hidden = false;
+      els.loaded = true;
+      return;
+    }
+
+    els.feed.innerHTML = items.map((item) => `
+      <div class="upload-feed-item">
+        <div class="upload-feed-head">
+          <span class="upload-feed-subject">${escapeHtml(item.subjectName)}</span>
+          ${typeBadgeHtml(item.type)}
+        </div>
+        <div class="upload-feed-meta">${escapeHtml(item.name || "Classmate")} · ${formatDateLabel(item.dateId)}</div>
+        ${item.title ? `<div class="upload-group-title">"${escapeHtml(item.title)}"</div>` : ""}
+        <div class="thumb-row">
+          ${(item.photoURLs || []).map((url) =>
+            `<a href="${url}" target="_blank" rel="noopener"><img src="${url}" class="thumb" /></a>`
+          ).join("")}
+        </div>
+      </div>
+    `).join("");
+
+    els.loaded = true;
+  } catch (err) {
+    console.error(err);
+    els.loading.hidden = false;
+    els.loading.textContent = "Couldn't load uploads — check your connection and refresh.";
+  }
+}
