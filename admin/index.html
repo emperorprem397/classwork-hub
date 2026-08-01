@@ -188,8 +188,8 @@ select option{background:#0d1518;color:var(--ink)}
         <div class="sec-title">Users</div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Name</th><th>Email</th><th>School</th><th>Class</th><th>XP</th><th>Rank</th><th>Status</th><th>Action</th></tr></thead>
-            <tbody id="usersTableBody"><tr class="empty-row"><td colspan="8">Loading…</td></tr></tbody>
+            <thead><tr><th>Photo</th><th>Name</th><th>Email</th><th>School</th><th>Class</th><th>XP</th><th>Rank</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="usersTableBody"><tr class="empty-row"><td colspan="9">Loading…</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -419,7 +419,7 @@ async function loadUsers(){
   document.getElementById("statUsers").textContent = snap.size;
 
   if (snap.empty) {
-    body.innerHTML = '<tr class="empty-row"><td colspan="8">No users yet.</td></tr>';
+    body.innerHTML = '<tr class="empty-row"><td colspan="9">No users yet.</td></tr>';
     return;
   }
   body.innerHTML = "";
@@ -428,15 +428,17 @@ async function loadUsers(){
     const banned = d.banned === true;
     const isSelf = doc.id === currentAdminUid;
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${escapeHtml(d.name || "—")}</td><td>${escapeHtml(d.email || "—")}</td>
+    tr.innerHTML = `<td><img src="${d.photoURL || ""}" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;background:var(--surface,#1a1a1a);vertical-align:middle;" onerror="this.style.visibility='hidden'" /></td>
+      <td>${escapeHtml(d.name || "—")}</td><td>${escapeHtml(d.email || "—")}</td>
       <td>${escapeHtml(d.schoolName || "—")}</td><td>${escapeHtml(d.classId || "—")}</td>
       <td>${d.xp ?? 0}</td><td>${escapeHtml(d.rank || "Bronze")}</td>
       <td>${banned ? '<span class="badge" style="background:var(--red2);color:var(--red)">Blocked</span>' : '<span class="badge badge-approved">Active</span>'}</td>
       <td>${isSelf ? "—" : `<button class="btn ${banned ? "btn-green" : "btn-red"}" data-toggle-ban="${doc.id}" data-banned="${banned}">${banned ? "Unblock" : "Block"}</button>`}</td>`;
     body.appendChild(tr);
   });
+  // Name is now the 2nd cell (index 1) since Photo was added as the 1st column.
   body.querySelectorAll("[data-toggle-ban]").forEach(b => b.addEventListener("click", () =>
-    toggleBan(b.dataset.toggleBan, b.dataset.banned === "true", b.closest("tr").children[0].textContent)));
+    toggleBan(b.dataset.toggleBan, b.dataset.banned === "true", b.closest("tr").children[1].textContent)));
 }
 
 async function toggleBan(uid, currentlyBanned, name){

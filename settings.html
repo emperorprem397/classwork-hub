@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Settings — Classwork Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/settings.css">
+</head>
+<body>
+
+<div class="shell">
+
+  <aside class="sidebar">
+    <div class="sb-logo"><span class="dot"></span> Classwork Hub</div>
+    <nav class="sb-nav">
+      <a class="sb-item" href="dashboard.html">🏠 Dashboard</a>
+      <a class="sb-item" href="subjects.html">📚 Subjects</a>
+      <a class="sb-item" href="myuploads.html">📤 My Uploads</a>
+      <a class="sb-item" href="homework.html">✅ Homework</a>
+      <a class="sb-item" href="leaderboard.html">🏆 Leaderboard</a>
+      <a class="sb-item" href="profile.html">👤 Profile</a>
+      <a class="sb-item active" href="settings.html">⚙️ Settings</a>
+    </nav>
+    <div class="sb-foot">
+      <button id="signOutBtn" class="btn btn-ghost" style="width:100%">Sign out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <div class="page-title">Settings</div>
+        <div class="page-sub">Manage your name, class, and account</div>
+      </div>
+      <div class="user-box">
+        <img id="userPhoto" class="user-photo" src="" alt="" />
+        <span id="userName"></span>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- Profile photo + name -->
+      <section class="glass settings-card">
+        <h2 class="settings-card-title">Profile</h2>
+
+        <div class="settings-photo-row">
+          <img id="settingsPhoto" class="settings-photo" src="" alt="" />
+          <div>
+            <div class="settings-photo-label">Profile photo</div>
+            <div class="settings-photo-sub">This is your Google account photo — it updates automatically if you change it on Google.</div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="nameInput">Display name</label>
+          <input type="text" id="nameInput" class="text-input" maxlength="40" placeholder="Your name" />
+        </div>
+        <button id="nameSaveBtn" class="btn btn-primary btn-sm">Save name</button>
+        <p id="nameStatus" class="upload-status"></p>
+      </section>
+
+      <!-- Enrolment -->
+      <section class="glass settings-card">
+        <h2 class="settings-card-title">Your class</h2>
+        <p class="settings-card-sub">You're currently enrolled here:</p>
+        <div class="enrolment-box">
+          <div class="enrolment-school" id="enrolmentSchool">—</div>
+          <div class="enrolment-class" id="enrolmentClass">—</div>
+        </div>
+        <p class="settings-hint">Joined the wrong school or class by mistake? You can switch any time — your XP, streak, and rank stay with your account.</p>
+        <a href="school-select.html?edit=1" class="btn btn-ghost btn-sm">Change school / class</a>
+      </section>
+
+      <!-- Account -->
+      <section class="glass settings-card">
+        <h2 class="settings-card-title">Account</h2>
+        <p class="settings-card-sub" id="accountEmail">—</p>
+        <button id="signOutBtn2" class="btn btn-ghost btn-sm">Sign out</button>
+      </section>
+
+    </div>
+  </main>
+
+</div>
+
+<script type="module" src="js/firebase-config.js"></script>
+<script type="module" src="js/settings.js"></script>
+</body>
+</html>
