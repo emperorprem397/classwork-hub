@@ -260,12 +260,26 @@ saveClassBtn.addEventListener("click", async () => {
     // Only touch the school doc for the fixed APS list — a self-added school
     // was already created (with its own isAPS:false / status:"pending")
     // by the "Add your school" flow, so re-writing it here would clobber that.
+    //
+    // BUGFIX: this used to run unconditionally for every APS school every
+    // time ANY student selected it — fine for whoever picks that school
+    // first (a Firestore `create`), but Firestore rules only let admins
+    // `update` an existing school doc. So the very first student to pick,
+    // say, "APS Bareilly" worked; every student after them got
+    // "Missing or insufficient permissions" on this exact line, because by
+    // then the doc already existed and this had become an update, not a
+    // create. Checking existence first (same pattern already used for the
+    // class doc right below) means we only ever write it once, as a create.
     if (selectedSchool.fromAPS) {
-      await setDoc(doc(db, "schools", selectedSchool.id), {
-        name: selectedSchool.name,
-        isAPS: true,
-        status: "approved",
-      }, { merge: true });
+      const schoolRef = doc(db, "schools", selectedSchool.id);
+      const schoolSnap = await getDoc(schoolRef);
+      if (!schoolSnap.exists()) {
+        await setDoc(schoolRef, {
+          name: selectedSchool.name,
+          isAPS: true,
+          status: "approved",
+        });
+      }
     }
 
     // Create the class doc if this is the first student joining it — otherwise leave it alone.

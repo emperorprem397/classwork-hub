@@ -171,4 +171,16 @@ Milestone 2 was a 14-item feature brief — way too much for one safe round, so 
 
 Activity Feed + Class Group Chat was ranked #3 — likely next up, but confirm with Prem before starting since it's the largest remaining piece (new Firestore collections, new security rules, real-time listeners).
 
+## 🩹 Hotfix — signup/class-switch permission-denied bug (`js/school-select.js`)
+
+**Not a new-round regression — a pre-existing bug that had been there since school-select.js was first written**, just hadn't been noticed because early testing was mostly the first person into each school.
+
+**Symptom:** any student picking an APS school that a previous student had *already* selected got "Missing or insufficient permissions" on "Continue to Dashboard" and could never reach the dashboard. Switching class via Settings hit the same code path and failed the same way.
+
+**Root cause:** `saveClassBtn`'s click handler unconditionally ran `setDoc(schoolRef, {...}, {merge:true})` on the school's document for every APS school selection. The very first student to pick a given school creates that doc (Firestore `create`, always allowed). Every student after them hits the exact same doc, which now exists — Firestore rules only let **admins** `update` an existing school doc — so the write is rejected for everyone else.
+
+**Fix:** check `schoolSnap.exists()` first and only write when it doesn't (mirrors the pattern already used two lines below it for the class doc, which is why the class doc was never affected by this). No Firestore rules change needed — this is a client-code-only fix.
+
+**Deploy:** just `js/school-select.js` this time — single file, shipped separately from the Milestone 2 round since it's an active blocker.
+
 
