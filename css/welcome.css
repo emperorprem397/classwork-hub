@@ -1,0 +1,34 @@
+.wizard-progress {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 1.6rem 0 1rem;
+}
+.wizard-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border-strong);
+  transition: background 0.2s;
+}
+.wizard-dot.active { background: var(--cyan); }
+.wizard-dot.done { background: var(--cyan-dim); }
+
+.wizard-step { max-width: 480px; }
+
+.wizard-hint {
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  margin-top: 0.5rem;
+}
+
+.wizard-btn-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.6rem;
+}
+.wizard-btn-row .text-btn:first-child { margin-right: auto; }
+
+.field-label { font-size: 0.82rem; font-weight: 600; color: var(--text-soft); }

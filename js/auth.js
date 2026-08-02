@@ -35,14 +35,20 @@ loginBtns.forEach((btn) => {
       // already-working behavior.
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
-      const profile = await ensureUserProfile(user);
+      const { profile, isNew } = await ensureUserProfile(user);
       if (profile.banned === true) {
         await signOut(auth);
         showStatus("This account has been blocked by an admin. Contact your school admin if you think this is a mistake.");
         setLoading(false, originalLabel);
         return;
       }
-      window.location.href = "school-select.html";
+      // First-ever sign-in gets the optional welcome/profile-setup wizard;
+      // everyone else (including existing accounts from before this
+      // feature shipped, since they'll already have onboarded === true or
+      // a schoolId set) skips straight to their usual destination.
+      window.location.href = (isNew || !profile.onboarded) && !profile.schoolId
+        ? "welcome.html"
+        : "school-select.html";
     } catch (err) {
       console.error(err);
       showStatus(getFriendlyError(err.code));
@@ -62,7 +68,10 @@ onAuthStateChanged(auth, async (user) => {
       showStatus("This account has been blocked by an admin. Contact your school admin if you think this is a mistake.");
       return;
     }
-    window.location.href = "school-select.html";
+    const profile = snap.exists() ? snap.data() : null;
+    window.location.href = (profile && !profile.onboarded && !profile.schoolId)
+      ? "welcome.html"
+      : "school-select.html";
   }
 });
 
@@ -83,12 +92,13 @@ async function ensureUserProfile(user) {
       classId: null,
       sectionId: null,
       banned: false,
+      onboarded: false, // flips to true once they finish (or skip) the welcome wizard
       createdAt: serverTimestamp()
     };
     await setDoc(userRef, newProfile);
-    return newProfile;
+    return { profile: newProfile, isNew: true };
   }
-  return existing.data();
+  return { profile: existing.data(), isNew: false };
 }
 
 function setLoading(isLoading, originalLabel) {

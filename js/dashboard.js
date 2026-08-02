@@ -3,7 +3,7 @@ import { syncThemeFromCloud } from "./theme.js";
 import { onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
-  doc, getDoc, updateDoc, collection, getDocs, addDoc, query, orderBy, runTransaction, serverTimestamp
+  doc, getDoc, updateDoc, deleteDoc, collection, getDocs, addDoc, query, orderBy, runTransaction, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 // NOTE: updateDoc above is reused for both the profile-sync background task
 // and the new "edit subject" feature below — no new imports needed.
@@ -11,7 +11,6 @@ import {
   XP_UPLOAD, XP_FIRST_OF_DAY, XP_STREAK_TICK, calcRank,
   todayId, yesterdayId, formatDateLabel, escapeHtml, typeBadgeHtml, logActivity
 } from "./helpers.js";
-import { deleteDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const userPhoto     = document.getElementById("userPhoto");
 const userNameEl    = document.getElementById("userName");
@@ -207,7 +206,7 @@ function renderSubjectCard(subject, entry) {
   const card = document.createElement("div");
   card.className = "subject-card";
 
-  const uploaded = !!entry;
+  const uploaded = !!entry && (entry.uploadedBy?.length || 0) > 0;
   const uploaderCount = uploaded ? (entry.uploadedBy?.length || 0) : 0;
   const uploaderNames = uploaded ? Object.values(entry.uploaderNames || {}) : [];
 
@@ -276,7 +275,7 @@ function openModal(subject, entry) {
   modalSubject.textContent = subject.name;
   modalDate.textContent = formatDateLabel(TODAY);
 
-  if (entry) {
+  if (entry && (entry.uploadedBy?.length || 0) > 0) {
     modalExisting.hidden = false;
     if (entry.uploads?.length) {
       // New-style entry: render each submission with its own type badge/title.
@@ -478,15 +477,42 @@ if (deleteSubjectBtn) {
 }
 
 fileInput.addEventListener("change", () => {
-  pendingFiles = Array.from(fileInput.files || []); // no cap — pick as many notebook photos as needed
+  const newFiles = Array.from(fileInput.files || []);
+  // Append rather than replace. The <input type=file> always starts empty
+  // when reopened, so picking photos one at a time (very common — snap one
+  // page, tap "choose photos" again for the next) was silently wiping out
+  // every photo picked in an earlier round instead of adding to it. This
+  // was the "my first photo disappears when I pick a second one" bug.
+  pendingFiles = pendingFiles.concat(newFiles);
+  fileInput.value = ""; // reset so picking the exact same photo again still fires "change"
+  renderPreviewRow();
+});
+
+function renderPreviewRow() {
   previewRow.innerHTML = "";
-  pendingFiles.forEach((file) => {
+  pendingFiles.forEach((file, idx) => {
+    const wrap = document.createElement("div");
+    wrap.className = "thumb-preview-wrap";
+
     const img = document.createElement("img");
     img.className = "thumb thumb-preview";
     img.src = URL.createObjectURL(file);
-    previewRow.appendChild(img);
+
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "thumb-remove-btn";
+    removeBtn.setAttribute("aria-label", "Remove this photo");
+    removeBtn.textContent = "✕";
+    removeBtn.addEventListener("click", () => {
+      pendingFiles.splice(idx, 1);
+      renderPreviewRow();
+    });
+
+    wrap.appendChild(img);
+    wrap.appendChild(removeBtn);
+    previewRow.appendChild(wrap);
   });
-});
+}
 
 uploadSubmit.addEventListener("click", async () => {
   if (!activeSubject || pendingFiles.length === 0) {
@@ -533,6 +559,7 @@ uploadSubmit.addEventListener("click", async () => {
     // string (not serverTimestamp()) because Firestore doesn't allow the
     // serverTimestamp() sentinel inside array elements.
     const uploadRecord = {
+      id: (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2)}`),
       uid: currentUser.uid,
       name: currentUser.displayName || currentUser.email,
       type: type || null,

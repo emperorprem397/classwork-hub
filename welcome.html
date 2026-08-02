@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>(function(){try{var t=localStorage.getItem("cwhTheme");if(t&&t!=="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Welcome — Classwork Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/theme.css?v=20260804">
+<link rel="stylesheet" href="css/school-select.css?v=20260804">
+<link rel="stylesheet" href="css/settings.css?v=20260804">
+<link rel="stylesheet" href="css/welcome.css?v=20260804">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="logo">📓 Classwork Hub</div>
+    <div class="user-box" id="userBox">
+      <img id="userPhoto" class="user-photo" src="" alt="" />
+      <span id="userName"></span>
+      <button id="signOutBtn" class="link-btn">Sign out</button>
+    </div>
+  </header>
+
+  <main class="page">
+
+    <div class="wizard-progress">
+      <span class="wizard-dot active" data-dot="1"></span>
+      <span class="wizard-dot" data-dot="2"></span>
+      <span class="wizard-dot" data-dot="3"></span>
+    </div>
+
+    <!-- STEP 1: Name -->
+    <section id="step-name" class="notebook-card step wizard-step">
+      <h1>Welcome 👋</h1>
+      <p class="sub">Let's set up your profile — this only takes a few seconds, and every step here is optional.</p>
+
+      <label for="nameInput" class="field-label" style="display:block; margin-top:1.2rem;">What should we call you?</label>
+      <input type="text" id="nameInput" class="ruled-input" maxlength="60" />
+      <p class="wizard-hint">Defaults to your Google name — change it any time later from Settings.</p>
+
+      <div class="btn-row wizard-btn-row">
+        <button id="skipNameBtn" class="text-btn" type="button">Skip</button>
+        <button id="nextNameBtn" class="btn btn-primary" type="button">Next</button>
+      </div>
+    </section>
+
+    <!-- STEP 2: Appearance -->
+    <section id="step-appearance" class="notebook-card step wizard-step" hidden>
+      <h1>Pick a look</h1>
+      <p class="sub">You can switch this any time from Settings → Appearance.</p>
+
+      <div class="theme-swatch-row" id="themeSwatchRow" style="margin-top:1.2rem;">
+        <button class="theme-swatch active" data-theme-choice="dark">
+          <span class="theme-swatch-preview theme-preview-dark"></span>
+          <span class="theme-swatch-label">Dark Cyan<br><small>Default</small></span>
+        </button>
+        <button class="theme-swatch" data-theme-choice="light">
+          <span class="theme-swatch-preview theme-preview-light"></span>
+          <span class="theme-swatch-label">Light</span>
+        </button>
+        <button class="theme-swatch" data-theme-choice="monochrome">
+          <span class="theme-swatch-preview theme-preview-mono"></span>
+          <span class="theme-swatch-label">Monochrome</span>
+        </button>
+      </div>
+
+      <div class="btn-row wizard-btn-row">
+        <button id="backAppearanceBtn" class="text-btn" type="button">Back</button>
+        <button id="skipAppearanceBtn" class="text-btn" type="button">Skip</button>
+        <button id="nextAppearanceBtn" class="btn btn-primary" type="button">Next</button>
+      </div>
+    </section>
+
+    <!-- STEP 3: Continue to school/class (required — the app can't load a
+         class-specific feed without this, so it isn't skippable the way
+         the first two steps are, but it's one tap since it's the very
+         next thing that would happen anyway). -->
+    <section id="step-continue" class="notebook-card step wizard-step" hidden>
+      <h1>Last step</h1>
+      <p class="sub">Pick your school and class so you land in the right place — subjects, uploads, and the leaderboard are all scoped to your class.</p>
+      <p class="wizard-hint">This one isn't optional — the app has nothing to show you without it — but it only takes a moment.</p>
+
+      <div class="btn-row wizard-btn-row" style="margin-top:1.2rem;">
+        <button id="backContinueBtn" class="text-btn" type="button">Back</button>
+        <button id="continueBtn" class="btn btn-primary" type="button">Continue to select your school →</button>
+      </div>
+    </section>
+
+  </main>
+
+<script type="module" src="js/firebase-config.js?v=20260804"></script>
+<script type="module" src="js/welcome.js?v=20260804"></script>
+</body>
+</html>

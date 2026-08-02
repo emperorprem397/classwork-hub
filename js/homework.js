@@ -73,7 +73,8 @@ onAuthStateChanged(auth, async (user) => {
   classLabel.textContent = `Class ${currentProfile.classId}`;
 
   await loadSubjects();
-  await loadHomework();
+  await loadUploadFeed("classwork"); // now the default/active tab
+  await loadHomework(); // assignments — loaded eagerly too since it's cheap
 });
 
 // ---------- Tab switching ----------

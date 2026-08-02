@@ -7,9 +7,9 @@
 <title>Work — Classwork Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/theme.css?v=20260803">
-<link rel="stylesheet" href="css/dashboard.css?v=20260803">
-<link rel="stylesheet" href="css/homework.css?v=20260803">
+<link rel="stylesheet" href="css/theme.css?v=20260804">
+<link rel="stylesheet" href="css/dashboard.css?v=20260804">
+<link rel="stylesheet" href="css/homework.css?v=20260804">
 </head>
 <body>
 
@@ -53,25 +53,13 @@
     <div class="content">
 
       <div class="work-tabs" role="tablist">
-        <button class="work-tab active" data-tab="assignments">📌 Assignments</button>
-        <button class="work-tab" data-tab="classwork">📓 Classwork Uploads</button>
+        <button class="work-tab active" data-tab="classwork">📓 Classwork Uploads</button>
         <button class="work-tab" data-tab="homework">📝 Homework Uploads</button>
-      </div>
-
-      <!-- Assignments tracker — subject + description + due date, class checks each off individually -->
-      <div class="work-panel active" id="panel-assignments">
-        <button id="addHwBtn" class="btn btn-primary" style="margin-bottom: 1rem;">+ Add homework</button>
-
-        <p id="loadingMsg" class="loading-msg">Loading homework…</p>
-        <div id="hwList" class="hw-list"></div>
-        <div id="emptyState" class="glass empty-state" hidden>
-          <p class="empty-title">No homework posted yet.</p>
-          <p class="empty-sub">Anyone in your class can add one — tap "+ Add homework" above.</p>
-        </div>
+        <button class="work-tab" data-tab="assignments">📌 Assignments</button>
       </div>
 
       <!-- Every upload across the class tagged "Classwork" over the last 14 days -->
-      <div class="work-panel" id="panel-classwork">
+      <div class="work-panel active" id="panel-classwork">
         <p id="classworkLoadingMsg" class="loading-msg">Loading classwork uploads…</p>
         <div id="classworkFeed" class="upload-feed"></div>
         <div id="classworkEmptyState" class="glass empty-state" hidden>
@@ -87,6 +75,18 @@
         <div id="homeworkEmptyState" class="glass empty-state" hidden>
           <p class="empty-title">No uploads tagged "Homework" in the last 14 days.</p>
           <p class="empty-sub">Tag an upload as Homework from the Dashboard and it'll show up here.</p>
+        </div>
+      </div>
+
+      <!-- Assignments tracker — subject + description + due date, class checks each off individually -->
+      <div class="work-panel" id="panel-assignments">
+        <button id="addHwBtn" class="btn btn-primary" style="margin-bottom: 1rem;">+ Add homework</button>
+
+        <p id="loadingMsg" class="loading-msg">Loading homework…</p>
+        <div id="hwList" class="hw-list"></div>
+        <div id="emptyState" class="glass empty-state" hidden>
+          <p class="empty-title">No homework posted yet.</p>
+          <p class="empty-sub">Anyone in your class can add one — tap "+ Add homework" above.</p>
         </div>
       </div>
 
@@ -115,8 +115,8 @@
   </div>
 </div>
 
-<script type="module" src="js/firebase-config.js?v=20260803"></script>
-<script type="module" src="js/homework.js?v=20260803"></script>
-<script src="js/nav.js?v=20260803"></script>
+<script type="module" src="js/firebase-config.js?v=20260804"></script>
+<script type="module" src="js/homework.js?v=20260804"></script>
+<script src="js/nav.js?v=20260804"></script>
 </body>
 </html>

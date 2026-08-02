@@ -153,6 +153,42 @@ service cloud.firestore {
         }
 
         // ========================================================
+        // .../messages/{messageId}  <- real-time Class Chat. Ordered by
+        // createdAt, listened to live via onSnapshot (not polled) so
+        // messages appear for every classmate within roughly the same
+        // second they're sent — see js/activity.js. Hard-deleted on
+        // removal (no "message deleted" placeholder, kept simple); only
+        // the author (or admin) can edit/delete their own message.
+        // ========================================================
+        match /messages/{messageId} {
+          allow read: if inClass(schoolId, classId) || isAdmin();
+          allow create: if isAdmin() || (
+                          inClass(schoolId, classId)
+                          && request.resource.data.uid == request.auth.uid
+                          && request.resource.data.text is string
+                          && request.resource.data.text.size() > 0
+                          && request.resource.data.text.size() <= 2000
+                        );
+          allow update: if isAdmin() || (
+                          inClass(schoolId, classId) && resource.data.uid == request.auth.uid
+                        );
+          allow delete: if isAdmin() || (
+                          inClass(schoolId, classId) && resource.data.uid == request.auth.uid
+                        );
+        }
+
+        // ========================================================
+        // .../typing/{uid}  <- ephemeral "is typing…" presence, one doc
+        // per user, overwritten every couple seconds while they're
+        // actively typing in Class Chat. Each student can only write
+        // their own doc.
+        // ========================================================
+        match /typing/{uid} {
+          allow read: if inClass(schoolId, classId) || isAdmin();
+          allow write: if inClass(schoolId, classId) && request.auth.uid == uid;
+        }
+
+        // ========================================================
         // .../homework/{hwId}  <- simple homework tracker, any classmate
         // can post an item, each student tracks their own completion in a
         // small subcollection keyed by their own uid.

@@ -7,9 +7,9 @@
 <title>Activity — Classwork Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/theme.css?v=20260803">
-<link rel="stylesheet" href="css/dashboard.css?v=20260803">
-<link rel="stylesheet" href="css/activity.css?v=20260803">
+<link rel="stylesheet" href="css/theme.css?v=20260804">
+<link rel="stylesheet" href="css/dashboard.css?v=20260804">
+<link rel="stylesheet" href="css/activity.css?v=20260804">
 </head>
 <body>
 
@@ -51,29 +51,49 @@
     </header>
 
     <div class="content">
-      <div class="section-head">
-        <div>
-          <h2>Class Activity</h2>
-          <span class="section-sub">Who added, edited, deleted, or uploaded — newest first</span>
-        </div>
-        <button id="refreshBtn" class="btn btn-ghost btn-sm">↻ Refresh</button>
+      <div class="activity-tabs" role="tablist">
+        <button class="activity-tab active" data-tab="log">📜 Activity Log</button>
+        <button class="activity-tab" data-tab="chat">💬 Class Chat</button>
       </div>
 
-      <p id="loadingMsg" class="loading-msg">Loading activity…</p>
+      <!-- Activity Log panel -->
+      <div class="activity-panel active" id="panel-log">
+        <div class="section-head">
+          <div>
+            <h2>Class Activity</h2>
+            <span class="section-sub">Who added, edited, deleted, or uploaded — newest first</span>
+          </div>
+          <button id="refreshBtn" class="btn btn-ghost btn-sm">↻ Refresh</button>
+        </div>
 
-      <div id="activityList" class="activity-list"></div>
+        <p id="loadingMsg" class="loading-msg">Loading activity…</p>
+        <div id="activityList" class="activity-list"></div>
+        <div id="emptyState" class="glass empty-state" hidden>
+          <p class="empty-title">No activity yet.</p>
+          <p class="empty-sub">Add a subject or upload today's work from the Dashboard — it'll show up here for the whole class to see.</p>
+        </div>
+      </div>
 
-      <div id="emptyState" class="glass empty-state" hidden>
-        <p class="empty-title">No activity yet.</p>
-        <p class="empty-sub">Add a subject or upload today's work from the Dashboard — it'll show up here for the whole class to see.</p>
+      <!-- Class Chat panel — real-time, live for the whole class -->
+      <div class="activity-panel" id="panel-chat">
+        <div class="chat-shell glass">
+          <div id="chatMessages" class="chat-messages">
+            <p id="chatLoadingMsg" class="loading-msg">Loading chat…</p>
+          </div>
+          <div id="typingIndicator" class="typing-indicator" hidden></div>
+          <div class="chat-input-row">
+            <input id="chatInput" class="text-input" placeholder="Message your class…" maxlength="1000" autocomplete="off" />
+            <button id="chatSendBtn" class="btn btn-primary">Send</button>
+          </div>
+        </div>
       </div>
     </div>
   </main>
 
 </div>
 
-<script type="module" src="js/firebase-config.js?v=20260803"></script>
-<script type="module" src="js/activity.js?v=20260803"></script>
-<script src="js/nav.js?v=20260803"></script>
+<script type="module" src="js/firebase-config.js?v=20260804"></script>
+<script type="module" src="js/activity.js?v=20260804"></script>
+<script src="js/nav.js?v=20260804"></script>
 </body>
 </html>

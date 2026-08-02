@@ -110,6 +110,7 @@ export const ACTIVITY_META = {
   subject_edited:  { icon: "✎",  verb: "edited the subject" },
   subject_deleted: { icon: "🗑️", verb: "deleted the subject" },
   upload:          { icon: "📤", verb: "uploaded work for" },
+  upload_deleted:  { icon: "🗑️", verb: "deleted their upload for" },
 };
 
 export async function logActivity(db, { schoolId, classId, uid, name, type, subjectName, detail }) {
