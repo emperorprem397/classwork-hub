@@ -9,7 +9,8 @@ import {
 // and the new "edit subject" feature below — no new imports needed.
 import {
   XP_UPLOAD, XP_FIRST_OF_DAY, XP_STREAK_TICK, calcRank,
-  todayId, yesterdayId, formatDateLabel, escapeHtml, typeBadgeHtml, logActivity
+  todayId, yesterdayId, formatDateLabel, escapeHtml, typeBadgeHtml, logActivity,
+  uploadOneFile, fileThumbHtml, isPdfFile
 } from "./helpers.js";
 
 const userPhoto     = document.getElementById("userPhoto");
@@ -69,38 +70,6 @@ let selectedType = null; // "classwork" | "homework" | null — fully optional
 let loadedSubjects = []; // kept in sync by loadSubjects(), used for the duplicate-name check
 const TODAY = todayId();
 
-// Resizes to a max dimension of 1600px and re-encodes as JPEG at 82% quality.
-// Notebook photos are usually 3-5MB straight off a phone camera — this
-// typically brings them down to 200-500KB with no real loss of readability,
-// which matters a lot on Cloudinary's free storage/bandwidth tier.
-function compressImage(file, maxDimension = 1600, quality = 0.82) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      let { width, height } = img;
-      if (width > maxDimension || height > maxDimension) {
-        const scale = maxDimension / Math.max(width, height);
-        width = Math.round(width * scale);
-        height = Math.round(height * scale);
-      }
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, width, height);
-      canvas.toBlob(
-        (blob) => (blob ? resolve(blob) : reject(new Error("Compression failed"))),
-        "image/jpeg",
-        quality
-      );
-    };
-    img.onerror = reject;
-    img.src = url;
-  });
-}
-
 signOutBtn.addEventListener("click", () => signOut(auth));
 todayDate.textContent = formatDateLabel(TODAY);
 
@@ -131,6 +100,11 @@ onAuthStateChanged(auth, async (user) => {
 
   renderProfile();
   await loadSubjects();
+
+  // Clears the "new activity" dot on the Dashboard sidebar item — best-effort,
+  // never blocks the page if it fails.
+  updateDoc(doc(db, "users", user.uid), { lastSeenUploads: serverTimestamp() })
+    .catch((err) => console.error("lastSeenUploads sync failed:", err));
 
   // First-time onboarding banner — keyed by uid (not just a flat flag) so
   // it doesn't bleed across accounts on a shared device, and shown at most
@@ -292,7 +266,7 @@ function openModal(subject, entry) {
             </div>
             ${u.title ? `<div class="upload-group-title">"${escapeHtml(u.title)}"</div>` : ""}
             <div class="thumb-row">
-              ${(u.photoURLs || []).map((url) => `<a href="${url}" target="_blank" rel="noopener"><img src="${url}" class="thumb" /></a>`).join("")}
+              ${(u.files || (u.photoURLs || []).map((url) => ({ url, isPdf: false }))).map(fileThumbHtml).join("")}
             </div>
           </div>
         `).join("")}
@@ -524,17 +498,44 @@ if (deleteSubjectBtn) {
   });
 }
 
-fileInput.addEventListener("change", () => {
-  const newFiles = Array.from(fileInput.files || []);
+function addPendingFiles(fileList) {
   // Append rather than replace. The <input type=file> always starts empty
   // when reopened, so picking photos one at a time (very common — snap one
   // page, tap "choose photos" again for the next) was silently wiping out
   // every photo picked in an earlier round instead of adding to it. This
   // was the "my first photo disappears when I pick a second one" bug.
+  const newFiles = Array.from(fileList || []).filter(
+    (f) => f.type.startsWith("image/") || isPdfFile(f)
+  );
   pendingFiles = pendingFiles.concat(newFiles);
-  fileInput.value = ""; // reset so picking the exact same photo again still fires "change"
   renderPreviewRow();
+}
+
+fileInput.addEventListener("change", () => {
+  addPendingFiles(fileInput.files);
+  fileInput.value = ""; // reset so picking the exact same photo again still fires "change"
 });
+
+// Drag & drop straight onto the picker, in addition to the normal "choose
+// files" click — same pendingFiles pipeline either way.
+const fileDropZone = document.getElementById("fileDropZone");
+if (fileDropZone) {
+  ["dragenter", "dragover"].forEach((evt) =>
+    fileDropZone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      fileDropZone.classList.add("drag-over");
+    })
+  );
+  ["dragleave", "drop"].forEach((evt) =>
+    fileDropZone.addEventListener(evt, (e) => {
+      e.preventDefault();
+      fileDropZone.classList.remove("drag-over");
+    })
+  );
+  fileDropZone.addEventListener("drop", (e) => {
+    addPendingFiles(e.dataTransfer?.files);
+  });
+}
 
 function renderPreviewRow() {
   previewRow.innerHTML = "";
@@ -542,9 +543,18 @@ function renderPreviewRow() {
     const wrap = document.createElement("div");
     wrap.className = "thumb-preview-wrap";
 
-    const img = document.createElement("img");
-    img.className = "thumb thumb-preview";
-    img.src = URL.createObjectURL(file);
+    let img;
+    if (isPdfFile(file)) {
+      img = document.createElement("div");
+      img.className = "thumb thumb-preview thumb-pdf";
+      img.title = file.name;
+      const shortName = file.name.length > 16 ? file.name.slice(0, 13) + "…" : file.name;
+      img.innerHTML = `📄<span class="thumb-pdf-name">${escapeHtml(shortName)}</span>`;
+    } else {
+      img = document.createElement("img");
+      img.className = "thumb thumb-preview";
+      img.src = URL.createObjectURL(file);
+    }
 
     const removeBtn = document.createElement("button");
     removeBtn.type = "button";
@@ -577,27 +587,25 @@ uploadSubmit.addEventListener("click", async () => {
   const type = selectedType; // optional — "classwork" | "homework" | null
 
   try {
-    // 1. Compress, then upload each file directly to Cloudinary (unsigned preset).
-    //    No backend involved — the browser talks to Cloudinary's API directly.
-    const urls = [];
+    // 1. Upload each file directly to Cloudinary (unsigned preset) — images
+    //    are compressed first, PDFs go up as-is. No backend involved, the
+    //    browser talks to Cloudinary's API directly either way.
+    const urls = [];   // flat list of every URL (images + PDFs) — kept for
+                        // backward compatibility with anything that only
+                        // reads photoURLs (e.g. leaderboard-era code)
+    const files = [];  // { url, isPdf, name } — used for correct rendering
     for (let i = 0; i < pendingFiles.length; i++) {
       const file = pendingFiles[i];
-      uploadStatus.textContent = `Compressing photo ${i + 1}/${pendingFiles.length}…`;
-      const compressed = await compressImage(file);
+      const pdf = isPdfFile(file);
+      uploadStatus.textContent = pdf
+        ? `Uploading PDF ${i + 1}/${pendingFiles.length}…`
+        : `Compressing & uploading photo ${i + 1}/${pendingFiles.length}…`;
 
-      uploadStatus.textContent = `Uploading photo ${i + 1}/${pendingFiles.length}…`;
-      const formData = new FormData();
-      formData.append("file", compressed);
-      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-        { method: "POST", body: formData }
+      const uploaded = await uploadOneFile(
+        file, CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET, pdf ? "pdfs" : "images"
       );
-
-      const result = await response.json();
-      if (!result.secure_url) throw new Error(result.error?.message || "Upload failed");
-      urls.push(result.secure_url);
+      urls.push(uploaded.url);
+      files.push(uploaded);
     }
 
     uploadStatus.textContent = "Saving…";
@@ -613,6 +621,7 @@ uploadSubmit.addEventListener("click", async () => {
       type: type || null,
       title: title || "",
       photoURLs: urls,
+      files: files,
       uploadedAt: new Date().toISOString(),
     };
 

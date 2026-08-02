@@ -257,3 +257,37 @@ Several links (sidebar nav items, uploader thumbnail links, etc.) were showing a
 **Firestore Console step required:** yes — republish `firestore.rules` (self-delete + `adminMessages` rules). **Plus the new one-time TTL setup** described above for real (not just client-hidden) 48-hour chat deletion. No Storage rules change.
 
 
+## ✅ Round 16 — Milestone 3: PDF uploads, navbar redesign, unread badges, per-image management, admin cross-class browsing
+
+Milestone 3's "Chat Expiry System" ask (Feature 2) was already done in Round 15, app-level, not Firestore TTL — nothing to do there. Everything else below is new this round.
+
+**1. PDF upload support** — the upload picker (Dashboard) now accepts `image/*,application/pdf` and supports drag-and-drop onto the picker, not just click-to-browse. Images still get client-side compression before upload (unchanged); PDFs skip compression and go straight to Cloudinary's `/auto/upload` endpoint so they're stored as their own resource type, tagged into a `pdfs` folder (images now explicitly tagged `images`) for future tooling. **Viewer — an intentional deviation from the brief:** this project is plain HTML/JS with no bundler, so "use a modern React PDF library" doesn't apply. Instead, PDF thumbnails are a small 📄 file chip that opens the PDF in a new tab, where every modern browser's *built-in* PDF viewer already provides zoom, page navigation, fullscreen, and download — functionally equivalent to what the brief asked for, with zero added dependencies. Existing image viewing (click a thumbnail → opens in a new tab) is untouched. New `uploads[].files[]` array (`{url, isPdf, name}`) stores per-file metadata for correct mixed rendering; the old flat `photoURLs` array is still populated alongside it for anything that only reads that field, so nothing that already worked can break.
+
+**2. Per-image management** (My Uploads page) — each photo/PDF inside an upload now has its own **◀ move earlier / 🔁 replace / ✕ remove / move later ▶** controls, instead of only being able to delete the entire submission. Removing the last file in an upload prompts to delete the whole thing (same guardrail as before). All of this is transactional — updates both your private `myUploads` mirror and the shared class `entries` doc together, same pattern as the existing whole-record delete. **Honest limit:** per-file controls only appear on uploads made after this round (they need the `files[]` array's per-item identity) — pre-existing legacy-format uploads still support whole-record delete only, exactly as before.
+
+**3. Top navbar redesign** — every app page's topbar now has a right-side cluster: 🔍 Search shortcut, 🌓 theme toggle (cycles Dark Cyan → Light → Monochrome), 🔔 notification bell, and a profile avatar with a dropdown (name, Profile, Settings, Sign out). Kept minimal rather than replacing the sidebar entirely — matches the Notion/Linear/Raycast pattern of "a light top bar for global actions, a side rail for full navigation" rather than cramming 9 nav items into a horizontal bar. All existing element IDs (`userPhoto`, `userName`, `signOutBtn`) were preserved so no other page script needed to change.
+
+**4. Unread badges** — a dot (not a count, to keep this to cheap single-field existence queries with no composite indexes needed) on the 🔔 bell and the sidebar's Activity/Dashboard items: new Chat messages or new Activity-log entries light up the bell + Activity dot; any new class activity since your last Dashboard visit lights up the Dashboard dot. Clears automatically when you visit the relevant page (`lastSeenChat`/`lastSeenActivity`/`lastSeenUploads` fields on your own `users/{uid}` doc). **Honest scope note:** "Uploads" and "Announcements" badges from the brief are folded into the single Activity-based signal above — there's no separate uploads-only feed or announcements feature built yet (announcements was never built at all — still on the Pending list).
+
+**5. Admin cross-class browsing** — new **🌐 Browse Classes** tab in the admin panel: pick any school → any class → see its subjects, its students, and the last 10 uploads per subject (with uploader names and thumbnails), all without joining that class the way a student would. No `firestore.rules` changes were needed for this — admin already had universal read access to `subjects`/`entries`/`users` from earlier rounds; this was purely a missing UI on top of permissions that already existed.
+
+**Files changed this round:** `js/helpers.js` (shared `uploadOneFile`/`compressImage`/`fileThumbHtml`/`isPdfFile` — dashboard.js's old local `compressImage` was removed in favor of this shared version), `js/dashboard.js` (PDF upload + drag-drop + mixed rendering + lastSeenUploads), `js/myuploads.js` (per-file delete/replace/reorder, rewritten render functions), `js/activity.js` (lastSeenActivity/lastSeenChat), `js/topbar.js` (**new file** — theme toggle, notif bell, profile dropdown, badge logic, self-contained), `admin/index.html` (Browse Classes tab), `css/dashboard.css` (navbar/dropdown/badge/PDF-chip/per-file-control styles), and the topbar markup + cache-bust bump (`20260806`) applied identically across `dashboard.html`, `subjects.html`, `myuploads.html`, `homework.html`, `leaderboard.html`, `activity.html`, `profile.html`, `settings.html`, `search.html`.
+
+**Firestore Console step required:** No. Nothing in this round needed a rules change — verified against the current rules file (mixed-file arrays are just extra fields on documents that were already writable by their owner; `lastSeen*` fields are just extra fields on your own `users/{uid}` doc, already self-writable; admin's Browse Classes reads use permissions the rules already granted). Just upload the changed files to GitHub as usual.
+
+**Manual testing worth doing after deploy:**
+- Dashboard → upload a PDF alongside a photo in the same submission → both should show correctly, PDF as a 📄 chip that opens the browser's native viewer in a new tab.
+- My Uploads → open an upload made after this round → try ✕ remove one photo, 🔁 replace one, and ◀▶ reorder — confirm it also updates correctly on the Dashboard's "already shared today" view for that subject.
+- Click the 🌓 icon in the top bar a few times → theme should cycle and persist on reload.
+- Have a classmate post a chat message or activity-log entry while you're on a different page → 🔔 dot should appear; open Activity → dot clears.
+- Admin panel → Browse Classes → pick a school/class you haven't joined → subjects/students/uploads should show up.
+
+## ⏳ Pending / not built yet (updated)
+- Comments on uploads
+- In-app announcements (separate from the Activity Log)
+- Notebook viewer upgrade beyond "opens in new tab" (in-page zoom/fullscreen for images specifically — PDFs now get this for free via the browser)
+- Leaderboard time filters (weekly/monthly/all-time)
+- Contribution calendar (GitHub-style heatmap on Profile)
+- Profile page redesign
+- Real per-file identity for pre-Round-16 legacy uploads (would let old uploads get per-file management too — currently only whole-record delete)
+- Precise unread *counts* (currently a simple yes/no dot, by design, to avoid composite indexes)

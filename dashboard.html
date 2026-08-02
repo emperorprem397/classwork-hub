@@ -7,8 +7,8 @@
 <title>Dashboard — Classwork Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/theme.css?v=20260805">
-<link rel="stylesheet" href="css/dashboard.css?v=20260805">
+<link rel="stylesheet" href="css/theme.css?v=20260806">
+<link rel="stylesheet" href="css/dashboard.css?v=20260806">
 </head>
 <body>
 
@@ -20,18 +20,17 @@
   <aside class="sidebar" id="sidebar">
     <div class="sb-logo"><span class="dot"></span> Classwork Hub</div>
     <nav class="sb-nav">
-      <a class="sb-item active" href="dashboard.html">🏠 Dashboard</a>
+      <a class="sb-item active" href="dashboard.html">🏠 Dashboard<span class="sb-badge" id="sbDashboardBadge" hidden></span></a>
       <a class="sb-item" href="search.html">🔍 Search</a>
       <a class="sb-item" href="subjects.html">📚 Subjects</a>
       <a class="sb-item" href="myuploads.html">📤 My Uploads</a>
       <a class="sb-item" href="homework.html">🗂️ Work</a>
       <a class="sb-item" href="leaderboard.html">🏆 Leaderboard</a>
-      <a class="sb-item" href="activity.html">🔔 Activity</a>
+      <a class="sb-item" href="activity.html">🔔 Activity<span class="sb-badge" id="sbActivityBadge" hidden></span></a>
       <a class="sb-item" href="profile.html">👤 Profile</a>
       <a class="sb-item" href="settings.html">⚙️ Settings</a>
     </nav>
     <div class="sb-foot">
-      <button id="signOutBtn" class="btn btn-ghost" style="width:100%">Sign out</button>
     </div>
   </aside>
 
@@ -45,9 +44,23 @@
         <div class="page-sub" id="classLabel">—</div>
       </div>
       </div>
-      <div class="user-box">
-        <img id="userPhoto" class="user-photo" src="" alt="" />
-        <span id="userName"></span>
+      <div class="topbar-actions">
+        <a href="search.html" class="icon-btn" title="Search">🔍</a>
+        <button id="themeToggleBtn" type="button" class="icon-btn" title="Toggle theme">🌓</button>
+        <a href="activity.html" class="icon-btn" id="notifBell" title="Activity &amp; Chat">
+          🔔<span class="notif-dot" id="notifDot" hidden></span>
+        </a>
+        <div class="profile-menu">
+          <button id="profileAvatarBtn" type="button" class="avatar-btn" aria-label="Account menu" aria-expanded="false">
+            <img id="userPhoto" class="user-photo" src="" alt="" />
+          </button>
+          <div id="profileDropdown" class="profile-dropdown" hidden>
+            <div class="pd-name" id="userName"></div>
+            <a href="profile.html">👤 Profile</a>
+            <a href="settings.html">⚙️ Settings</a>
+            <button id="signOutBtn" class="pd-signout" type="button">Sign out</button>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -136,9 +149,9 @@
       <input type="text" id="titleInput" class="text-input" placeholder="e.g. Chapter 5 — Photosynthesis notes" maxlength="80" />
     </div>
 
-    <label class="file-drop" for="fileInput">
-      <span>📷 Choose notebook photos (any number)</span>
-      <input type="file" id="fileInput" accept="image/*" multiple hidden />
+    <label class="file-drop" for="fileInput" id="fileDropZone">
+      <span>📷📄 Choose notebook photos or PDFs (any number) — or drag & drop here</span>
+      <input type="file" id="fileInput" accept="image/*,application/pdf" multiple hidden />
     </label>
     <div id="previewRow" class="thumb-row"></div>
 
@@ -190,8 +203,9 @@
   </div>
 </div>
 
-<script type="module" src="js/firebase-config.js?v=20260805"></script>
-<script type="module" src="js/dashboard.js?v=20260805"></script>
-<script src="js/nav.js?v=20260805"></script>
+<script type="module" src="js/firebase-config.js?v=20260806"></script>
+<script type="module" src="js/dashboard.js?v=20260806"></script>
+<script type="module" src="js/topbar.js?v=20260806"></script>
+<script src="js/nav.js?v=20260806"></script>
 </body>
 </html>

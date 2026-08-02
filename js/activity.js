@@ -58,6 +58,13 @@ onAuthStateChanged(auth, async (user) => {
   await loadActivity();
   startChatListener();
   startTypingListener();
+
+  // Clears the notif bell + sidebar Activity dot — best-effort, never
+  // blocks the page if it fails.
+  updateDoc(doc(db, "users", user.uid), {
+    lastSeenActivity: serverTimestamp(),
+    lastSeenChat: serverTimestamp(),
+  }).catch((err) => console.error("lastSeen sync failed:", err));
 });
 
 // ---------- Tab switching ----------

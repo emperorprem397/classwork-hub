@@ -107,6 +107,88 @@ export function generateLetterAvatarDataUri(letter, colorHex) {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
+// ---------- File upload (images + PDFs) ----------
+// Images are compressed client-side then sent to Cloudinary's image
+// endpoint (unchanged behavior from before PDF support existed). PDFs skip
+// compression and go through Cloudinary's /auto/upload endpoint so they're
+// stored as their own resource type. Shared by dashboard.js (new uploads)
+// and myuploads.js (replacing a single photo within an existing upload) so
+// the compression/upload logic isn't duplicated.
+export function isPdfFile(file) {
+  return file.type === "application/pdf" || /\.pdf$/i.test(file.name || "");
+}
+
+export function compressImage(file, maxDimension = 1600, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > maxDimension || height > maxDimension) {
+        const scale = maxDimension / Math.max(width, height);
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => (blob ? resolve(blob) : reject(new Error("Compression failed"))),
+        "image/jpeg",
+        quality
+      );
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+// Uploads one File to Cloudinary. Returns { url, isPdf, name } — a small
+// uniform shape so a submission can mix photos and PDFs in the same
+// uploads[]/files[] array. `folder` is optional ("images" / "pdfs") —
+// keeps Cloudinary tidy for future tooling; harmless if the unsigned
+// preset ignores it.
+export async function uploadOneFile(file, cloudName, uploadPreset, folder) {
+  const pdf = isPdfFile(file);
+  const formData = new FormData();
+  let endpoint;
+  if (pdf) {
+    formData.append("file", file);
+    endpoint = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
+  } else {
+    const compressed = await compressImage(file);
+    formData.append("file", compressed);
+    endpoint = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+  }
+  formData.append("upload_preset", uploadPreset);
+  if (folder) formData.append("folder", folder);
+
+  const response = await fetch(endpoint, { method: "POST", body: formData });
+  const result = await response.json();
+  if (!result.secure_url) throw new Error(result.error?.message || "Upload failed");
+  return { url: result.secure_url, isPdf: pdf, name: file.name || (pdf ? "document.pdf" : "photo.jpg") };
+}
+
+// Renders one thumbnail — a real <img> for a photo, or a small file chip
+// for a PDF (clicking either opens the file in a new tab; browsers render
+// PDFs natively with their own zoom/page-nav/download/fullscreen controls,
+// so no separate in-page viewer library is needed for this plain-JS stack).
+// Accepts either the old shape (a bare URL string, always a photo) or the
+// new { url, isPdf, name } shape, so legacy uploads keep rendering as-is.
+export function fileThumbHtml(item) {
+  const url = typeof item === "string" ? item : item.url;
+  const isPdf = typeof item === "object" && item && item.isPdf;
+  const name = (typeof item === "object" && item && item.name) || "";
+  if (isPdf) {
+    const shortName = name.length > 16 ? name.slice(0, 13) + "…" : name;
+    return `<a href="${url}" target="_blank" rel="noopener" class="thumb thumb-pdf" title="${escapeHtml(name)}">📄<span class="thumb-pdf-name">${escapeHtml(shortName)}</span></a>`;
+  }
+  return `<a href="${url}" target="_blank" rel="noopener"><img src="${url}" class="thumb" /></a>`;
+}
+
 export function typeBadgeHtml(type) {
   if (!type || !TYPE_META[type]) return "";
   const t = TYPE_META[type];
