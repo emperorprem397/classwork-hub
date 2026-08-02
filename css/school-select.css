@@ -189,7 +189,7 @@ select.ruled-input option {
 
 .primary-btn {
   background: linear-gradient(135deg, var(--cyan), var(--cyan-dim));
-  color: #04191c;
+  color: var(--on-accent);
   border: none;
   border-radius: var(--radius-sm);
   padding: 12px 22px;

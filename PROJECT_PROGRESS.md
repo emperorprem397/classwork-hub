@@ -127,8 +127,48 @@ Large round covering most of the outstanding bug list plus two structural change
 - Subject editing (✎) was only added to the Dashboard page, not the Subjects (browse) page — could extend there too if it comes up
 - The new homepage's illustration is an abstract CSS-built stack of notebook icons, not a pixel match of the reference screenshot's 3D render — flagging in case an exact visual match still matters
 
+## 🎨 Theming system + redesigned Settings + admin parity, 🔍 Universal Search (this round)
+
+Milestone 2 was a 14-item feature brief — way too much for one safe round, so Prem ranked priorities and this round covers the top two: **Theming** and **Universal Search**. The rest (Activity Feed + Class Chat, Dashboard widgets, Profile redesign, Contribution calendar, Leaderboard filters, Notebook viewer upgrade, Upload polish, empty states/skeletons elsewhere) are queued for follow-up rounds — see Pending below.
+
+**Note on the brief itself:** Milestone 2's document specified React/Vite/Tailwind/Framer Motion. The live site (and everything shipped in every round so far) is plain HTML/CSS/JS + Firebase + Cloudinary — confirmed with Prem to keep that stack rather than rebuild from scratch.
+
+**Theming (Dark Cyan / Light / Monochrome):**
+- Every color in the app already lived in CSS custom properties (`css/theme.css`), so adding themes meant adding two override blocks (`:root[data-theme="light"]`, `:root[data-theme="monochrome"]`) that redefine the same variable names — no other CSS file needed touching for the app itself. Fixed two spots (`​.btn-primary`, `.primary-btn` on school-select) that had a hardcoded text color instead of a variable, which would've been unreadable on the new light backgrounds.
+- New `js/theme.js` — shared helper: `applyTheme()`, `getStoredTheme()`, `syncThemeFromCloud()`, `saveThemeToCloud()`.
+- A tiny inline script at the very top of every page's `<head>` (before any stylesheet) reads the saved theme from `localStorage` and applies it before first paint — no flash of the wrong theme on load.
+- Theme is saved to `localStorage` **and** to `users/{uid}.theme` in Firestore, so switching on your phone shows up on your laptop next time you open the app — `dashboard.js` does a silent one-time pull from Firestore on load in case it changed elsewhere.
+- **Settings page redesigned** into tabs (Account / Appearance / Notifications / Privacy / About), matching the brief. Appearance has the 3 theme swatches. Notifications has 5 toggles saved to `users/{uid}.notificationPrefs` — **honest caveat: these are saved and ready, but nothing is actually pushed yet** since there's no notification infrastructure (that's part of the deferred Activity Feed work). Privacy is a static explainer of who can see what. About is static app info.
+- **Admin panel parity** — same 3-theme system added as a new "🎨 Appearance" tab in the sidebar, self-contained (the admin panel is one standalone HTML file, doesn't share code with the main app, so the same token pattern was duplicated there rather than shared — intentional, keeps the admin panel's "no dependency on the main site's file structure" property that was a deliberate choice from an earlier round).
+- No Firestore rules changes needed — the existing per-user update rule already permits writing arbitrary fields to your own `users/{uid}` doc (aside from `banned`), so `theme` and `notificationPrefs` were already writable.
+
+**Universal Search:**
+- New sidebar item "🔍 Search" (added to all 8 pages) → dedicated `search.html` + `js/search.js`.
+- Builds a client-side searchable index once per page load: subjects, teachers, homework assignments, the last 30 days of classwork/homework uploads (same window as the Work page's upload feeds), and classmates (from the same query the leaderboard uses). Typing filters instantly (150ms debounce) — no per-keystroke Firestore reads.
+- Results are grouped by type (Subjects / Teachers / Homework / Uploads / Classmates) with the matched text highlighted.
+- Recent searches (last 6) saved to `localStorage`, shown as tappable chips when the box is empty. Skeleton loader while the index builds, a "start typing" empty state, and a distinct "no matches" state.
+- Search results link to the most relevant existing page (a subject match → Dashboard, a homework/upload match → Work, a classmate match → Leaderboard) rather than a dedicated per-item detail page, since those don't exist yet.
+
+**Firestore Console step required this round:** none. **GitHub upload:** drag every file in this round's zip into "Add file" as usual — several are brand new (`search.html`, `js/search.js`, `css/search.css`, `js/theme.js`), the rest are edits to existing files.
+
+## ⏳ Pending / not built yet
+
+- Activity Feed + real-time Class Group Chat (ranked #3 — biggest remaining lift, needs new Firestore collections + security rules of its own)
+- Dashboard widgets (Welcome card, Upload streak, Quick Upload shortcut, Leaderboard preview, etc.)
+- Profile page redesign (GitHub-profile-style: badges, contribution score, achievements)
+- GitHub-style contribution calendar
+- Leaderboard filters (Today/Week/Month/All-time) — needs XP to start being recorded with timestamps, not just as a running total, so this needs a small data-model change first
+- Notebook viewer upgrade (zoom, fullscreen, next/prev, keyboard nav) — currently photos just open in a new tab
+- Smart upload improvements (blur/duplicate detection, rotate/crop, reorder)
+- OCR-ready fields on upload documents (foundation only, no OCR itself)
+- Skeleton loaders + polished empty states on the older pages (Search has one now; Dashboard/Subjects/etc. still use the plain "Loading…" text from earlier rounds)
+- Bottom mobile nav + floating upload button
+- Notification toggles exist and save, but nothing is actually sent yet — needs the Activity Feed infrastructure first
+- Comments on uploads, in-app announcements
+- Known gap, carried over: Firestore rules let a signed-in student update their own `xp`/`rank`/`streak` fields directly since the update rule only checks `banned` is unchanged — fine for now, worth locking down later
+
 ## ➡️ Next step
 
-Not yet decided — ask Prem what to prioritize from the "Pending" list above, or whether something new has come up.
+Activity Feed + Class Group Chat was ranked #3 — likely next up, but confirm with Prem before starting since it's the largest remaining piece (new Firestore collections, new security rules, real-time listeners).
 
 

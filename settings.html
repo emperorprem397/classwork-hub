@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>(function(){try{var t=localStorage.getItem("cwhTheme");if(t&&t!=="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Settings — Classwork Hub</title>
@@ -20,6 +21,7 @@
     <div class="sb-logo"><span class="dot"></span> Classwork Hub</div>
     <nav class="sb-nav">
       <a class="sb-item" href="dashboard.html">🏠 Dashboard</a>
+      <a class="sb-item" href="search.html">🔍 Search</a>
       <a class="sb-item" href="subjects.html">📚 Subjects</a>
       <a class="sb-item" href="myuploads.html">📤 My Uploads</a>
       <a class="sb-item" href="homework.html">🗂️ Work</a>
@@ -49,44 +51,131 @@
 
     <div class="content">
 
-      <!-- Profile photo + name -->
-      <section class="glass settings-card">
-        <h2 class="settings-card-title">Profile</h2>
+      <div class="work-tabs" role="tablist">
+        <button class="work-tab active" data-tab="account">👤 Account</button>
+        <button class="work-tab" data-tab="appearance">🎨 Appearance</button>
+        <button class="work-tab" data-tab="notifications">🔔 Notifications</button>
+        <button class="work-tab" data-tab="privacy">🔒 Privacy</button>
+        <button class="work-tab" data-tab="about">ℹ️ About</button>
+      </div>
 
-        <div class="settings-photo-row">
-          <img id="settingsPhoto" class="settings-photo" src="" alt="" />
-          <div>
-            <div class="settings-photo-label">Profile photo</div>
-            <div class="settings-photo-sub">This is your Google account photo — it updates automatically if you change it on Google.</div>
+      <!-- ACCOUNT -->
+      <div class="work-panel active" id="panel-account">
+
+        <section class="glass settings-card">
+          <h2 class="settings-card-title">Profile</h2>
+
+          <div class="settings-photo-row">
+            <img id="settingsPhoto" class="settings-photo" src="" alt="" />
+            <div>
+              <div class="settings-photo-label">Profile photo</div>
+              <div class="settings-photo-sub">This is your Google account photo — it updates automatically if you change it on Google.</div>
+            </div>
           </div>
-        </div>
 
-        <div class="field-group">
-          <label class="field-label" for="nameInput">Display name</label>
-          <input type="text" id="nameInput" class="text-input" maxlength="40" placeholder="Your name" />
-        </div>
-        <button id="nameSaveBtn" class="btn btn-primary btn-sm">Save name</button>
-        <p id="nameStatus" class="upload-status"></p>
-      </section>
+          <div class="field-group">
+            <label class="field-label" for="nameInput">Display name</label>
+            <input type="text" id="nameInput" class="text-input" maxlength="40" placeholder="Your name" />
+          </div>
+          <button id="nameSaveBtn" class="btn btn-primary btn-sm">Save name</button>
+          <p id="nameStatus" class="upload-status"></p>
+        </section>
 
-      <!-- Enrolment -->
-      <section class="glass settings-card">
-        <h2 class="settings-card-title">Your class</h2>
-        <p class="settings-card-sub">You're currently enrolled here:</p>
-        <div class="enrolment-box">
-          <div class="enrolment-school" id="enrolmentSchool">—</div>
-          <div class="enrolment-class" id="enrolmentClass">—</div>
-        </div>
-        <p class="settings-hint">Joined the wrong school or class by mistake? You can switch any time — your XP, streak, and rank stay with your account.</p>
-        <a href="school-select.html?edit=1" class="btn btn-ghost btn-sm">Change school / class</a>
-      </section>
+        <section class="glass settings-card">
+          <h2 class="settings-card-title">Your class</h2>
+          <p class="settings-card-sub">You're currently enrolled here:</p>
+          <div class="enrolment-box">
+            <div class="enrolment-school" id="enrolmentSchool">—</div>
+            <div class="enrolment-class" id="enrolmentClass">—</div>
+          </div>
+          <p class="settings-hint">Joined the wrong school or class by mistake? You can switch any time — your XP, streak, and rank stay with your account.</p>
+          <a href="school-select.html?edit=1" class="btn btn-ghost btn-sm">Change school / class</a>
+        </section>
 
-      <!-- Account -->
-      <section class="glass settings-card">
-        <h2 class="settings-card-title">Account</h2>
-        <p class="settings-card-sub" id="accountEmail">—</p>
-        <button id="signOutBtn2" class="btn btn-ghost btn-sm">Sign out</button>
-      </section>
+        <section class="glass settings-card">
+          <h2 class="settings-card-title">Account</h2>
+          <p class="settings-card-sub" id="accountEmail">—</p>
+          <button id="signOutBtn2" class="btn btn-ghost btn-sm">Sign out</button>
+        </section>
+
+      </div>
+
+      <!-- APPEARANCE -->
+      <div class="work-panel" id="panel-appearance">
+        <section class="glass settings-card" style="max-width:640px;">
+          <h2 class="settings-card-title">Theme</h2>
+          <p class="settings-card-sub">Applies instantly, and follows your account to any device you sign in on.</p>
+          <div class="theme-swatch-row" id="themeSwatchRow">
+            <button class="theme-swatch" data-theme-choice="dark">
+              <span class="theme-swatch-preview theme-preview-dark"></span>
+              <span class="theme-swatch-label">Dark Cyan<br><small>Default</small></span>
+            </button>
+            <button class="theme-swatch" data-theme-choice="light">
+              <span class="theme-swatch-preview theme-preview-light"></span>
+              <span class="theme-swatch-label">Light</span>
+            </button>
+            <button class="theme-swatch" data-theme-choice="monochrome">
+              <span class="theme-swatch-preview theme-preview-mono"></span>
+              <span class="theme-swatch-label">Monochrome</span>
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- NOTIFICATIONS -->
+      <div class="work-panel" id="panel-notifications">
+        <section class="glass settings-card" style="max-width:560px;">
+          <h2 class="settings-card-title">Notification preferences</h2>
+          <p class="settings-card-sub">These are saved to your account now, ready for when in-app notifications launch — nothing is pushed to you yet, so it's safe to turn on whatever you'll want.</p>
+
+          <div class="toggle-row">
+            <div><div class="toggle-label">Activity notifications</div><div class="toggle-sub">Classmates uploading, joining, or hitting milestones</div></div>
+            <label class="switch"><input type="checkbox" id="notifyActivity" checked /><span class="switch-track"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Upload notifications</div><div class="toggle-sub">When someone uploads to a subject you follow</div></div>
+            <label class="switch"><input type="checkbox" id="notifyUploads" checked /><span class="switch-track"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Homework reminders</div><div class="toggle-sub">Due-date reminders for open assignments</div></div>
+            <label class="switch"><input type="checkbox" id="notifyHomework" checked /><span class="switch-track"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Announcements</div><div class="toggle-sub">Messages from your class or admin</div></div>
+            <label class="switch"><input type="checkbox" id="notifyAnnouncements" checked /><span class="switch-track"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Leaderboard updates</div><div class="toggle-sub">When your rank changes</div></div>
+            <label class="switch"><input type="checkbox" id="notifyLeaderboard" /><span class="switch-track"></span></label>
+          </div>
+
+          <p id="notifyStatus" class="upload-status"></p>
+        </section>
+      </div>
+
+      <!-- PRIVACY -->
+      <div class="work-panel" id="panel-privacy">
+        <section class="glass settings-card" style="max-width:560px;">
+          <h2 class="settings-card-title">Privacy</h2>
+          <p class="settings-card-sub">What classmates and admins can see about you.</p>
+          <ul class="privacy-list">
+            <li>Your name and photo are visible to classmates in your own class only, plus your school's admin.</li>
+            <li>Uploads you post are visible to classmates in the same school and class — not to other schools or classes.</li>
+            <li>Your email address is never shown to classmates, only to admins for account support.</li>
+            <li>Your XP, streak, and rank are visible to classmates on the class Leaderboard.</li>
+          </ul>
+          <p class="settings-hint">Want your account or data removed entirely? Contact your school's admin — they can do this from the admin panel.</p>
+        </section>
+      </div>
+
+      <!-- ABOUT -->
+      <div class="work-panel" id="panel-about">
+        <section class="glass settings-card" style="max-width:560px;">
+          <h2 class="settings-card-title">About Classwork Hub</h2>
+          <p class="settings-card-sub">Share. Learn. Stay Ahead.</p>
+          <p class="about-body">Classwork Hub is a place for your class to share the day's notebook work, so nobody falls behind just because they were absent. Built by students, for students.</p>
+        </section>
+      </div>
 
     </div>
   </main>

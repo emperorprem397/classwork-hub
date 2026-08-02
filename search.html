@@ -4,12 +4,12 @@
 <script>(function(){try{var t=localStorage.getItem("cwhTheme");if(t&&t!=="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>My Uploads — Classwork Hub</title>
+<title>Search — Classwork Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/theme.css">
 <link rel="stylesheet" href="css/dashboard.css">
-<link rel="stylesheet" href="css/myuploads.css">
+<link rel="stylesheet" href="css/search.css">
 </head>
 <body>
 
@@ -21,9 +21,9 @@
     <div class="sb-logo"><span class="dot"></span> Classwork Hub</div>
     <nav class="sb-nav">
       <a class="sb-item" href="dashboard.html">🏠 Dashboard</a>
-      <a class="sb-item" href="search.html">🔍 Search</a>
+      <a class="sb-item active" href="search.html">🔍 Search</a>
       <a class="sb-item" href="subjects.html">📚 Subjects</a>
-      <a class="sb-item active" href="myuploads.html">📤 My Uploads</a>
+      <a class="sb-item" href="myuploads.html">📤 My Uploads</a>
       <a class="sb-item" href="homework.html">🗂️ Work</a>
       <a class="sb-item" href="leaderboard.html">🏆 Leaderboard</a>
       <a class="sb-item" href="profile.html">👤 Profile</a>
@@ -39,8 +39,8 @@
       <div class="topbar-left">
         <button id="navToggle" class="nav-toggle" aria-label="Toggle menu" aria-expanded="false"><span></span><span></span><span></span></button>
         <div>
-        <div class="page-title">My Uploads</div>
-        <div class="page-sub">Everything you've shared, most recent first</div>
+        <div class="page-title">Search</div>
+        <div class="page-sub">Subjects, teachers, homework, uploads and classmates — all in one place</div>
       </div>
       </div>
       <div class="user-box">
@@ -50,19 +50,47 @@
     </header>
 
     <div class="content">
-      <p id="loadingMsg" class="loading-msg">Loading your uploads…</p>
-      <div id="uploadsList" class="uploads-list"></div>
-      <div id="emptyState" class="glass empty-state" hidden>
-        <p class="empty-title">You haven't uploaded anything yet.</p>
-        <p class="empty-sub">Head to the dashboard and share today's notebook — it'll show up here.</p>
+
+      <div class="search-bar-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search subjects, teachers, homework, uploads, classmates…" autocomplete="off" />
+        <button id="searchClearBtn" class="search-clear" hidden aria-label="Clear search">✕</button>
       </div>
+
+      <!-- Recent searches (shown only when the box is empty) -->
+      <div id="recentSearches" class="recent-searches" hidden>
+        <div class="recent-label">Recent searches</div>
+        <div id="recentChips" class="recent-chips"></div>
+      </div>
+
+      <!-- Loading skeleton, shown while the searchable index is being built -->
+      <div id="searchSkeleton" class="search-skeleton">
+        <div class="skeleton-row"></div>
+        <div class="skeleton-row"></div>
+        <div class="skeleton-row"></div>
+      </div>
+
+      <!-- Empty state — nothing typed yet, index is ready -->
+      <div id="searchIdleState" class="glass empty-state" hidden>
+        <p class="empty-title">Start typing to search.</p>
+        <p class="empty-sub">Try a subject name, a teacher, a classmate, or a word from a homework description.</p>
+      </div>
+
+      <!-- No results -->
+      <div id="searchNoResults" class="glass empty-state" hidden>
+        <p class="empty-title">No matches for that.</p>
+        <p class="empty-sub">Check the spelling, or try a shorter word.</p>
+      </div>
+
+      <div id="searchResults" class="search-results"></div>
+
     </div>
   </main>
 
 </div>
 
 <script type="module" src="js/firebase-config.js"></script>
-<script type="module" src="js/myuploads.js"></script>
+<script type="module" src="js/search.js"></script>
 <script src="js/nav.js"></script>
 </body>
 </html>

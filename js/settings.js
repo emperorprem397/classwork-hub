@@ -3,6 +3,7 @@ import { onAuthStateChanged, signOut, updateProfile }
   from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { doc, getDoc, updateDoc }
   from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getStoredTheme, applyTheme, syncThemeFromCloud, saveThemeToCloud } from "./theme.js";
 
 const userPhoto     = document.getElementById("userPhoto");
 const userNameEl    = document.getElementById("userName");
@@ -18,10 +19,69 @@ const enrolmentSchool = document.getElementById("enrolmentSchool");
 const enrolmentClass  = document.getElementById("enrolmentClass");
 const accountEmail    = document.getElementById("accountEmail");
 
+const notifyStatus = document.getElementById("notifyStatus");
+const NOTIFY_KEYS = {
+  notifyActivity: "activity",
+  notifyUploads: "uploads",
+  notifyHomework: "homework",
+  notifyAnnouncements: "announcements",
+  notifyLeaderboard: "leaderboard",
+};
+
 signOutBtn.addEventListener("click", () => signOut(auth));
 signOutBtn2.addEventListener("click", () => signOut(auth));
 
 let currentUser = null;
+
+// ---------- Tabs ----------
+document.querySelectorAll(".work-tab").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const tab = btn.dataset.tab;
+    document.querySelectorAll(".work-tab").forEach((b) => b.classList.toggle("active", b === btn));
+    document.querySelectorAll(".work-panel").forEach((p) => p.classList.toggle("active", p.id === `panel-${tab}`));
+  });
+});
+
+// ---------- Appearance ----------
+function updateThemeSwatchUI() {
+  const current = getStoredTheme();
+  document.querySelectorAll("[data-theme-choice]").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.themeChoice === current);
+  });
+}
+document.querySelectorAll("[data-theme-choice]").forEach((btn) => {
+  btn.addEventListener("click", async () => {
+    const themeId = btn.dataset.themeChoice;
+    applyTheme(themeId);
+    updateThemeSwatchUI();
+    if (currentUser) {
+      try { await saveThemeToCloud(db, currentUser.uid, themeId); }
+      catch (err) { console.error("Couldn't save theme preference:", err); }
+    }
+  });
+});
+updateThemeSwatchUI();
+
+// ---------- Notifications ----------
+document.querySelectorAll('[id^="notify"]').forEach((checkbox) => {
+  checkbox.addEventListener("change", saveNotificationPrefs);
+});
+
+async function saveNotificationPrefs() {
+  if (!currentUser) return;
+  const prefs = {};
+  Object.entries(NOTIFY_KEYS).forEach(([elId, key]) => {
+    prefs[key] = document.getElementById(elId).checked;
+  });
+  notifyStatus.textContent = "Saving…";
+  try {
+    await updateDoc(doc(db, "users", currentUser.uid), { notificationPrefs: prefs });
+    notifyStatus.textContent = "Saved ✓";
+  } catch (err) {
+    console.error(err);
+    notifyStatus.textContent = "Couldn't save — check your connection.";
+  }
+}
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) { window.location.href = "index.html"; return; }
@@ -41,6 +101,20 @@ onAuthStateChanged(auth, async (user) => {
 
   enrolmentSchool.textContent = profile.schoolName || "Your school";
   enrolmentClass.textContent = `Class ${profile.classId}`;
+
+  // Pull any theme saved from another device and reflect it here.
+  await syncThemeFromCloud(db, user.uid);
+  updateThemeSwatchUI();
+
+  // Reflect saved notification prefs (default: all on except Leaderboard,
+  // matching the checked/unchecked attributes already in the HTML).
+  if (profile.notificationPrefs) {
+    Object.entries(NOTIFY_KEYS).forEach(([elId, key]) => {
+      if (profile.notificationPrefs[key] !== undefined) {
+        document.getElementById(elId).checked = profile.notificationPrefs[key];
+      }
+    });
+  }
 
   // Keep the Firestore mirror of name/photo in sync with the live Google
   // account — this is what the leaderboard and admin panel actually read

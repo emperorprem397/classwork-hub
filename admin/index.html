@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>(function(){try{var t=localStorage.getItem("cwhTheme");if(t&&t!=="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Admin — Classwork Hub</title>
@@ -9,21 +10,49 @@
 <style>
 :root{
   --paper-bg:#05090c;--paper-card:rgba(18,30,34,.6);--paper2:rgba(34,54,60,.55);
+  --bg-glow-1:#0a2a30;--bg-glow-2:#062024;
   --ink:#eaf6f8;--ink-soft:#9db3b8;--rule:rgba(103,232,249,.14);
   --red:#f26d6d;--red2:rgba(242,109,109,.12);
   --gold:#f5c451;--gold2:rgba(245,196,81,.14);
   --green:#4ade80;--green2:rgba(74,222,128,.12);
   --cyan:#22d3ee;--cyan-bright:#67e8f9;--cyan-dim:#0e7490;--cyan2:rgba(34,211,238,.12);
+  --on-accent:#04191c;
   --font:'Inter',sans-serif;--font-h:'Zilla Slab',serif;
   --sh:0 2px 14px rgba(0,0,0,.35);--shl:0 20px 50px -20px rgba(34,211,238,.15), 0 0 0 1px var(--rule);
   --blur:blur(18px);
+}
+/* Same three Appearance options as the student-facing Settings page — kept
+   as a separate token set (--paper-bg/--ink/--rule/etc.) since this file
+   is intentionally self-contained, but the theme *values* mirror css/theme.css
+   so "Light" and "Monochrome" look the same across both surfaces. */
+:root[data-theme="light"]{
+  --paper-bg:#f3f6f7;--paper-card:rgba(255,255,255,.82);--paper2:rgba(224,241,243,.9);
+  --bg-glow-1:#e3f2f4;--bg-glow-2:#edf7f8;
+  --ink:#0b1e22;--ink-soft:#4b6267;--rule:rgba(14,116,144,.16);
+  --red:#c9392f;--red2:rgba(201,57,47,.12);
+  --gold:#a86a0c;--gold2:rgba(168,106,12,.14);
+  --green:#159146;--green2:rgba(21,145,70,.12);
+  --cyan:#0891b2;--cyan-bright:#0e7490;--cyan-dim:#0e7490;--cyan2:rgba(8,145,178,.12);
+  --on-accent:#ffffff;
+  --sh:0 2px 14px rgba(15,40,45,.12);--shl:0 20px 40px -22px rgba(8,145,178,.18), 0 0 0 1px var(--rule);
+}
+:root[data-theme="monochrome"]{
+  --paper-bg:#ffffff;--paper-card:rgba(246,246,247,.9);--paper2:rgba(230,230,231,.92);
+  --bg-glow-1:#f2f2f2;--bg-glow-2:#f8f8f8;
+  --ink:#111112;--ink-soft:#55565b;--rule:#e6e6e8;
+  --red:#7a3733;--red2:rgba(122,55,51,.12);
+  --gold:#6b6b6e;--gold2:rgba(107,107,110,.14);
+  --green:#38553f;--green2:rgba(56,85,63,.12);
+  --cyan:#111112;--cyan-bright:#2b2b2e;--cyan-dim:#3a3a3d;--cyan2:rgba(17,17,18,.08);
+  --on-accent:#ffffff;
+  --sh:0 2px 14px rgba(17,17,18,.1);--shl:0 16px 34px -20px rgba(17,17,18,.14), 0 0 0 1px var(--rule);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:var(--font);color:var(--ink);min-height:100vh;
   background:
-    radial-gradient(1200px 600px at 15% -10%, #0a2a30, transparent 60%),
-    radial-gradient(900px 500px at 110% 20%, #062024, transparent 55%),
+    radial-gradient(1200px 600px at 15% -10%, var(--bg-glow-1), transparent 60%),
+    radial-gradient(900px 500px at 110% 20%, var(--bg-glow-2), transparent 55%),
     var(--paper-bg);
   background-attachment:fixed;
 }
@@ -97,7 +126,7 @@ select option{background:#0d1518;color:var(--ink)}
 .btn-green:hover{background:rgba(74,222,128,.2)}
 .btn-red{background:var(--red2);border:1px solid rgba(242,109,109,.3);color:var(--red)}
 .btn-red:hover{background:rgba(242,109,109,.2)}
-.btn-cyan{background:linear-gradient(135deg,var(--cyan),var(--cyan-dim));border:none;color:#04191c}
+.btn-cyan{background:linear-gradient(135deg,var(--cyan),var(--cyan-dim));border:none;color:var(--on-accent)}
 .btn-cyan:hover{box-shadow:0 6px 18px -6px rgba(34,211,238,.5)}
 .btn-row{display:flex;gap:.5rem}
 
@@ -112,6 +141,22 @@ select option{background:#0d1518;color:var(--ink)}
 
 .loading-msg{text-align:center;color:var(--ink-soft);padding:2rem;font-size:.85rem}
 [hidden]{display:none!important}
+
+/* ── APPEARANCE ── */
+.theme-swatch-row{display:flex;gap:1rem;flex-wrap:wrap}
+.theme-swatch{
+  display:flex;flex-direction:column;align-items:flex-start;gap:.6rem;
+  background:var(--paper-card);border:1.5px solid var(--rule);border-radius:12px;
+  padding:.9rem;cursor:pointer;width:150px;font-family:var(--font);
+}
+.theme-swatch:hover{border-color:var(--cyan-dim)}
+.theme-swatch.active{border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan)}
+.theme-swatch-preview{display:block;width:100%;height:64px;border-radius:8px;border:1px solid rgba(0,0,0,.12)}
+.theme-preview-dark{background:linear-gradient(135deg,#05090c,#0a2a30 60%,#22d3ee 130%)}
+.theme-preview-light{background:linear-gradient(135deg,#f3f6f7,#e3f2f4 60%,#0891b2 130%)}
+.theme-preview-mono{background:linear-gradient(135deg,#ffffff,#f2f2f2 60%,#111112 130%)}
+.theme-swatch-label{font-size:.82rem;font-weight:600;color:var(--ink);text-align:left}
+.theme-swatch-label small{font-weight:400;color:var(--ink-soft)}
 </style>
 </head>
 <body>
@@ -139,6 +184,7 @@ select option{background:#0d1518;color:var(--ink)}
       <div class="sb-item" data-panel="schools">🏫 All Schools</div>
       <div class="sb-item" data-panel="users">👥 Users</div>
       <div class="sb-item" data-panel="subjects">📚 Subjects</div>
+      <div class="sb-item" data-panel="appearance">🎨 Appearance</div>
       <div class="sb-item" data-panel="logs">📝 Activity Log</div>
     </div>
     <div class="sb-foot">
@@ -219,6 +265,26 @@ select option{background:#0d1518;color:var(--ink)}
         <p class="hint" id="subjectsHint">Pick a school and class above to view or add its subjects.</p>
       </div>
 
+      <!-- APPEARANCE -->
+      <div class="panel" id="panel-appearance">
+        <div class="sec-title">Appearance</div>
+        <p class="hint" style="margin-top:-.6rem;margin-bottom:1rem">Applies instantly and is remembered for your admin account across devices.</p>
+        <div class="theme-swatch-row" id="themeSwatchRow">
+          <button class="theme-swatch" data-theme-choice="dark">
+            <span class="theme-swatch-preview theme-preview-dark"></span>
+            <span class="theme-swatch-label">Dark Cyan<br><small>Default</small></span>
+          </button>
+          <button class="theme-swatch" data-theme-choice="light">
+            <span class="theme-swatch-preview theme-preview-light"></span>
+            <span class="theme-swatch-label">Light</span>
+          </button>
+          <button class="theme-swatch" data-theme-choice="monochrome">
+            <span class="theme-swatch-preview theme-preview-mono"></span>
+            <span class="theme-swatch-label">Monochrome</span>
+          </button>
+        </div>
+      </div>
+
       <!-- LOGS -->
       <div class="panel" id="panel-logs">
         <div class="sec-title">Activity Log <span style="font-weight:400;font-size:.75rem;color:var(--ink-soft)">(this device only)</span></div>
@@ -286,6 +352,10 @@ function init(){
   document.querySelectorAll(".sb-item").forEach(item => {
     item.addEventListener("click", () => switchPanel(item.dataset.panel));
   });
+  document.querySelectorAll("[data-theme-choice]").forEach(btn => {
+    btn.addEventListener("click", () => chooseTheme(btn.dataset.themeChoice));
+  });
+  updateThemeSwatchUI();
   subjSchoolSelect.addEventListener("change", onSubjSchoolChange);
   subjClassSelect.addEventListener("change", onSubjClassChange);
   addSubjectForm.addEventListener("submit", onAddSubject);
@@ -300,6 +370,10 @@ function init(){
       const snap = await db.collection("users").doc(user.uid).get();
       if (snap.exists && snap.data().role === "admin") {
         currentAdminUid = user.uid;
+        const cloudTheme = snap.data().theme;
+        if (cloudTheme && cloudTheme !== (localStorage.getItem("cwhTheme") || "dark")) {
+          applyTheme(cloudTheme);
+        }
         showDashboard(user.displayName || user.email);
       } else {
         await auth.signOut();
@@ -344,11 +418,34 @@ function showDashboard(name){
   loadAll();
 }
 
+/* ── APPEARANCE ── */
+function applyTheme(themeId){
+  if (themeId === "dark") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", themeId);
+  try { localStorage.setItem("cwhTheme", themeId); } catch (e) { /* non-fatal */ }
+}
+
+function updateThemeSwatchUI(){
+  const current = localStorage.getItem("cwhTheme") || "dark";
+  document.querySelectorAll("[data-theme-choice]").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.themeChoice === current);
+  });
+}
+
+async function chooseTheme(themeId){
+  applyTheme(themeId);
+  updateThemeSwatchUI();
+  if (currentAdminUid) {
+    try { await db.collection("users").doc(currentAdminUid).update({ theme: themeId }); }
+    catch (e) { console.error("Couldn't save theme preference:", e); }
+  }
+}
+
 function switchPanel(name){
   document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
   document.getElementById("panel-" + name).classList.add("active");
   document.querySelectorAll(".sb-item").forEach(i => i.classList.toggle("active", i.dataset.panel === name));
-  const titles = { dashboard:"Dashboard", pending:"Pending Schools", schools:"All Schools", users:"Users", subjects:"Subjects", logs:"Activity Log" };
+  const titles = { dashboard:"Dashboard", pending:"Pending Schools", schools:"All Schools", users:"Users", subjects:"Subjects", appearance:"Appearance", logs:"Activity Log" };
   document.getElementById("pageTitle").textContent = titles[name] || name;
   if (name === "subjects" && subjSchoolSelect.options.length <= 1) loadSchoolsForSubjects();
 }

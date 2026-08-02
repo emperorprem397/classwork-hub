@@ -22,6 +22,7 @@
   --gold: #f5c451;
   --red: #f26d6d;
   --green: #4ade80;
+  --on-accent: #04191c; /* text color used on top of the accent gradient (.btn-primary etc.) */
 
   --radius-lg: 20px;
   --radius-md: 14px;
@@ -31,6 +32,66 @@
   --shadow-glow: 0 0 0 1px var(--border), 0 20px 50px -20px rgba(34, 211, 238, 0.15);
 
   --blur: blur(18px);
+}
+
+/* ==========================================================
+   Theme overrides — Appearance setting (Settings → Appearance,
+   and the equivalent tab in the admin panel). Every component
+   file only ever reads these custom properties, so swapping the
+   values here re-skins the entire app with no other CSS changes.
+   Applied as data-theme on <html>; "dark" (the default) needs no
+   block since :root above already holds those values.
+   ========================================================== */
+:root[data-theme="light"] {
+  --bg: #f3f6f7;
+  --bg-glow-1: #e3f2f4;
+  --bg-glow-2: #edf7f8;
+  --surface: rgba(255, 255, 255, 0.78);
+  --surface-solid: #ffffff;
+  --surface-hover: rgba(224, 241, 243, 0.9);
+  --border: rgba(14, 116, 144, 0.16);
+  --border-strong: rgba(14, 116, 144, 0.32);
+
+  --text: #0b1e22;
+  --text-soft: #4b6267;
+  --text-faint: #7f979e;
+
+  --cyan: #0891b2;
+  --cyan-bright: #0e7490;
+  --cyan-dim: #0e7490;
+  --gold: #a86a0c;
+  --red: #c9392f;
+  --green: #159146;
+  --on-accent: #ffffff;
+
+  --shadow-card: 0 24px 50px -28px rgba(15, 40, 45, 0.22);
+  --shadow-glow: 0 0 0 1px var(--border), 0 20px 40px -22px rgba(8, 145, 178, 0.18);
+}
+
+:root[data-theme="monochrome"] {
+  --bg: #ffffff;
+  --bg-glow-1: #f2f2f2;
+  --bg-glow-2: #f8f8f8;
+  --surface: rgba(246, 246, 247, 0.88);
+  --surface-solid: #f6f6f7;
+  --surface-hover: rgba(230, 230, 231, 0.92);
+  --border: #e6e6e8;
+  --border-strong: #c9c9cc;
+
+  --text: #111112;
+  --text-soft: #55565b;
+  --text-faint: #95969c;
+
+  --cyan: #111112;
+  --cyan-bright: #2b2b2e;
+  --cyan-dim: #3a3a3d;
+  --gold: #6b6b6e;
+  --red: #7a3733;
+  --green: #38553f;
+  --on-accent: #ffffff;
+
+  --shadow-card: 0 20px 40px -26px rgba(17, 17, 18, 0.18);
+  --shadow-glow: 0 0 0 1px var(--border), 0 16px 34px -20px rgba(17, 17, 18, 0.12);
 }
 
 * { box-sizing: border-box; }
@@ -99,7 +160,7 @@ body {
 
 .btn-primary {
   background: linear-gradient(135deg, var(--cyan), var(--cyan-dim));
-  color: #04191c;
+  color: var(--on-accent);
 }
 .btn-primary:hover { box-shadow: 0 8px 24px -8px rgba(34, 211, 238, 0.5); }
 

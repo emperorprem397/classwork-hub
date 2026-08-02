@@ -1,4 +1,5 @@
 import { auth, db, CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from "./firebase-config.js";
+import { syncThemeFromCloud } from "./theme.js";
 import { onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
@@ -106,6 +107,7 @@ onAuthStateChanged(auth, async (user) => {
   currentUser = user;
   userPhoto.src = user.photoURL || "";
   userNameEl.textContent = user.displayName || user.email;
+  syncThemeFromCloud(db, user.uid); // fire-and-forget — picks up a theme set on another device
 
   const snap = await getDoc(doc(db, "users", user.uid));
   if (!snap.exists()) { window.location.href = "school-select.html"; return; }
