@@ -9,8 +9,9 @@ import {
 // and the new "edit subject" feature below — no new imports needed.
 import {
   XP_UPLOAD, XP_FIRST_OF_DAY, XP_STREAK_TICK, calcRank,
-  todayId, yesterdayId, formatDateLabel, escapeHtml, typeBadgeHtml
+  todayId, yesterdayId, formatDateLabel, escapeHtml, typeBadgeHtml, logActivity
 } from "./helpers.js";
+import { deleteDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const userPhoto     = document.getElementById("userPhoto");
 const userNameEl    = document.getElementById("userName");
@@ -56,7 +57,9 @@ const editSubjectNameInput = document.getElementById("editSubjectNameInput");
 const editSubjectTeacherInput = document.getElementById("editSubjectTeacherInput");
 const editSubjectSubmit   = document.getElementById("editSubjectSubmit");
 const editSubjectStatus   = document.getElementById("editSubjectStatus");
+const deleteSubjectBtn    = document.getElementById("deleteSubjectBtn");
 let editingSubjectId = null;
+let editingSubjectName = null;
 
 let currentUser = null;
 let currentProfile = null;
@@ -366,6 +369,13 @@ addSubjectSubmit.addEventListener("click", async () => {
       createdBy: currentUser.uid,
       createdAt: serverTimestamp(),
     });
+    logActivity(db, {
+      schoolId, classId,
+      uid: currentUser.uid,
+      name: currentUser.displayName || currentUser.email,
+      type: "subject_created",
+      subjectName: name,
+    });
     closeAddSubjectModal();
     await loadSubjects();
   } catch (err) {
@@ -378,16 +388,19 @@ addSubjectSubmit.addEventListener("click", async () => {
 // ---------- Edit subject (any classmate — e.g. filling in a missing teacher name) ----------
 function openEditSubjectModal(subject) {
   editingSubjectId = subject.id;
+  editingSubjectName = subject.name || "";
   editSubjectNameInput.value = subject.name || "";
   editSubjectTeacherInput.value = subject.teacher || "";
   editSubjectStatus.textContent = "";
   editSubjectSubmit.disabled = false;
+  if (deleteSubjectBtn) deleteSubjectBtn.disabled = false;
   editSubjectModal.hidden = false;
   editSubjectNameInput.focus();
 }
 function closeEditSubjectModal() {
   editSubjectModal.hidden = true;
   editingSubjectId = null;
+  editingSubjectName = null;
 }
 editSubjectClose.addEventListener("click", closeEditSubjectModal);
 editSubjectModal.addEventListener("click", (e) => { if (e.target === editSubjectModal) closeEditSubjectModal(); });
@@ -408,6 +421,13 @@ editSubjectSubmit.addEventListener("click", async () => {
     const { schoolId, classId } = currentProfile;
     const subjectRef = doc(db, "schools", schoolId, "classes", classId, "subjects", editingSubjectId);
     await updateDoc(subjectRef, { name, teacher: teacher || null });
+    logActivity(db, {
+      schoolId, classId,
+      uid: currentUser.uid,
+      name: currentUser.displayName || currentUser.email,
+      type: "subject_edited",
+      subjectName: name,
+    });
     closeEditSubjectModal();
     await loadSubjects();
   } catch (err) {
@@ -416,6 +436,46 @@ editSubjectSubmit.addEventListener("click", async () => {
     editSubjectSubmit.disabled = false;
   }
 });
+
+// Delete a subject entirely — any classmate can do this now (not just
+// admin), since every class has a different subject list and there's no
+// reason a wrong/unwanted subject someone added should be stuck forever.
+// A confirm() dialog is the only guard rail; there's no undo, so make that
+// clear before it happens.
+if (deleteSubjectBtn) {
+  deleteSubjectBtn.addEventListener("click", async () => {
+    if (!editingSubjectId) return;
+    const confirmed = confirm(
+      `Delete "${editingSubjectName}"? This removes it (and its upload history) for the whole class. This can't be undone.`
+    );
+    if (!confirmed) return;
+
+    deleteSubjectBtn.disabled = true;
+    editSubjectSubmit.disabled = true;
+    editSubjectStatus.textContent = "Deleting…";
+
+    try {
+      const { schoolId, classId } = currentProfile;
+      const subjectRef = doc(db, "schools", schoolId, "classes", classId, "subjects", editingSubjectId);
+      const deletedName = editingSubjectName;
+      await deleteDoc(subjectRef);
+      logActivity(db, {
+        schoolId, classId,
+        uid: currentUser.uid,
+        name: currentUser.displayName || currentUser.email,
+        type: "subject_deleted",
+        subjectName: deletedName,
+      });
+      closeEditSubjectModal();
+      await loadSubjects();
+    } catch (err) {
+      console.error(err);
+      editSubjectStatus.textContent = "Couldn't delete — check your connection and try again.";
+      deleteSubjectBtn.disabled = false;
+      editSubjectSubmit.disabled = false;
+    }
+  });
+}
 
 fileInput.addEventListener("change", () => {
   pendingFiles = Array.from(fileInput.files || []); // no cap — pick as many notebook photos as needed
@@ -562,6 +622,15 @@ uploadSubmit.addEventListener("click", async () => {
       currentProfile.rank = newRank;
       currentProfile.streak = newStreak;
       currentProfile.lastUploadDate = newLastUploadDate;
+    });
+
+    logActivity(db, {
+      schoolId, classId,
+      uid: currentUser.uid,
+      name: currentUser.displayName || currentUser.email,
+      type: "upload",
+      subjectName: activeSubject.name,
+      detail: type ? `(${type})` : "",
     });
 
     uploadStatus.textContent = "Done ✓";

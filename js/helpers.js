@@ -97,3 +97,51 @@ export function typeBadgeHtml(type) {
   const t = TYPE_META[type];
   return `<span class="badge badge-cyan type-badge">${t.icon} ${t.label}</span>`;
 }
+
+// ---------- Activity log (NEW) ----------
+// A lightweight, append-only feed shared by the whole class — every subject
+// create/edit/delete and every upload writes one small doc here so everyone
+// (admin included) can see who did what, using the same name shown on their
+// profile. This is intentionally simple (no chat, no reactions, no editing
+// of entries) — a fuller Class Chat is a separate, much bigger feature to
+// scope later if wanted.
+export const ACTIVITY_META = {
+  subject_created: { icon: "➕", verb: "added the subject" },
+  subject_edited:  { icon: "✎",  verb: "edited the subject" },
+  subject_deleted: { icon: "🗑️", verb: "deleted the subject" },
+  upload:          { icon: "📤", verb: "uploaded work for" },
+};
+
+export async function logActivity(db, { schoolId, classId, uid, name, type, subjectName, detail }) {
+  try {
+    const { collection, addDoc, serverTimestamp } = await import(
+      "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"
+    );
+    const activityCol = collection(db, "schools", schoolId, "classes", classId, "activity");
+    await addDoc(activityCol, {
+      type,
+      actorUid: uid,
+      actorName: name || "Classmate",
+      subjectName: subjectName || "",
+      detail: detail || "",
+      createdAt: serverTimestamp(),
+    });
+  } catch (err) {
+    // Never let a logging failure block the real action (subject edit,
+    // upload, etc.) that triggered it — this is best-effort telemetry.
+    console.error("Activity log write failed:", err);
+  }
+}
+
+export function timeAgo(date) {
+  if (!date) return "";
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (seconds < 60) return "just now";
+  const mins = Math.floor(seconds / 60);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}

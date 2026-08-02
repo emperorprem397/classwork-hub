@@ -183,4 +183,36 @@ Activity Feed + Class Group Chat was ranked #3 — likely next up, but confirm w
 
 **Deploy:** just `js/school-select.js` this time — single file, shipped separately from the Milestone 2 round since it's an active blocker.
 
+## 🩹 Hotfix #2 — duplicate school data isolation + cache-busting
+
+**Two more reports right after the last hotfix:** (1) two accounts both in "APS Bareilly" / Class 11-F saw completely different subjects, teacher names, and uploads from each other, and (2) multi-photo upload appeared to only take one photo at a time despite that being fixed two rounds ago.
+
+**Bug #1 root cause — duplicate school documents:** at some point a second "APS Bareilly" got self-added through "+ Add your school" even though it was already in the fixed APS list — most likely because the student's typed name had a tiny whitespace difference from the list entry (e.g. a double space), so the old exact-match duplicate check didn't catch it and a second Firestore document got created with a different ID. Two students who each picked a differently-IDed "APS Bareilly" are, underneath the identical-looking name, actually in two entirely separate schools/classes/subjects — neither can ever see the other's data. Deleting the duplicate from the admin panel (as Prem did) removes it from the picker going forward, but doesn't fix an account that's already bound to the deleted ID — Firestore doesn't cascade-delete a doc's subcollections, so that account's data quietly keeps working in isolation.
+- **Fix (prevents new duplicates):** the "+ Add your school" duplicate check and the school search box now both normalize whitespace before comparing, so a stray extra space can't slip a near-duplicate past the check. (`js/school-select.js`)
+- **Fix for already-affected accounts:** no code can safely auto-merge two unrelated Firestore subtrees. Any account currently bound to a stale/orphaned school ID needs to go to **Settings → Change school / class** and re-pick "APS Bareilly" + the right class from the list — now that the duplicate is gone, everyone re-selecting lands on the same canonical school document and starts seeing the same shared class data.
+
+**Bug #2 — multi-photo upload:** re-verified the code — the file input still has `multiple`, and the upload loop still iterates every selected file with no cap. Almost certainly this was stale cached JavaScript rather than a real regression — browsers (and Vercel's CDN) can keep serving an old cached copy of a `.js` file after a GitHub update even though the file on disk changed, since there was nothing telling the browser the file was new.
+- **Fix:** every page's local `<script src="js/...">` and `<link href="css/...">` now has a `?v=20260803` version tag appended. Bump that date string any time a future round should force everyone's browser to fetch fresh files instead of a cached copy — this should prevent "I shipped the fix but you're still seeing the old bug" mismatches like this one going forward.
+
+**Deploy:** every `.html` file (all 10 got the version-tag change) plus `js/school-select.js`. No Firestore Console step.
+
+## ✅ Round 13 — subject delete + activity log + theme/underline fixes
+
+**1. Delete a subject (self-service, not just admin)**
+Classes vary a lot (Science stream vs. Commerce vs. Arts electives), so students shouldn't be stuck with subjects that don't apply, or wait on an admin to remove one. The existing edit-subject modal (✎ on each subject card) now has a red "🗑️ Delete this subject" button. Confirms via a plain `confirm()` dialog first (no undo). `firestore.rules`: `subjects/{subjectId}` delete rule changed from admin-only to `isAdmin() || inClass(schoolId, classId)`.
+
+**2. New: Class Activity log (`activity.html`)**
+New sidebar page, 7th item, between Leaderboard and Profile. A lightweight, append-only feed — every subject **create**, **edit**, and **delete**, plus every **photo upload**, now writes one small doc to a new `schools/{schoolId}/classes/{classId}/activity` subcollection with the actor's profile name (same name shown everywhere else, not just "a classmate"), what they did, to which subject, and a timestamp. The Activity page lists the most recent 100, newest first, with an icon + relative time ("3h ago"). Nobody can edit or delete their own past entries — it's an honest log, not a chat — admin can still delete an entry for moderation. New files: `activity.html`, `js/activity.js`, `css/activity.css`. New shared helpers in `helpers.js`: `logActivity()`, `ACTIVITY_META`, `timeAgo()`. `firestore.rules`: new `activity/{activityId}` rule (read: class members + admin; create: class members + admin, must self-attest `actorUid`; update: nobody; delete: admin only).
+This is a **scoped-down version** of the bigger "Activity Center" from the Milestone 2 brief — it's a log, not real-time messaging. The full **Class Group Chat** (live messages, typing indicators, replies, edit/delete own message, emoji) is still a separate, much bigger feature — same as noted in the "Pending" list below, worth confirming before starting since it needs its own Firestore collection design and real-time listeners.
+
+**3. Theme switch not reaching the sidebar/topbar — fixed**
+Root cause: `.sidebar` and `.topbar` in `dashboard.css` (shared across every app page) had two colors hardcoded as plain `rgba(11,18,21,...)` values instead of reading from `theme.css`'s custom properties — so switching to Light or Monochrome in Settings → Appearance re-skinned every card on the page except the nav, which stayed dark no matter what. Fix: added `--nav-surface` / `--nav-surface-soft` tokens to all three theme blocks in `theme.css` (dark/light/monochrome each get their own values), and pointed `.sidebar`, `.topbar`, and the school-select page's topbar at those instead of the old hardcoded colors.
+
+**4. Stray underlines removed**
+Several links (sidebar nav items, uploader thumbnail links, etc.) were showing a plain browser-default underline since nothing explicitly turned it off. Added one global rule to `theme.css`: `a { text-decoration: none; color: inherit; }`. Anywhere an underline is actually wanted (e.g. the small "forgot password"-style helper text), that page already sets `text-decoration: underline` on a specific class, which still wins by CSS specificity — nothing intentional was lost.
+
+**Files changed this round:** `firebase/firestore.rules`, `css/theme.css`, `css/dashboard.css`, `css/school-select.css`, `js/helpers.js`, `js/dashboard.js`, `dashboard.html`, plus 7 other pages' sidebars got the new Activity nav link (`subjects.html`, `myuploads.html`, `homework.html`, `leaderboard.html`, `profile.html`, `settings.html`, `search.html`). New files: `activity.html`, `js/activity.js`, `css/activity.css`.
+
+**Firestore Console step required:** yes — republish `firestore.rules` (subject delete rule changed, new `activity` collection rule added). No Storage rules change.
+
 

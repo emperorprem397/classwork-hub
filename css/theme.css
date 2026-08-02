@@ -32,6 +32,12 @@
   --shadow-glow: 0 0 0 1px var(--border), 0 20px 50px -20px rgba(34, 211, 238, 0.15);
 
   --blur: blur(18px);
+
+  /* Sidebar/topbar surface — was hardcoded dark rgba() before, which is why
+     switching to Light/Monochrome in Settings → Appearance left the nav
+     looking unchanged. Every theme block below now sets its own value. */
+  --nav-surface: rgba(11, 18, 21, 0.92);
+  --nav-surface-soft: rgba(13, 21, 24, 0.5);
 }
 
 /* ==========================================================
@@ -66,6 +72,9 @@
 
   --shadow-card: 0 24px 50px -28px rgba(15, 40, 45, 0.22);
   --shadow-glow: 0 0 0 1px var(--border), 0 20px 40px -22px rgba(8, 145, 178, 0.18);
+
+  --nav-surface: rgba(255, 255, 255, 0.92);
+  --nav-surface-soft: rgba(255, 255, 255, 0.75);
 }
 
 :root[data-theme="monochrome"] {
@@ -92,9 +101,19 @@
 
   --shadow-card: 0 20px 40px -26px rgba(17, 17, 18, 0.18);
   --shadow-glow: 0 0 0 1px var(--border), 0 16px 34px -20px rgba(17, 17, 18, 0.12);
+
+  --nav-surface: rgba(255, 255, 255, 0.94);
+  --nav-surface-soft: rgba(248, 248, 248, 0.8);
 }
 
 * { box-sizing: border-box; }
+
+/* Global link reset — several pages had stray browser-default underlines
+   on nav items, uploader links, etc. Anywhere an underline is actually
+   wanted (e.g. the "forgot password"-style helper links), that page's own
+   CSS sets text-decoration: underline on a specific class, which wins over
+   this plain-tag rule by specificity, so nothing intentional is lost. */
+a { text-decoration: none; color: inherit; }
 
 html, body {
   margin: 0;

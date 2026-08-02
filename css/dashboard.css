@@ -9,7 +9,7 @@ body { font-family: 'Inter', sans-serif; }
 .sidebar {
   width: 240px;
   flex-shrink: 0;
-  background: rgba(11, 18, 21, 0.92);
+  background: var(--nav-surface);
   border-right: 1px solid var(--border);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
@@ -129,7 +129,7 @@ body { font-family: 'Inter', sans-serif; }
   justify-content: space-between;
   align-items: center;
   padding: 1.1rem 1.8rem;
-  background: rgba(13, 21, 24, 0.5);
+  background: var(--nav-surface-soft);
   border-bottom: 1px solid var(--border);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);

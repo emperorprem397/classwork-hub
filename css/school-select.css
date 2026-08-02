@@ -10,7 +10,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 16px 28px;
-  background: rgba(13, 21, 24, 0.7);
+  background: var(--nav-surface-soft);
   border-bottom: 1px solid var(--border);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);

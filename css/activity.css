@@ -1,0 +1,36 @@
+.activity-list { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 0.85rem 1.1rem;
+  border-radius: var(--radius-md);
+}
+
+.activity-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--surface-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.activity-body { flex: 1; min-width: 0; }
+
+.activity-line {
+  font-size: 0.88rem;
+  color: var(--text-soft);
+  line-height: 1.5;
+}
+.activity-line b { color: var(--text); font-weight: 600; }
+
+.activity-time {
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  margin-top: 2px;
+}
