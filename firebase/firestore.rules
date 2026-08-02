@@ -54,7 +54,11 @@ service cloud.firestore {
         (request.auth.uid == uid &&
          request.resource.data.get('banned', false) == resource.data.get('banned', false))
       );
-      allow delete: if isAdmin();
+      // Self-delete needed for Settings → "Start fresh": a student can wipe
+      // their own profile doc to reset onboarding, XP, streak, school/class.
+      // ensureUserProfile() in auth.js recreates a brand-new doc (with
+      // onboarded: false) the next time this same account signs in.
+      allow delete: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
 
       // Personal upload history mirror — written alongside the real entry doc
       // in the same transaction, so a student's own "My Uploads" page doesn't
@@ -208,6 +212,17 @@ service cloud.firestore {
           }
         }
       }
+    }
+
+    // ============================================================
+    // adminMessages/{messageId}  <- Settings → About → "Contact admin".
+    // Any signed-in user can send one; only admin can read/manage them
+    // (they show up as notifications in the admin panel). The sender can't
+    // read them back, edit, or delete once sent — it's a one-way mailbox.
+    // ============================================================
+    match /adminMessages/{messageId} {
+      allow read, update, delete: if isAdmin();
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
     }
   }
 }

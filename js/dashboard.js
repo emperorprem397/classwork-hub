@@ -62,6 +62,7 @@ let editingSubjectName = null;
 
 let currentUser = null;
 let currentProfile = null;
+let isAdminUser = false; // true when this signed-in account has role: "admin" on their own users/{uid} doc
 let activeSubject = null; // { id, name, entry }
 let pendingFiles = [];
 let selectedType = null; // "classwork" | "homework" | null — fully optional
@@ -114,6 +115,7 @@ onAuthStateChanged(auth, async (user) => {
   const snap = await getDoc(doc(db, "users", user.uid));
   if (!snap.exists()) { window.location.href = "school-select.html"; return; }
   currentProfile = snap.data();
+  isAdminUser = currentProfile.role === "admin";
 
   if (currentProfile.banned === true) {
     await signOut(auth);
@@ -286,6 +288,7 @@ function openModal(subject, entry) {
             <div class="upload-group-head">
               <span class="upload-group-name">${escapeHtml(u.name || "Classmate")}</span>
               ${typeBadgeHtml(u.type)}
+              ${isAdminUser ? `<button class="upload-delete-btn" data-admin-delete="${escapeHtml(u.id || "")}" title="Delete this student's upload (admin)">🗑️ Delete</button>` : ""}
             </div>
             ${u.title ? `<div class="upload-group-title">"${escapeHtml(u.title)}"</div>` : ""}
             <div class="thumb-row">
@@ -294,6 +297,9 @@ function openModal(subject, entry) {
           </div>
         `).join("")}
       `;
+      modalExisting.querySelectorAll("[data-admin-delete]").forEach((btn) => {
+        btn.addEventListener("click", () => adminDeleteUploadRecord(subject.id, btn.dataset.adminDelete));
+      });
     } else {
       // Backward compatibility for entries created before type/title existed.
       const names = Object.values(entry.uploaderNames || {}).join(", ") || "classmates";
@@ -323,6 +329,48 @@ function closeModal() {
   selectedType = null;
 }
 modalClose.addEventListener("click", closeModal);
+
+// Admin-only: remove any student's upload record straight from the "Already
+// shared today" list, no need to go through their own My Uploads page.
+async function adminDeleteUploadRecord(subjectId, recordId) {
+  if (!confirm("Delete this student's upload? This can't be undone.")) return;
+  const { schoolId, classId } = currentProfile;
+  const entryRef = doc(db, "schools", schoolId, "classes", classId, "subjects", subjectId, "entries", TODAY);
+
+  try {
+    await runTransaction(db, async (tx) => {
+      const entrySnap = await tx.get(entryRef);
+      if (!entrySnap.exists()) return;
+      const entryData = entrySnap.data();
+      const remaining = (entryData.uploads || []).filter((u) => u.id !== recordId);
+      const remainingUids = [...new Set(remaining.map((u) => u.uid))];
+      const remainingNames = {};
+      remaining.forEach((u) => { remainingNames[u.uid] = u.name; });
+      const remainingPhotoURLs = remaining.flatMap((u) => u.photoURLs || []);
+      tx.update(entryRef, {
+        uploads: remaining,
+        uploadedBy: remainingUids,
+        uploaderNames: remainingNames,
+        photoURLs: remainingPhotoURLs,
+      });
+    });
+
+    logActivity(db, {
+      schoolId, classId,
+      uid: currentUser.uid,
+      name: currentUser.displayName || currentUser.email,
+      type: "upload_deleted",
+      subjectName: activeSubject?.name || subjectId,
+      detail: "(removed by admin)",
+    });
+
+    closeModal();
+    await loadSubjects();
+  } catch (err) {
+    console.error(err);
+    alert("Couldn't delete — check your connection and try again.");
+  }
+}
 modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
 
 // ---------- Add subject (self-service, no admin needed) ----------

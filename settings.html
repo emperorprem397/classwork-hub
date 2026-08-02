@@ -7,9 +7,10 @@
 <title>Settings — Classwork Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/theme.css?v=20260804">
-<link rel="stylesheet" href="css/dashboard.css?v=20260804">
-<link rel="stylesheet" href="css/settings.css?v=20260804">
+<link rel="stylesheet" href="css/theme.css?v=20260805">
+<link rel="stylesheet" href="css/dashboard.css?v=20260805">
+<link rel="stylesheet" href="css/settings.css?v=20260805">
+<link rel="stylesheet" href="css/welcome.css?v=20260805">
 </head>
 <body>
 
@@ -70,11 +71,28 @@
             <img id="settingsPhoto" class="settings-photo" src="" alt="" />
             <div>
               <div class="settings-photo-label">Profile photo</div>
-              <div class="settings-photo-sub">This is your Google account photo — it updates automatically if you change it on Google.</div>
+              <div class="settings-photo-sub">Google photo, a custom upload, or just your initials — your choice.</div>
             </div>
           </div>
+          <div class="avatar-option-row" style="margin-top:0.8rem;">
+            <button type="button" class="avatar-option" data-avatar-mode="google">
+              <img id="googlePhotoPreview" class="avatar-option-img" src="" alt="" />
+              <span>Google photo</span>
+            </button>
+            <button type="button" class="avatar-option" data-avatar-mode="upload">
+              <span class="avatar-option-icon">📷</span>
+              <span>Upload one</span>
+            </button>
+            <button type="button" class="avatar-option" data-avatar-mode="letter">
+              <span id="letterPreview" class="avatar-option-img avatar-letter-preview"></span>
+              <span>Just initials</span>
+            </button>
+          </div>
+          <input type="file" id="avatarFileInput" accept="image/*" hidden />
+          <div id="colorPickerRow" class="avatar-color-row" hidden></div>
+          <p id="avatarStatus" class="upload-status"></p>
 
-          <div class="field-group">
+          <div class="field-group" style="margin-top:1.2rem;">
             <label class="field-label" for="nameInput">Display name</label>
             <input type="text" id="nameInput" class="text-input" maxlength="40" placeholder="Your name" />
           </div>
@@ -97,6 +115,12 @@
           <h2 class="settings-card-title">Account</h2>
           <p class="settings-card-sub" id="accountEmail">—</p>
           <button id="signOutBtn2" class="btn btn-ghost btn-sm">Sign out</button>
+        </section>
+
+        <section class="glass settings-card settings-danger-zone">
+          <h2 class="settings-card-title" style="color:var(--red);">Danger zone</h2>
+          <p class="settings-card-sub">Start completely fresh — resets your Classwork Hub profile (name, photo, school, class, XP, streak) back to zero, and you'll go through profile setup again next time you sign in. This does <b>not</b> delete your Google account.</p>
+          <button id="startFreshBtn" class="btn btn-red btn-sm">Start fresh (reset my account)</button>
         </section>
 
       </div>
@@ -176,6 +200,24 @@
           <p class="settings-card-sub">Share. Learn. Stay Ahead.</p>
           <p class="about-body">Classwork Hub is a place for your class to share the day's notebook work, so nobody falls behind just because they were absent. Built by students, for students.</p>
         </section>
+
+        <section class="glass settings-card" style="max-width:560px;">
+          <h2 class="settings-card-title">Contact admin</h2>
+          <p class="settings-card-sub">Can't find your school, hit a bug, or just have feedback? Reach out any of these ways.</p>
+
+          <a id="whatsappContactLink" class="whatsapp-contact-btn" href="#" target="_blank" rel="noopener">
+            <span class="whatsapp-icon">💬</span>
+            <span>Message on WhatsApp</span>
+          </a>
+          <a id="emailContactLink" class="btn btn-ghost btn-sm" href="#" style="margin-top:0.6rem; display:inline-block;">✉️ Email emperorprem397@gmail.com</a>
+
+          <div class="field-group" style="margin-top:1.2rem;">
+            <label class="field-label" for="adminMsgInput">Or send a message directly — it'll show up in the admin panel</label>
+            <textarea id="adminMsgInput" class="text-input" rows="4" maxlength="1000" placeholder="What's up?"></textarea>
+          </div>
+          <button id="adminMsgSendBtn" class="btn btn-primary btn-sm">Send message</button>
+          <p id="adminMsgStatus" class="upload-status"></p>
+        </section>
       </div>
 
     </div>
@@ -183,8 +225,8 @@
 
 </div>
 
-<script type="module" src="js/firebase-config.js?v=20260804"></script>
-<script type="module" src="js/settings.js?v=20260804"></script>
-<script src="js/nav.js?v=20260804"></script>
+<script type="module" src="js/firebase-config.js?v=20260805"></script>
+<script type="module" src="js/settings.js?v=20260805"></script>
+<script src="js/nav.js?v=20260805"></script>
 </body>
 </html>

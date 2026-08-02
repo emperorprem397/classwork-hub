@@ -84,6 +84,13 @@
 .chat-msg.mine .chat-bubble-col { text-align: right; }
 
 .chat-name { font-size: 0.72rem; color: var(--text-faint); margin-bottom: 2px; }
+.admin-tag {
+  font-size: 0.62rem;
+  color: var(--red);
+  border: 1px solid rgba(242,109,109,0.4);
+  border-radius: 999px;
+  padding: 0 6px;
+}
 
 .chat-bubble {
   display: inline-block;

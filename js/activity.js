@@ -30,6 +30,7 @@ signOutBtn.addEventListener("click", () => signOut(auth));
 
 let currentUser = null;
 let currentProfile = null;
+let isAdminUser = false;
 let chatUnsub = null;
 let typingUnsub = null;
 let typingUsers = {}; // uid -> { name, tsMillis }
@@ -46,6 +47,7 @@ onAuthStateChanged(auth, async (user) => {
   const snap = await getDoc(doc(db, "users", user.uid));
   if (!snap.exists()) { window.location.href = "school-select.html"; return; }
   currentProfile = snap.data();
+  isAdminUser = currentProfile.role === "admin";
 
   if (!currentProfile.schoolId || !currentProfile.classId) {
     window.location.href = "school-select.html";
@@ -162,7 +164,25 @@ function startChatListener() {
         return;
       }
 
-      snap.docs.forEach((d) => chatMessagesEl.appendChild(renderChatMessage(d.id, d.data())));
+      // Belt-and-suspenders: even once Firestore's own TTL policy is enabled
+      // (see PROJECT_PROGRESS.md — that's a one-time Console step, not
+      // instant), TTL deletion can lag by a while, so also hide anything
+      // past its 48-hour mark on the client immediately.
+      const now = Date.now();
+      const visibleDocs = snap.docs.filter((d) => {
+        const expireAt = d.data().expireAt;
+        return !(expireAt?.toMillis && expireAt.toMillis() < now);
+      });
+
+      if (!visibleDocs.length) {
+        const empty = document.createElement("p");
+        empty.className = "chat-empty loading-msg";
+        empty.textContent = "No messages yet — say hi to your class.";
+        chatMessagesEl.appendChild(empty);
+        return;
+      }
+
+      visibleDocs.forEach((d) => chatMessagesEl.appendChild(renderChatMessage(d.id, d.data())));
 
       if (wasNearBottom) chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
     },
@@ -176,6 +196,7 @@ function startChatListener() {
 
 function renderChatMessage(id, m) {
   const mine = m.uid === currentUser.uid;
+  const canModerate = mine || isAdminUser; // admin can edit/delete anyone's message
   const wrap = document.createElement("div");
   wrap.className = `chat-msg${mine ? " mine" : ""}`;
 
@@ -184,11 +205,11 @@ function renderChatMessage(id, m) {
   wrap.innerHTML = `
     <img class="chat-avatar" src="${m.photoURL || ""}" alt="" />
     <div class="chat-bubble-col">
-      ${!mine ? `<div class="chat-name">${escapeHtml(m.name || "Classmate")}</div>` : ""}
+      ${!mine ? `<div class="chat-name">${escapeHtml(m.name || "Classmate")}${isAdminUser && !mine ? ` <span class="admin-tag">admin view</span>` : ""}</div>` : ""}
       <div class="chat-bubble" data-text-el></div>
       <div class="chat-meta-row">
         <span>${when}${m.editedAt ? " · edited" : ""}</span>
-        ${mine ? `
+        ${canModerate ? `
           <button class="chat-msg-action" data-action="edit">Edit</button>
           <button class="chat-msg-action" data-action="delete">Delete</button>
         ` : ""}
@@ -199,7 +220,7 @@ function renderChatMessage(id, m) {
   const textEl = wrap.querySelector("[data-text-el]");
   textEl.textContent = m.text || ""; // textContent, not innerHTML — no HTML injection risk from message text
 
-  if (mine) {
+  if (canModerate) {
     wrap.querySelector('[data-action="delete"]').addEventListener("click", () => deleteMessage(id));
     wrap.querySelector('[data-action="edit"]').addEventListener("click", () => beginEditMessage(id, wrap, m.text || ""));
   }
@@ -263,6 +284,11 @@ async function sendMessage() {
       text: text.slice(0, 2000),
       createdAt: serverTimestamp(),
       editedAt: null,
+      // Auto-expires 48 hours from now. Firestore's own TTL policy (a
+      // one-time setup step in the Cloud Console, on this exact field name)
+      // actually deletes the doc in the background; the client-side filter
+      // above hides it immediately either way, so nobody waits on that.
+      expireAt: Timestamp.fromMillis(Date.now() + 48 * 60 * 60 * 1000),
     });
     // Clear our own typing flag immediately after sending, rather than
     // waiting for it to age out — feels snappier to whoever's watching it.

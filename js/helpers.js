@@ -92,6 +92,21 @@ export const TYPE_META = {
   homework:  { icon: "📝", label: "Homework" },
 };
 
+export const AVATAR_COLORS = ["#0e7490", "#7c3aed", "#dc2626", "#ea580c", "#16a34a", "#0891b2", "#db2777", "#4f46e5"];
+
+// Generates a small inline SVG (as a data: URI, no upload needed) so
+// someone who doesn't want their Google photo — or any photo at all —
+// still gets a proper avatar, the same idea as Google's own colored-letter
+// fallback avatars.
+export function generateLetterAvatarDataUri(letter, colorHex) {
+  const ch = (letter || "?").trim().charAt(0).toUpperCase() || "?";
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128">` +
+    `<rect width="128" height="128" rx="64" fill="${colorHex}"/>` +
+    `<text x="50%" y="52%" dy=".35em" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="56" font-weight="600" fill="#ffffff">${ch}</text>` +
+    `</svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
 export function typeBadgeHtml(type) {
   if (!type || !TYPE_META[type]) return "";
   const t = TYPE_META[type];

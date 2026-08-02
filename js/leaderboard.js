@@ -47,9 +47,11 @@ onAuthStateChanged(auth, async (user) => {
 
     // Every enrolled classmate shows up, even with 0 XP and zero uploads —
     // they just sort to the bottom. Banned accounts are excluded entirely.
+    // Admin accounts are excluded too — admin isn't a student and
+    // shouldn't be ranked, even if they've joined a class to moderate it.
     const students = results.docs
       .map((d) => ({ id: d.id, ...d.data() }))
-      .filter((d) => d.banned !== true)
+      .filter((d) => d.banned !== true && d.role !== "admin")
       .sort((a, b) => (b.xp ?? 0) - (a.xp ?? 0));
 
     if (students.length === 0) { emptyState.hidden = false; return; }

@@ -20,6 +20,7 @@
   --font:'Inter',sans-serif;--font-h:'Zilla Slab',serif;
   --sh:0 2px 14px rgba(0,0,0,.35);--shl:0 20px 50px -20px rgba(34,211,238,.15), 0 0 0 1px var(--rule);
   --blur:blur(18px);
+  --nav-surface: rgba(13, 21, 24, 0.7);
 }
 /* Same three Appearance options as the student-facing Settings page — kept
    as a separate token set (--paper-bg/--ink/--rule/etc.) since this file
@@ -35,6 +36,7 @@
   --cyan:#0891b2;--cyan-bright:#0e7490;--cyan-dim:#0e7490;--cyan2:rgba(8,145,178,.12);
   --on-accent:#ffffff;
   --sh:0 2px 14px rgba(15,40,45,.12);--shl:0 20px 40px -22px rgba(8,145,178,.18), 0 0 0 1px var(--rule);
+  --nav-surface: rgba(255, 255, 255, 0.88);
 }
 :root[data-theme="monochrome"]{
   --paper-bg:#ffffff;--paper-card:rgba(246,246,247,.9);--paper2:rgba(230,230,231,.92);
@@ -46,6 +48,7 @@
   --cyan:#111112;--cyan-bright:#2b2b2e;--cyan-dim:#3a3a3d;--cyan2:rgba(17,17,18,.08);
   --on-accent:#ffffff;
   --sh:0 2px 14px rgba(17,17,18,.1);--shl:0 16px 34px -20px rgba(17,17,18,.14), 0 0 0 1px var(--rule);
+  --nav-surface: rgba(255, 255, 255, 0.92);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{
@@ -71,7 +74,7 @@ body{
 
 /* ── LAYOUT ── */
 .dash{display:none;flex-direction:row;min-height:100vh}
-.sidebar{width:220px;flex-shrink:0;background:rgba(13,21,24,.7);border-right:1px solid var(--rule);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.sidebar{width:220px;flex-shrink:0;background:var(--nav-surface);border-right:1px solid var(--rule);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
 .sb-logo{padding:1.3rem 1.1rem 1rem;border-bottom:1px solid var(--rule);font-family:var(--font-h);font-size:1.15rem;font-weight:700;color:var(--ink)}
 .sb-nav{padding:.8rem 0;flex:1}
 .sb-item{display:flex;align-items:center;gap:.65rem;padding:.6rem 1.1rem;font-size:.85rem;font-weight:500;color:var(--ink-soft);cursor:pointer;border-left:3px solid transparent}
@@ -84,7 +87,7 @@ body{
 .btn-logout:hover{background:var(--red);color:#fff}
 
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
-.topbar{background:rgba(13,21,24,.7);border-bottom:1px solid var(--rule);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);padding:1rem 1.6rem;position:sticky;top:0;z-index:5}
+.topbar{background:var(--nav-surface);border-bottom:1px solid var(--rule);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);padding:1rem 1.6rem;position:sticky;top:0;z-index:5}
 .page-title{font-family:var(--font-h);font-size:1.2rem;font-weight:600;color:var(--ink)}
 .content{padding:1.5rem;flex:1}
 
@@ -184,6 +187,7 @@ select option{background:#0d1518;color:var(--ink)}
       <div class="sb-item" data-panel="schools">🏫 All Schools</div>
       <div class="sb-item" data-panel="users">👥 Users</div>
       <div class="sb-item" data-panel="subjects">📚 Subjects</div>
+      <div class="sb-item" data-panel="messages">✉️ Messages <span class="sb-badge" id="sbMessages" hidden>0</span></div>
       <div class="sb-item" data-panel="appearance">🎨 Appearance</div>
       <div class="sb-item" data-panel="logs">📝 Activity Log</div>
     </div>
@@ -263,6 +267,13 @@ select option{background:#0d1518;color:var(--ink)}
           </table>
         </div>
         <p class="hint" id="subjectsHint">Pick a school and class above to view or add its subjects.</p>
+      </div>
+
+      <!-- MESSAGES -->
+      <div class="panel" id="panel-messages">
+        <div class="sec-title">Messages from users</div>
+        <p class="hint" style="margin-top:-.6rem;margin-bottom:1rem">Sent from Settings → About → "Contact admin" on the main site.</p>
+        <div class="table-wrap" id="messagesList"><p class="loading-msg">Loading…</p></div>
       </div>
 
       <!-- APPEARANCE -->
@@ -445,14 +456,66 @@ function switchPanel(name){
   document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
   document.getElementById("panel-" + name).classList.add("active");
   document.querySelectorAll(".sb-item").forEach(i => i.classList.toggle("active", i.dataset.panel === name));
-  const titles = { dashboard:"Dashboard", pending:"Pending Schools", schools:"All Schools", users:"Users", subjects:"Subjects", appearance:"Appearance", logs:"Activity Log" };
+  const titles = { dashboard:"Dashboard", pending:"Pending Schools", schools:"All Schools", users:"Users", subjects:"Subjects", messages:"Messages", appearance:"Appearance", logs:"Activity Log" };
   document.getElementById("pageTitle").textContent = titles[name] || name;
   if (name === "subjects" && subjSchoolSelect.options.length <= 1) loadSchoolsForSubjects();
+  if (name === "messages") loadAdminMessages();
 }
 
 /* ── LOAD DATA ── */
 async function loadAll(){
-  await Promise.all([loadPending(), loadApprovedSchools(), loadUsers()]);
+  await Promise.all([loadPending(), loadApprovedSchools(), loadUsers(), loadUnreadMessageCount()]);
+}
+
+async function loadUnreadMessageCount(){
+  const badge = document.getElementById("sbMessages");
+  try {
+    const snap = await db.collection("adminMessages").where("read", "==", false).get();
+    if (snap.size > 0) { badge.textContent = snap.size; badge.hidden = false; }
+    else badge.hidden = true;
+  } catch (e) { console.error("Couldn't load unread message count:", e); }
+}
+
+async function loadAdminMessages(){
+  const list = document.getElementById("messagesList");
+  list.innerHTML = '<p class="loading-msg">Loading…</p>';
+  try {
+    const snap = await db.collection("adminMessages").orderBy("createdAt", "desc").limit(100).get();
+    if (snap.empty) { list.innerHTML = '<p class="loading-msg">No messages yet.</p>'; return; }
+
+    list.innerHTML = snap.docs.map(docSnap => {
+      const m = docSnap.data();
+      const when = m.createdAt?.toDate ? m.createdAt.toDate().toLocaleString() : "";
+      return `
+        <div class="log-item" style="flex-direction:column;align-items:stretch;gap:.35rem;${m.read ? "opacity:.6" : ""}">
+          <div style="display:flex;justify-content:space-between;gap:.6rem;">
+            <b>${escapeHtmlAdmin(m.name || "Someone")}</b>
+            <span class="log-time">${escapeHtmlAdmin(when)}</span>
+          </div>
+          <div style="font-size:.75rem;color:var(--ink-soft)">${escapeHtmlAdmin(m.email || "")}${m.schoolId ? ` · ${escapeHtmlAdmin(m.schoolId)}/${escapeHtmlAdmin(m.classId || "")}` : ""}</div>
+          <div>${escapeHtmlAdmin(m.text || "")}</div>
+          ${!m.read ? `<button class="btn btn-cyan" style="align-self:flex-start;" data-mark-read="${docSnap.id}">Mark read</button>` : ""}
+        </div>
+      `;
+    }).join("");
+
+    list.querySelectorAll("[data-mark-read]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        await db.collection("adminMessages").doc(btn.dataset.markRead).update({ read: true });
+        loadAdminMessages();
+        loadUnreadMessageCount();
+      });
+    });
+  } catch (e) {
+    console.error(e);
+    list.innerHTML = '<p class="loading-msg">Couldn\'t load messages — check your connection.</p>';
+  }
+}
+
+function escapeHtmlAdmin(str) {
+  const div = document.createElement("div");
+  div.textContent = str ?? "";
+  return div.innerHTML;
 }
 
 async function loadPending(){

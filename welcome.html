@@ -7,10 +7,10 @@
 <title>Welcome — Classwork Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/theme.css?v=20260804">
-<link rel="stylesheet" href="css/school-select.css?v=20260804">
-<link rel="stylesheet" href="css/settings.css?v=20260804">
-<link rel="stylesheet" href="css/welcome.css?v=20260804">
+<link rel="stylesheet" href="css/theme.css?v=20260805">
+<link rel="stylesheet" href="css/school-select.css?v=20260805">
+<link rel="stylesheet" href="css/settings.css?v=20260805">
+<link rel="stylesheet" href="css/welcome.css?v=20260805">
 </head>
 <body>
 
@@ -31,7 +31,7 @@
       <span class="wizard-dot" data-dot="3"></span>
     </div>
 
-    <!-- STEP 1: Name -->
+    <!-- STEP 1: Name + photo -->
     <section id="step-name" class="notebook-card step wizard-step">
       <h1>Welcome 👋</h1>
       <p class="sub">Let's set up your profile — this only takes a few seconds, and every step here is optional.</p>
@@ -39,6 +39,27 @@
       <label for="nameInput" class="field-label" style="display:block; margin-top:1.2rem;">What should we call you?</label>
       <input type="text" id="nameInput" class="ruled-input" maxlength="60" />
       <p class="wizard-hint">Defaults to your Google name — change it any time later from Settings.</p>
+
+      <label class="field-label" style="display:block; margin-top:1.4rem;">Profile photo</label>
+      <div class="avatar-option-row">
+        <button type="button" class="avatar-option active" data-avatar-mode="google">
+          <img id="googlePhotoPreview" class="avatar-option-img" src="" alt="" />
+          <span>Google photo</span>
+        </button>
+        <button type="button" class="avatar-option" data-avatar-mode="upload">
+          <span class="avatar-option-icon">📷</span>
+          <span>Upload one</span>
+        </button>
+        <button type="button" class="avatar-option" data-avatar-mode="letter">
+          <span id="letterPreview" class="avatar-option-img avatar-letter-preview"></span>
+          <span>Just initials</span>
+        </button>
+      </div>
+
+      <input type="file" id="avatarFileInput" accept="image/*" hidden />
+      <p id="avatarUploadStatus" class="wizard-hint"></p>
+
+      <div id="colorPickerRow" class="avatar-color-row" hidden></div>
 
       <div class="btn-row wizard-btn-row">
         <button id="skipNameBtn" class="text-btn" type="button">Skip</button>
@@ -90,7 +111,7 @@
 
   </main>
 
-<script type="module" src="js/firebase-config.js?v=20260804"></script>
-<script type="module" src="js/welcome.js?v=20260804"></script>
+<script type="module" src="js/firebase-config.js?v=20260805"></script>
+<script type="module" src="js/welcome.js?v=20260805"></script>
 </body>
 </html>

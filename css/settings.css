@@ -137,3 +137,27 @@
 .privacy-list { margin: 0 0 1rem; padding-left: 1.1rem; color: var(--text-soft); font-size: 0.86rem; line-height: 1.65; }
 .privacy-list li { margin-bottom: 6px; }
 .about-body { font-size: 0.88rem; color: var(--text-soft); line-height: 1.6; }
+
+/* ---------- Contact admin ---------- */
+.whatsapp-contact-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #25d366, #128c7e);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.88rem;
+  padding: 0.65rem 1.2rem;
+  border-radius: 999px;
+  text-decoration: none;
+  box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.55);
+  transition: box-shadow 0.25s ease, transform 0.15s ease;
+}
+.whatsapp-contact-btn:hover {
+  box-shadow: 0 0 22px 4px rgba(37, 211, 102, 0.55);
+  transform: translateY(-1px);
+}
+.whatsapp-icon { font-size: 1.1rem; }
+
+/* ---------- Danger zone ---------- */
+.settings-danger-zone { border-color: rgba(242, 109, 109, 0.35); }

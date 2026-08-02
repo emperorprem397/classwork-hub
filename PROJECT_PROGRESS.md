@@ -232,4 +232,28 @@ Several links (sidebar nav items, uploader thumbnail links, etc.) were showing a
 
 **Firestore Console step required:** yes — republish `firestore.rules` again (new `messages` and `typing` collection rules). No Storage rules change.
 
+## ✅ Round 15 — real admin superpowers, account reset, avatar picker, Contact Admin, chat auto-expiry, admin theme fix
+
+**Scope note up front:** this request had ~12 distinct asks. The horizontal top navbar redesign, unread-message/upload notification badges on that navbar, per-image delete/replace within a single upload (vs. deleting the whole submission), and a full admin cross-class browser (join-free access to *any* class) are each big enough to deserve their own round — **not built yet, queued next.** Everything below **is** done:
+
+**1. Admin theme bug — same root cause as the student-facing fix a few rounds back:** `admin/index.html`'s embedded `.sidebar`/`.topbar` CSS had the same hardcoded dark color instead of a theme variable. Added a `--nav-surface` token to all three of the admin panel's theme blocks (it has its own self-contained `:root[data-theme]` blocks, separate from `css/theme.css`) — Light/Monochrome now actually restyle the admin nav too.
+
+**2. Admin superpowers, main website (not just admin panel) — for accounts with `role: "admin"` on their own profile doc:**
+   - Excluded from the Leaderboard entirely (`js/leaderboard.js`).
+   - Can delete *any* student's upload straight from the Dashboard's "Already shared today" list (not just their own, via My Uploads) — new 🗑️ button per upload group, admin-only.
+   - Can edit or delete *anyone's* Class Chat message, not just their own — shows a small "admin view" tag next to a moderated name.
+   - **Honest limit:** this all works within a class the admin has actually joined (same as any student, via school-select) — a true "browse *any* class without joining it" switcher is the bigger deferred piece above.
+
+**3. Contact Admin** — Settings → About: a WhatsApp button (glowing hover, deep-links to `wa.me/917568521210` with a pre-filled message), an email link to emperorprem397@gmail.com, and a direct message box that writes to a new `adminMessages` collection. Admin panel gets a new **Messages** tab (with an unread-count badge in the sidebar) to read and mark them as handled.
+
+**4. Start Fresh (account reset)** — Settings → Danger Zone. Resets your Classwork Hub profile back to zero (name, photo, school, class, XP, streak — `onboarded` flips back to `false`) by deleting your own `users/{uid}` doc; signs you out; next sign-in with the same Google account creates a brand-new profile and routes you straight back through the welcome wizard. Asks first whether to also strip your uploaded work out of the class entirely, or leave it visible to classmates (your private "My Uploads" mirror is always cleared either way — that's inherently part of "your account"). **This does not delete your actual Google account** — only your Classwork Hub data — and it doesn't remove the actual image files from Cloudinary (no delete API available client-side without exposing a secret key), just their listing in Firestore.
+
+**5. Profile photo picker — Google photo / custom upload / colored-initials —** available both during the welcome wizard and any time after from Settings → Account. "Initials" mode generates a small inline SVG avatar (no upload needed) in one of 8 colors, the same idea as Google's own fallback avatars.
+
+**6. Class Chat messages now auto-expire after 48 hours** — every message gets an `expireAt` field set at send time; the chat listener hides anything past that mark immediately (belt-and-suspenders) regardless of whether the backend has actually deleted it yet. **Manual step required for real deletion, not just hiding:** Firestore's TTL policies aren't something `firestore.rules` can configure — they're a separate one-time setup step in the Google Cloud Console: go to `console.cloud.google.com/firestore/ttl` (or Firebase Console → Firestore Database → the "TTL" area), add a policy on the `expireAt` field for the `messages` collection group. Google's own docs say actual deletion typically happens within 24 hours of expiry (not instant) — but since the app already hides expired messages on the client the moment they pass 48h, nobody actually sees a stale message either way.
+
+**Files changed this round:** `admin/index.html` (theme fix + Messages tab), `js/leaderboard.js` (exclude admin), `js/dashboard.js` (admin delete-any-upload), `js/activity.js` (admin chat moderation + 48h expiry), `js/settings.js` (rewritten — avatar picker, Contact Admin, Start Fresh), `js/welcome.js` + `welcome.html` (avatar picker added), `js/helpers.js` (`generateLetterAvatarDataUri`, `AVATAR_COLORS`), `settings.html` + `css/settings.css` (avatar picker, Danger Zone, Contact Admin UI), `firebase/firestore.rules` (self-delete on `users/{uid}`, new `adminMessages` collection). Cache-bust bumped to `20260805` on every page.
+
+**Firestore Console step required:** yes — republish `firestore.rules` (self-delete + `adminMessages` rules). **Plus the new one-time TTL setup** described above for real (not just client-hidden) 48-hour chat deletion. No Storage rules change.
+
 
