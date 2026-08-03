@@ -106,6 +106,41 @@
   --nav-surface-soft: rgba(248, 248, 248, 0.8);
 }
 
+/* Premium Showcase — warm dark, amber glow, rounded pop-up card feel
+   (per the furniture-showcase reference image). Same token set as every
+   other theme, so anything already reading these variables re-skins for
+   free; the dashboard subject cards additionally get a dedicated
+   [data-theme="premium"] treatment in dashboard.css for the glowing
+   rounded pop-up look specifically. */
+:root[data-theme="premium"] {
+  --bg: #1c1815;
+  --bg-glow-1: #3a2a1a;
+  --bg-glow-2: #24201c;
+  --surface: rgba(43, 36, 30, 0.72);
+  --surface-solid: #2b241f;
+  --surface-hover: rgba(60, 49, 40, 0.85);
+  --border: rgba(242, 163, 95, 0.2);
+  --border-strong: rgba(242, 163, 95, 0.45);
+
+  --text: #f6efe4;
+  --text-soft: #cbbba7;
+  --text-faint: #8d7c6c;
+
+  --cyan: #e8823c;
+  --cyan-bright: #f2a35f;
+  --cyan-dim: #b9631f;
+  --gold: #f5c451;
+  --red: #e6584f;
+  --green: #6fbf73;
+  --on-accent: #201409;
+
+  --shadow-card: 0 28px 60px -22px rgba(0, 0, 0, 0.55);
+  --shadow-glow: 0 0 0 1px var(--border), 0 22px 50px -18px rgba(232, 130, 60, 0.32);
+
+  --nav-surface: rgba(28, 24, 21, 0.92);
+  --nav-surface-soft: rgba(30, 26, 22, 0.65);
+}
+
 * { box-sizing: border-box; }
 
 /* Global link reset — several pages had stray browser-default underlines

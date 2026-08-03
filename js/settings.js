@@ -234,18 +234,36 @@ adminMsgSendBtn.addEventListener("click", async () => {
 });
 
 // ---------- Danger zone: start fresh ----------
-startFreshBtn.addEventListener("click", async () => {
-  const proceed = confirm(
-    "Start fresh? This resets your Classwork Hub profile — name, photo, school, class, XP and streak — back to zero. You'll set up your profile again next time you sign in. This can't be undone. Continue?"
-  );
-  if (!proceed) return;
+// A single custom modal replaces the old back-to-back confirm() popups —
+// those looked identical, which is exactly why it was easy to click
+// through OK/OK without registering either one. This modal keeps the
+// "are you sure" headline and the "what about my uploads" choice visually
+// distinct (see reset-modal styles in settings.css).
+const resetModal          = document.getElementById("resetModal");
+const resetModalClose     = document.getElementById("resetModalClose");
+const resetCancelBtn      = document.getElementById("resetCancelBtn");
+const resetConfirmBtn     = document.getElementById("resetConfirmBtn");
+const resetDeleteWorkCheck = document.getElementById("resetDeleteWorkCheck");
 
-  const deleteWork = confirm(
-    "Also delete the work you've uploaded from the class? Click OK to remove it everywhere. Click Cancel to keep it visible to your classmates — it'll just disappear from your own My Uploads."
-  );
+function openResetModal() {
+  resetDeleteWorkCheck.checked = false; // default: keep work visible to classmates
+  resetModal.hidden = false;
+}
+function closeResetModal() {
+  resetModal.hidden = true;
+}
 
+startFreshBtn.addEventListener("click", openResetModal);
+resetModalClose.addEventListener("click", closeResetModal);
+resetCancelBtn.addEventListener("click", closeResetModal);
+resetModal.addEventListener("click", (e) => { if (e.target === resetModal) closeResetModal(); });
+
+resetConfirmBtn.addEventListener("click", async () => {
+  const deleteWork = resetDeleteWorkCheck.checked;
+
+  resetConfirmBtn.disabled = true;
+  resetConfirmBtn.textContent = "Resetting…";
   startFreshBtn.disabled = true;
-  startFreshBtn.textContent = "Resetting…";
 
   try {
     await resetAccount(deleteWork);
@@ -254,8 +272,10 @@ startFreshBtn.addEventListener("click", async () => {
   } catch (err) {
     console.error(err);
     alert("Something went wrong resetting your account — check your connection and try again.");
+    resetConfirmBtn.disabled = false;
+    resetConfirmBtn.textContent = "Yes, reset my account";
     startFreshBtn.disabled = false;
-    startFreshBtn.textContent = "Start fresh (reset my account)";
+    closeResetModal();
   }
 });
 

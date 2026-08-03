@@ -96,6 +96,7 @@
 .theme-preview-dark  { background: linear-gradient(135deg, #05090c, #0a2a30 60%, #22d3ee 130%); }
 .theme-preview-light { background: linear-gradient(135deg, #f3f6f7, #e3f2f4 60%, #0891b2 130%); }
 .theme-preview-mono  { background: linear-gradient(135deg, #ffffff, #f2f2f2 60%, #111112 130%); }
+.theme-preview-premium { background: linear-gradient(135deg, #1c1815, #3a2a1a 60%, #f2a35f 130%); }
 .theme-swatch-label { font-size: 0.82rem; font-weight: 600; color: var(--text); text-align: left; }
 .theme-swatch-label small { font-weight: 400; color: var(--text-faint); }
 
@@ -161,3 +162,61 @@
 
 /* ---------- Danger zone ---------- */
 .settings-danger-zone { border-color: rgba(242, 109, 109, 0.35); }
+
+/* ---------- Reset-account confirmation modal ----------
+   Two visually distinct zones on purpose: the top (icon + big glowing
+   headline + small detail) is the irreversible "are you sure" part; the
+   boxed section below is a separate, smaller decision about uploaded
+   work. Different sizes/weights/backgrounds so they can't be mistaken
+   for the same message the way two identical confirm() popups could. */
+.reset-modal { max-width: 420px; text-align: center; }
+.reset-modal-icon { font-size: 2.2rem; margin-bottom: 4px; }
+.reset-modal-title {
+  font-family: 'Zilla Slab', serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--red);
+  text-shadow: 0 0 22px rgba(242, 109, 109, 0.45);
+  margin: 0 0 10px;
+}
+.reset-modal-detail {
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  line-height: 1.5;
+  margin: 0 0 18px;
+}
+.reset-modal-choice {
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.9rem 1rem;
+  text-align: left;
+  margin-bottom: 1.2rem;
+}
+.reset-choice-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.86rem;
+  color: var(--text);
+  cursor: pointer;
+}
+.reset-choice-label input[type="checkbox"] {
+  margin-top: 3px;
+  width: 16px; height: 16px;
+  accent-color: var(--red);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.reset-choice-note {
+  font-size: 0.74rem;
+  color: var(--text-faint);
+  margin: 8px 0 0 26px;
+  line-height: 1.4;
+}
+.reset-modal-actions { display: flex; gap: 10px; }
+.reset-confirm-btn {
+  box-shadow: 0 0 0 0 rgba(242, 109, 109, 0.5);
+  transition: box-shadow 0.25s ease, transform 0.1s ease, background 0.15s ease;
+}
+.reset-confirm-btn:hover { box-shadow: 0 0 20px 2px rgba(242, 109, 109, 0.5); }

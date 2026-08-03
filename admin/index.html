@@ -50,6 +50,18 @@
   --sh:0 2px 14px rgba(17,17,18,.1);--shl:0 16px 34px -20px rgba(17,17,18,.14), 0 0 0 1px var(--rule);
   --nav-surface: rgba(255, 255, 255, 0.92);
 }
+:root[data-theme="premium"]{
+  --paper-bg:#1c1815;--paper-card:rgba(43,36,30,.75);--paper2:rgba(60,49,40,.85);
+  --bg-glow-1:#3a2a1a;--bg-glow-2:#24201c;
+  --ink:#f6efe4;--ink-soft:#cbbba7;--rule:rgba(242,163,95,.2);
+  --red:#e6584f;--red2:rgba(230,88,79,.14);
+  --gold:#f5c451;--gold2:rgba(245,196,81,.14);
+  --green:#6fbf73;--green2:rgba(111,191,115,.12);
+  --cyan:#e8823c;--cyan-bright:#f2a35f;--cyan-dim:#b9631f;--cyan2:rgba(232,130,60,.14);
+  --on-accent:#201409;
+  --sh:0 2px 14px rgba(0,0,0,.4);--shl:0 22px 50px -18px rgba(232,130,60,.32), 0 0 0 1px var(--rule);
+  --nav-surface: rgba(28, 24, 21, 0.92);
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:var(--font);color:var(--ink);min-height:100vh;
@@ -171,6 +183,7 @@ select option{background:#0d1518;color:var(--ink)}
 .theme-preview-dark{background:linear-gradient(135deg,#05090c,#0a2a30 60%,#22d3ee 130%)}
 .theme-preview-light{background:linear-gradient(135deg,#f3f6f7,#e3f2f4 60%,#0891b2 130%)}
 .theme-preview-mono{background:linear-gradient(135deg,#ffffff,#f2f2f2 60%,#111112 130%)}
+.theme-preview-premium{background:linear-gradient(135deg,#1c1815,#3a2a1a 60%,#f2a35f 130%)}
 .theme-swatch-label{font-size:.82rem;font-weight:600;color:var(--ink);text-align:left}
 .theme-swatch-label small{font-weight:400;color:var(--ink-soft)}
 </style>
@@ -334,6 +347,10 @@ select option{background:#0d1518;color:var(--ink)}
           <button class="theme-swatch" data-theme-choice="monochrome">
             <span class="theme-swatch-preview theme-preview-mono"></span>
             <span class="theme-swatch-label">Monochrome</span>
+          </button>
+          <button class="theme-swatch" data-theme-choice="premium">
+            <span class="theme-swatch-preview theme-preview-premium"></span>
+            <span class="theme-swatch-label">Premium Showcase<br><small>Glowing rounded cards</small></span>
           </button>
         </div>
       </div>

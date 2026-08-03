@@ -68,17 +68,25 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // ---------- Tab switching ----------
+function switchToTab(tab) {
+  const btn = document.querySelector(`.activity-tab[data-tab="${tab}"]`);
+  if (!btn) return;
+  tabButtons.forEach((b) => b.classList.toggle("active", b === btn));
+  Object.entries(panels).forEach(([key, el]) => el.classList.toggle("active", key === tab));
+  if (tab === "chat") {
+    chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+    chatInput.focus();
+  }
+}
 tabButtons.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const tab = btn.dataset.tab;
-    tabButtons.forEach((b) => b.classList.toggle("active", b === btn));
-    Object.entries(panels).forEach(([key, el]) => el.classList.toggle("active", key === tab));
-    if (tab === "chat") {
-      chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
-      chatInput.focus();
-    }
-  });
+  btn.addEventListener("click", () => switchToTab(btn.dataset.tab));
 });
+
+// Deep-link support: the topbar "Class Chat" bell (and anything else) can
+// link straight to activity.html?tab=chat to land on the Chat tab instead
+// of defaulting to the Activity Log.
+const requestedTab = new URLSearchParams(window.location.search).get("tab");
+if (requestedTab === "chat") switchToTab("chat");
 
 // ==========================================================
 // Activity Log (unchanged from the previous round)

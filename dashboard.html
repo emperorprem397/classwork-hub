@@ -47,7 +47,7 @@
       <div class="topbar-actions">
         <a href="search.html" class="icon-btn" title="Search">🔍</a>
         <button id="themeToggleBtn" type="button" class="icon-btn" title="Toggle theme">🌓</button>
-        <a href="activity.html" class="icon-btn" id="notifBell" title="Activity &amp; Chat">
+        <a href="activity.html?tab=chat" class="icon-btn" id="notifBell" title="Class Chat">
           🔔<span class="notif-dot" id="notifDot" hidden></span>
         </a>
         <div class="profile-menu">
@@ -136,9 +136,9 @@
 
     <div id="modalExisting" hidden></div>
 
-    <!-- Optional metadata — student can skip both and just upload photos -->
+    <!-- Mandatory: student must tag every upload as Classwork or Homework -->
     <div class="field-group">
-      <label class="field-label">What is this? <span class="optional-tag">(optional)</span></label>
+      <label class="field-label">What is this? <span class="required-tag">(required)</span></label>
       <div class="type-pills" id="typePills">
         <button type="button" class="type-pill" data-type="classwork">📓 Classwork</button>
         <button type="button" class="type-pill" data-type="homework">📝 Homework</button>

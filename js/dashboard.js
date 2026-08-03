@@ -178,9 +178,22 @@ async function loadSubjects() {
   }
 }
 
+// A deterministic emoji per subject (same subject always gets the same
+// icon, no storage needed) — used by the Premium Showcase theme's popped
+// icon-circle on each subject card. Purely cosmetic; every other theme
+// ignores data-icon entirely.
+const SUBJECT_ICONS = ["📘", "📗", "📙", "📕", "🧮", "🔬", "🎨", "🌍", "🎵", "⚗️", "📐", "🧪"];
+function subjectIcon(name) {
+  const str = String(name || "");
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
+  return SUBJECT_ICONS[hash % SUBJECT_ICONS.length];
+}
+
 function renderSubjectCard(subject, entry) {
   const card = document.createElement("div");
   card.className = "subject-card";
+  card.dataset.icon = subjectIcon(subject.name);
 
   const uploaded = !!entry && (entry.uploadedBy?.length || 0) > 0;
   const uploaderCount = uploaded ? (entry.uploadedBy?.length || 0) : 0;
@@ -224,18 +237,17 @@ function renderSubjectCard(subject, entry) {
   return card;
 }
 
-// Type pills (Classwork / Homework) — tap to select, tap again to clear.
-// Both fully optional, so nothing is pre-selected and nothing is required.
+// Type pills (Classwork / Homework) — mandatory as of this round: tapping
+// a pill selects it and switches away from the other one, but tapping the
+// already-selected pill no longer clears it back to null. The student must
+// have one of the two selected before the upload button will proceed
+// (enforced in the uploadSubmit handler below).
 typePillsWrap.querySelectorAll(".type-pill").forEach((btn) => {
   btn.addEventListener("click", () => {
-    const wasSelected = btn.classList.contains("selected");
     typePillsWrap.querySelectorAll(".type-pill").forEach((b) => b.classList.remove("selected"));
-    if (wasSelected) {
-      selectedType = null;
-    } else {
-      btn.classList.add("selected");
-      selectedType = btn.dataset.type;
-    }
+    btn.classList.add("selected");
+    selectedType = btn.dataset.type;
+    typePillsWrap.classList.remove("pills-required-flash");
   });
 });
 
@@ -577,6 +589,12 @@ uploadSubmit.addEventListener("click", async () => {
     uploadStatus.textContent = "Pick at least one photo first.";
     return;
   }
+  if (!selectedType) {
+    uploadStatus.textContent = "Please select Classwork or Homework before uploading.";
+    typePillsWrap.classList.add("pills-required-flash");
+    setTimeout(() => typePillsWrap.classList.remove("pills-required-flash"), 400);
+    return;
+  }
 
   uploadSubmit.disabled = true;
   uploadStatus.textContent = "Uploading photos…";
@@ -584,7 +602,7 @@ uploadSubmit.addEventListener("click", async () => {
   const { schoolId, classId } = currentProfile;
   const subjectId = activeSubject.id;
   const title = titleInput.value.trim().slice(0, 80); // optional, capped for display sanity
-  const type = selectedType; // optional — "classwork" | "homework" | null
+  const type = selectedType; // now mandatory — "classwork" | "homework"
 
   try {
     // 1. Upload each file directly to Cloudinary (unsigned preset) — images

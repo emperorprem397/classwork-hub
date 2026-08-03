@@ -47,7 +47,7 @@
       <div class="topbar-actions">
         <a href="search.html" class="icon-btn" title="Search">🔍</a>
         <button id="themeToggleBtn" type="button" class="icon-btn" title="Toggle theme">🌓</button>
-        <a href="activity.html" class="icon-btn" id="notifBell" title="Activity &amp; Chat">
+        <a href="activity.html?tab=chat" class="icon-btn" id="notifBell" title="Class Chat">
           🔔<span class="notif-dot" id="notifDot" hidden></span>
         </a>
         <div class="profile-menu">
@@ -136,6 +136,42 @@
           <button id="startFreshBtn" class="btn btn-red btn-sm">Start fresh (reset my account)</button>
         </section>
 
+        <!-- Reset-account confirmation — replaces the old back-to-back
+             confirm() popups, which looked identical enough that it was
+             easy to click OK, OK through both without reading either. This
+             is one modal with two clearly distinct zones: a big red
+             headline for the irreversible part, and a separate smaller
+             boxed choice for what happens to already-uploaded work. -->
+        <div id="resetModal" class="modal-overlay" hidden>
+          <div class="modal glass reset-modal">
+            <button id="resetModalClose" class="modal-close" aria-label="Close">✕</button>
+            <div class="reset-modal-icon">⚠️</div>
+            <h3 class="reset-modal-title">Reset your account?</h3>
+            <p class="reset-modal-detail">
+              This resets your Classwork Hub profile — name, photo, school, class, XP and
+              streak — back to zero. You'll set up your profile again next time you sign in.
+              This can't be undone.
+            </p>
+
+            <div class="reset-modal-choice">
+              <label class="reset-choice-label" for="resetDeleteWorkCheck">
+                <input type="checkbox" id="resetDeleteWorkCheck" />
+                <span><b>Also delete my uploaded work</b> from the class</span>
+              </label>
+              <p class="reset-choice-note">
+                Unchecked (default): your uploads stay visible to classmates, they just
+                disappear from your own My Uploads. Checked: your uploads are permanently
+                removed everywhere.
+              </p>
+            </div>
+
+            <div class="reset-modal-actions">
+              <button id="resetCancelBtn" class="btn btn-ghost" style="flex:1;">Cancel</button>
+              <button id="resetConfirmBtn" class="btn btn-red reset-confirm-btn" style="flex:1;">Yes, reset my account</button>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- APPEARANCE -->
@@ -155,6 +191,10 @@
             <button class="theme-swatch" data-theme-choice="monochrome">
               <span class="theme-swatch-preview theme-preview-mono"></span>
               <span class="theme-swatch-label">Monochrome</span>
+            </button>
+            <button class="theme-swatch" data-theme-choice="premium">
+              <span class="theme-swatch-preview theme-preview-premium"></span>
+              <span class="theme-swatch-label">Premium Showcase<br><small>Glowing rounded cards</small></span>
             </button>
           </div>
         </section>

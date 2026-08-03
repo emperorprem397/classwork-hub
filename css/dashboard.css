@@ -222,6 +222,73 @@ body { font-family: 'Inter', sans-serif; }
 .subject-edit-btn:hover { border-color: var(--border-strong); color: var(--text); background: var(--surface-hover); }
 .subject-uploaders { font-size: 0.76rem; color: var(--text-faint); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* ==========================================================
+   Premium Showcase theme — dashboard subject cards
+   Rounded pop-up cards with a glowing icon circle floating above
+   the top edge, centered grid, hover zoom + lift — modeled on the
+   furniture-showcase reference image (rounded product cards, image
+   popping above the card, warm glow on hover).
+   ========================================================== */
+[data-theme="premium"] .subjects-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 260px));
+  justify-content: center;
+  gap: 2.4rem;
+  padding-top: 2.4rem;
+}
+[data-theme="premium"] .subject-card {
+  position: relative;
+  overflow: visible;
+  border-radius: 28px;
+  padding: 2.8rem 1.4rem 1.5rem;
+  text-align: center;
+  box-shadow: var(--shadow-glow);
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.28s ease, border-color 0.2s ease;
+}
+[data-theme="premium"] .subject-card:hover {
+  transform: translateY(-10px) scale(1.04);
+  border-color: var(--border-strong);
+  box-shadow: 0 32px 70px -16px rgba(232, 130, 60, 0.45), var(--shadow-glow);
+}
+/* The "popped" icon circle — floats half above the card's top edge,
+   ringed with the card background color so it reads as sitting on top
+   of the card rather than clipped by it. */
+[data-theme="premium"] .subject-card::before {
+  content: attr(data-icon);
+  position: absolute;
+  top: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  background: linear-gradient(135deg, var(--cyan-bright), var(--cyan-dim));
+  box-shadow: 0 0 0 6px var(--surface-solid), 0 14px 30px -8px rgba(232, 130, 60, 0.55);
+  transition: transform 0.28s ease;
+}
+[data-theme="premium"] .subject-card:hover::before {
+  transform: translateX(-50%) scale(1.12) rotate(-6deg);
+}
+[data-theme="premium"] .subject-card-head {
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-top: 4px;
+  text-align: center;
+}
+[data-theme="premium"] .subject-name { font-size: 1.15rem; }
+[data-theme="premium"] .subject-edit-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+[data-theme="premium"] .subject-uploaders { text-align: center; white-space: normal; }
+[data-theme="premium"] .card-actions { justify-content: center; margin-top: 18px; }
+[data-theme="premium"] .subject-card .badge { margin-top: 4px; }
+
 .empty-state { text-align: center; padding: 2.4rem 1.5rem; }
 .empty-title { font-weight: 600; color: var(--text); margin: 0 0 6px; }
 .empty-sub { font-size: 0.85rem; color: var(--text-soft); max-width: 360px; margin: 0 auto; }
@@ -323,6 +390,12 @@ body { font-family: 'Inter', sans-serif; }
   text-transform: none;
   letter-spacing: 0;
 }
+.required-tag {
+  font-weight: 600;
+  color: var(--red);
+  text-transform: none;
+  letter-spacing: 0;
+}
 
 .type-pills { display: flex; gap: 8px; flex-wrap: wrap; }
 .type-pill {
@@ -341,6 +414,20 @@ body { font-family: 'Inter', sans-serif; }
   color: var(--cyan-bright);
   background: rgba(34, 211, 238, 0.1);
   font-weight: 600;
+}
+/* Brief shake + red outline when the student tries to upload without
+   picking Classwork/Homework first — draws the eye without a disruptive
+   alert() popup. */
+.type-pills.pills-required-flash {
+  animation: pillsShake 0.4s ease;
+}
+.type-pills.pills-required-flash .type-pill {
+  border-color: var(--red);
+}
+@keyframes pillsShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
 }
 
 .text-input {

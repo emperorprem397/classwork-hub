@@ -13,6 +13,7 @@ export const THEMES = [
   { id: "dark", label: "Dark Cyan", sub: "Default" },
   { id: "light", label: "Light" },
   { id: "monochrome", label: "Monochrome" },
+  { id: "premium", label: "Premium Showcase" },
 ];
 
 const STORAGE_KEY = "cwhTheme";
