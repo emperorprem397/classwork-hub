@@ -5,6 +5,7 @@ import { doc, getDoc, updateDoc }
   from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { applyTheme, saveThemeToCloud } from "./theme.js";
 import { AVATAR_COLORS, generateLetterAvatarDataUri } from "./helpers.js";
+import { openImageCropper } from "./cropper.js";
 
 const userPhoto  = document.getElementById("userPhoto");
 const userNameEl = document.getElementById("userName");
@@ -103,11 +104,16 @@ avatarFileInput.addEventListener("change", async () => {
   const file = avatarFileInput.files?.[0];
   if (!file) { avatarMode = "google"; document.querySelector('[data-avatar-mode="google"]').click(); return; }
 
+  // Preview + drag + zoom crop before uploading, same as Settings — so the
+  // first photo someone ever sets isn't silently squashed to fit.
+  const cropped = await openImageCropper(file, { shape: "circle", outputSize: 512 });
+  avatarFileInput.value = "";
+  if (!cropped) { avatarMode = "google"; document.querySelector('[data-avatar-mode="google"]').click(); return; }
+
   avatarUploadStatus.textContent = "Uploading…";
   try {
-    const compressed = await compressImage(file, 512, 0.85);
     const formData = new FormData();
-    formData.append("file", compressed);
+    formData.append("file", cropped, "avatar.jpg");
     formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
     const response = await fetch(
       `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
@@ -122,28 +128,6 @@ avatarFileInput.addEventListener("change", async () => {
     avatarUploadStatus.textContent = "Couldn't upload that photo — try a different one, or pick another option above.";
   }
 });
-
-function compressImage(file, maxDimension = 512, quality = 0.85) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      let { width, height } = img;
-      if (width > maxDimension || height > maxDimension) {
-        const scale = maxDimension / Math.max(width, height);
-        width = Math.round(width * scale);
-        height = Math.round(height * scale);
-      }
-      const canvas = document.createElement("canvas");
-      canvas.width = width; canvas.height = height;
-      canvas.getContext("2d").drawImage(img, 0, 0, width, height);
-      canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Compression failed"))), "image/jpeg", quality);
-    };
-    img.onerror = reject;
-    img.src = url;
-  });
-}
 
 // ---------- Step 1: name ----------
 nextNameBtn.addEventListener("click", () => {

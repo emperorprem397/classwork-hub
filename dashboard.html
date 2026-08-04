@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/theme.css?v=20260806">
-<link rel="stylesheet" href="css/dashboard.css?v=20260806">
+<link rel="stylesheet" href="css/dashboard.css?v=20260822">
 </head>
 <body>
 
@@ -175,6 +175,17 @@
       <label class="field-label" for="subjectTeacherInput">Teacher <span class="optional-tag">(optional)</span></label>
       <input type="text" id="subjectTeacherInput" class="text-input" placeholder="e.g. Mrs. Sharma" maxlength="40" />
     </div>
+    <div class="field-group">
+      <label class="field-label">Cover photo <span class="optional-tag">(optional — we'll pick one for you)</span></label>
+      <div class="cover-picker">
+        <div id="addSubjectCoverPreview" class="cover-preview"></div>
+        <div class="cover-picker-actions">
+          <button type="button" id="addSubjectCoverBtn" class="btn btn-ghost btn-sm">Choose photo</button>
+          <button type="button" id="addSubjectCoverClear" class="btn btn-ghost btn-sm" hidden>Remove</button>
+        </div>
+      </div>
+      <input type="file" id="addSubjectCoverInput" accept="image/*" hidden />
+    </div>
 
     <button id="addSubjectSubmit" class="btn btn-primary" style="width:100%; margin-top: 1rem;">Add subject</button>
     <p id="addSubjectStatus" class="upload-status"></p>
@@ -196,6 +207,17 @@
       <label class="field-label" for="editSubjectTeacherInput">Teacher <span class="optional-tag">(optional)</span></label>
       <input type="text" id="editSubjectTeacherInput" class="text-input" placeholder="e.g. Mrs. Sharma" maxlength="40" />
     </div>
+    <div class="field-group">
+      <label class="field-label">Cover photo</label>
+      <div class="cover-picker">
+        <div id="editSubjectCoverPreview" class="cover-preview"></div>
+        <div class="cover-picker-actions">
+          <button type="button" id="editSubjectCoverBtn" class="btn btn-ghost btn-sm">Change photo</button>
+          <button type="button" id="editSubjectCoverClear" class="btn btn-ghost btn-sm" hidden>Remove</button>
+        </div>
+      </div>
+      <input type="file" id="editSubjectCoverInput" accept="image/*" hidden />
+    </div>
 
     <button id="editSubjectSubmit" class="btn btn-primary" style="width:100%; margin-top: 1rem;">Save changes</button>
     <button id="deleteSubjectBtn" class="btn btn-red" style="width:100%; margin-top: 0.6rem;">🗑️ Delete this subject</button>
@@ -204,7 +226,7 @@
 </div>
 
 <script type="module" src="js/firebase-config.js?v=20260806"></script>
-<script type="module" src="js/dashboard.js?v=20260806"></script>
+<script type="module" src="js/dashboard.js?v=20260822"></script>
 <script type="module" src="js/topbar.js?v=20260806"></script>
 <script src="js/nav.js?v=20260806"></script>
 </body>

@@ -10,8 +10,9 @@ import {
 import {
   XP_UPLOAD, XP_FIRST_OF_DAY, XP_STREAK_TICK, calcRank,
   todayId, yesterdayId, formatDateLabel, escapeHtml, typeBadgeHtml, logActivity,
-  uploadOneFile, fileThumbHtml, isPdfFile
+  uploadOneFile, fileThumbHtml, isPdfFile, getSubjectCoverImage
 } from "./helpers.js";
+import { openImageCropper } from "./cropper.js";
 
 const userPhoto     = document.getElementById("userPhoto");
 const userNameEl    = document.getElementById("userName");
@@ -60,6 +61,76 @@ const editSubjectStatus   = document.getElementById("editSubjectStatus");
 const deleteSubjectBtn    = document.getElementById("deleteSubjectBtn");
 let editingSubjectId = null;
 let editingSubjectName = null;
+let editingSubjectCoverURL = null;
+
+// ---------- Cover photo pickers (Add + Edit subject modals) ----------
+const addSubjectCoverBtn     = document.getElementById("addSubjectCoverBtn");
+const addSubjectCoverInput   = document.getElementById("addSubjectCoverInput");
+const addSubjectCoverPreview = document.getElementById("addSubjectCoverPreview");
+const addSubjectCoverClear   = document.getElementById("addSubjectCoverClear");
+
+const editSubjectCoverBtn     = document.getElementById("editSubjectCoverBtn");
+const editSubjectCoverInput   = document.getElementById("editSubjectCoverInput");
+const editSubjectCoverPreview = document.getElementById("editSubjectCoverPreview");
+const editSubjectCoverClear   = document.getElementById("editSubjectCoverClear");
+
+let pendingAddCoverBlob = null;   // cropped Blob queued for upload on "Add subject"
+let pendingEditCoverBlob = null;  // cropped Blob queued for upload on "Save changes"
+let editCoverRemoved = false;     // true once the person hits "Remove" in Edit — reverts to the default photo
+
+async function uploadCoverBlob(blob) {
+  const formData = new FormData();
+  formData.append("file", blob, "cover.jpg");
+  formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+  formData.append("folder", "subject-covers");
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+    { method: "POST", body: formData }
+  );
+  const result = await response.json();
+  if (!result.secure_url) throw new Error(result.error?.message || "Cover upload failed");
+  return result.secure_url;
+}
+
+if (addSubjectCoverBtn) {
+  addSubjectCoverBtn.addEventListener("click", () => addSubjectCoverInput.click());
+  addSubjectCoverInput.addEventListener("change", async () => {
+    const file = addSubjectCoverInput.files?.[0];
+    addSubjectCoverInput.value = "";
+    if (!file) return;
+    const cropped = await openImageCropper(file, { shape: "square", outputSize: 640 });
+    if (!cropped) return;
+    pendingAddCoverBlob = cropped;
+    addSubjectCoverPreview.style.backgroundImage = `url(${URL.createObjectURL(cropped)})`;
+    addSubjectCoverClear.hidden = false;
+  });
+  addSubjectCoverClear.addEventListener("click", () => {
+    pendingAddCoverBlob = null;
+    addSubjectCoverPreview.style.backgroundImage = "";
+    addSubjectCoverClear.hidden = true;
+  });
+}
+
+if (editSubjectCoverBtn) {
+  editSubjectCoverBtn.addEventListener("click", () => editSubjectCoverInput.click());
+  editSubjectCoverInput.addEventListener("change", async () => {
+    const file = editSubjectCoverInput.files?.[0];
+    editSubjectCoverInput.value = "";
+    if (!file) return;
+    const cropped = await openImageCropper(file, { shape: "square", outputSize: 640 });
+    if (!cropped) return;
+    pendingEditCoverBlob = cropped;
+    editCoverRemoved = false;
+    editSubjectCoverPreview.style.backgroundImage = `url(${URL.createObjectURL(cropped)})`;
+    editSubjectCoverClear.hidden = false;
+  });
+  editSubjectCoverClear.addEventListener("click", () => {
+    pendingEditCoverBlob = null;
+    editCoverRemoved = true;
+    editSubjectCoverPreview.style.backgroundImage = `url(${getSubjectCoverImage(editingSubjectName)})`;
+    editSubjectCoverClear.hidden = true;
+  });
+}
 
 let currentUser = null;
 let currentProfile = null;
@@ -222,8 +293,12 @@ function renderSubjectCard(subject, entry) {
   // they even open it. Purely cosmetic; falls back to nothing if unset.
   const latest = uploaded && entry.uploads?.length ? entry.uploads[entry.uploads.length - 1] : null;
 
+  const coverUrl = getSubjectCoverImage(subject.name, subject.coverURL);
+
   card.innerHTML = `
-    <div class="subject-card-image" style="--subject-cover: ${subjectCover(subject.name)};"></div>
+    <div class="subject-card-image" style="--subject-cover: ${subjectCover(subject.name)};">
+      <img class="subject-card-photo" src="${coverUrl}" alt="" loading="lazy" onerror="this.remove()" />
+    </div>
     <button class="subject-edit-btn" data-action="edit-subject" title="Edit subject">✎</button>
     <div class="subject-card-body">
       <div class="subject-card-head">
@@ -384,6 +459,9 @@ function openAddSubjectModal() {
   subjectTeacherInput.value = "";
   addSubjectStatus.textContent = "";
   addSubjectSubmit.disabled = false;
+  pendingAddCoverBlob = null;
+  if (addSubjectCoverPreview) addSubjectCoverPreview.style.backgroundImage = "";
+  if (addSubjectCoverClear) addSubjectCoverClear.hidden = true;
   addSubjectModal.hidden = false;
   subjectNameInput.focus();
 }
@@ -413,11 +491,19 @@ addSubjectSubmit.addEventListener("click", async () => {
   addSubjectStatus.textContent = "Adding…";
 
   try {
+    let coverURL = null;
+    if (pendingAddCoverBlob) {
+      addSubjectStatus.textContent = "Uploading cover photo…";
+      coverURL = await uploadCoverBlob(pendingAddCoverBlob);
+      addSubjectStatus.textContent = "Adding…";
+    }
+
     const { schoolId, classId } = currentProfile;
     const subjectsCol = collection(db, "schools", schoolId, "classes", classId, "subjects");
     await addDoc(subjectsCol, {
       name,
       teacher: teacher || null,
+      coverURL: coverURL || null,
       createdBy: currentUser.uid,
       createdAt: serverTimestamp(),
     });
@@ -441,11 +527,20 @@ addSubjectSubmit.addEventListener("click", async () => {
 function openEditSubjectModal(subject) {
   editingSubjectId = subject.id;
   editingSubjectName = subject.name || "";
+  editingSubjectCoverURL = subject.coverURL || null;
   editSubjectNameInput.value = subject.name || "";
   editSubjectTeacherInput.value = subject.teacher || "";
   editSubjectStatus.textContent = "";
   editSubjectSubmit.disabled = false;
   if (deleteSubjectBtn) deleteSubjectBtn.disabled = false;
+
+  pendingEditCoverBlob = null;
+  editCoverRemoved = false;
+  if (editSubjectCoverPreview) {
+    editSubjectCoverPreview.style.backgroundImage = `url(${getSubjectCoverImage(subject.name, subject.coverURL)})`;
+  }
+  if (editSubjectCoverClear) editSubjectCoverClear.hidden = !subject.coverURL;
+
   editSubjectModal.hidden = false;
   editSubjectNameInput.focus();
 }
@@ -453,6 +548,7 @@ function closeEditSubjectModal() {
   editSubjectModal.hidden = true;
   editingSubjectId = null;
   editingSubjectName = null;
+  editingSubjectCoverURL = null;
 }
 editSubjectClose.addEventListener("click", closeEditSubjectModal);
 editSubjectModal.addEventListener("click", (e) => { if (e.target === editSubjectModal) closeEditSubjectModal(); });
@@ -470,9 +566,18 @@ editSubjectSubmit.addEventListener("click", async () => {
   editSubjectStatus.textContent = "Saving…";
 
   try {
+    let coverURL = editingSubjectCoverURL;
+    if (pendingEditCoverBlob) {
+      editSubjectStatus.textContent = "Uploading cover photo…";
+      coverURL = await uploadCoverBlob(pendingEditCoverBlob);
+      editSubjectStatus.textContent = "Saving…";
+    } else if (editCoverRemoved) {
+      coverURL = null;
+    }
+
     const { schoolId, classId } = currentProfile;
     const subjectRef = doc(db, "schools", schoolId, "classes", classId, "subjects", editingSubjectId);
-    await updateDoc(subjectRef, { name, teacher: teacher || null });
+    await updateDoc(subjectRef, { name, teacher: teacher || null, coverURL: coverURL || null });
     logActivity(db, {
       schoolId, classId,
       uid: currentUser.uid,

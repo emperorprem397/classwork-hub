@@ -1,6 +1,6 @@
 # Classwork Hub — Project Progress
 
-**Version:** 1.5 (Round 21 — Profile/Search restyled; Activity/Chat, Login, Admin still pending)
+**Version:** 1.6 (Round 22 — real subject cover photos + custom cover upload, profile photo crop/preview; Activity/Chat, Login, Admin still pending)
 **Live site:** https://classwork-hub.vercel.app/
 **Stack:** Plain HTML/CSS/JavaScript (ES modules, no bundler/framework) — Firebase Auth (Google popup) + Firestore + Cloudinary (images/PDFs) — hosted on GitHub, deployed on Vercel.
 
@@ -138,11 +138,12 @@ To set this up on a fresh Cloudinary account: create an unsigned upload preset, 
 - [x] Homework (all 3 tabs) and Leaderboard restyled to the same container layout
 - [x] Profile hero card polished; Search restyled to grouped rounded containers
 - [x] Old hardcoded cyan accent colors swept and retinted across the whole codebase to match the 2-theme token system
+- [x] Real per-subject imagery — keyword-matched default photos on the dashboard subject cards, plus a per-subject custom cover upload (square crop) in Add/Edit Subject
+- [x] Profile photo upload now goes through a preview + drag + zoom crop step (`js/cropper.js`) instead of squashing whatever ratio was picked — fixed in Settings and the Welcome wizard
 - [ ] Activity/Chat page — inherits new colors/sidebar/topbar automatically, page-specific layout not yet reworked to the container style
 - [ ] Login (`index.html`) and School Selection pages — not yet on the shared token system at all (`index.html` uses its own standalone `css/style.css`)
 - [ ] Welcome wizard steps beyond the Appearance step
 - [ ] Admin panel's dashboard/users/schools/uploads views — inherit the 2-theme colors automatically, but not yet visually reworked to the new layout language
-- [ ] Real per-subject imagery (chemistry beakers, physics Newton's cradle, etc.) — currently deterministic gradient placeholders on the dashboard cards
 - [ ] Modals, empty states, and loading screens — individual pass against the reference not yet done
 
 **Other:**

@@ -1,0 +1,45 @@
+/* Shared cropper modal — injected dynamically by js/cropper.js, so this
+   file isn't linked from any <head> directly. Uses the same design tokens
+   as everything else (css/theme.css) so it matches whichever page/theme
+   it's opened from. */
+.cropper-overlay {
+  position: fixed; inset: 0;
+  background: rgba(2, 6, 8, 0.78);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem;
+  z-index: 300;
+}
+.cropper-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 1.8rem;
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+}
+.cropper-title { font-family: 'Zilla Slab', serif; font-size: 1.1rem; font-weight: 700; color: var(--text); margin: 0 0 2px; }
+.cropper-sub { font-size: 0.8rem; color: var(--text-soft); margin: 0 0 1.1rem; }
+
+.cropper-viewport {
+  width: 260px; height: 260px;
+  max-width: 100%;
+  margin: 0 auto 1rem;
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-solid);
+  border: 1px solid var(--border);
+  cursor: grab;
+  touch-action: none;
+}
+.cropper-viewport:active { cursor: grabbing; }
+.cropper-viewport.is-circle { border-radius: 50%; }
+.cropper-viewport.is-square { border-radius: var(--radius-md); }
+
+.cropper-img { position: absolute; user-select: none; pointer-events: none; max-width: none; max-height: none; }
+
+.cropper-zoom { width: 100%; accent-color: var(--cyan); margin-bottom: 1.3rem; }
+
+.cropper-actions { display: flex; gap: 10px; }
+.cropper-actions .btn { flex: 1; }

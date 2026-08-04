@@ -195,6 +195,48 @@ export function typeBadgeHtml(type) {
   return `<span class="badge badge-cyan type-badge">${t.icon} ${t.label}</span>`;
 }
 
+// ---------- Subject cover images ----------
+// Deterministic default photography per subject (matched by keyword in the
+// subject name), used on the dashboard subject cards until/unless the class
+// picks a custom cover in the Add/Edit Subject modal. If an image URL ever
+// fails to load (dead link, offline, etc.) the <img> is removed on error
+// (see dashboard.js) and the existing gradient placeholder shows through —
+// so a bad URL can never break the card layout, only make it plainer.
+const SUBJECT_DEFAULT_IMAGES = [
+  { match: /chem/i,                      url: "https://images.unsplash.com/photo-1554475900-0a0350e3fc7b?w=500&h=500&fit=crop&q=80" },
+  { match: /phys/i,                      url: "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?w=500&h=500&fit=crop&q=80" },
+  { match: /math/i,                      url: "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=500&h=500&fit=crop&q=80" },
+  { match: /english|literat/i,           url: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=500&h=500&fit=crop&q=80" },
+  { match: /bio/i,                       url: "https://images.unsplash.com/photo-1530026405186-ed1f139313f8?w=500&h=500&fit=crop&q=80" },
+  { match: /computer|programming|\bit\b/i, url: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=500&h=500&fit=crop&q=80" },
+  { match: /hist/i,                      url: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?w=500&h=500&fit=crop&q=80" },
+  { match: /geog/i,                      url: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=500&h=500&fit=crop&q=80" },
+  { match: /art|draw/i,                  url: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=500&h=500&fit=crop&q=80" },
+  { match: /music/i,                     url: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=500&h=500&fit=crop&q=80" },
+  { match: /econ|commerce|business/i,    url: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=500&h=500&fit=crop&q=80" },
+  { match: /sanskrit|hindi/i,            url: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&h=500&fit=crop&q=80" },
+  { match: /phy(sical)? ?ed|sports|\bpe\b/i, url: "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=500&h=500&fit=crop&q=80" },
+  { match: /science|sst|social/i,        url: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=500&h=500&fit=crop&q=80" },
+];
+const SUBJECT_FALLBACK_IMAGES = [
+  "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=500&h=500&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=500&h=500&fit=crop&q=80",
+  "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=500&h=500&fit=crop&q=80",
+];
+
+// customURL (subject.coverURL from Firestore) always wins if set. Otherwise
+// match a keyword in the subject name, falling back to a deterministic
+// generic "study" photo so every subject still gets *some* real photography.
+export function getSubjectCoverImage(name, customURL) {
+  if (customURL) return customURL;
+  const str = String(name || "");
+  const found = SUBJECT_DEFAULT_IMAGES.find((s) => s.match.test(str));
+  if (found) return found.url;
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = (hash * 13 + str.charCodeAt(i)) >>> 0;
+  return SUBJECT_FALLBACK_IMAGES[hash % SUBJECT_FALLBACK_IMAGES.length];
+}
+
 // ---------- Activity log (NEW) ----------
 // A lightweight, append-only feed shared by the whole class — every subject
 // create/edit/delete and every upload writes one small doc here so everyone

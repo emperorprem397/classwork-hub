@@ -246,6 +246,16 @@ body { font-family: 'Inter', sans-serif; }
   background: var(--subject-cover, linear-gradient(135deg, var(--surface-hover), var(--surface-solid)));
   overflow: hidden;
 }
+/* Real subject photography (default keyword-matched, or a custom photo the
+   class picked in Edit Subject) sits on top of the gradient above. If the
+   image URL 404s, dashboard.js removes it via onerror and the gradient
+   shows through — so a bad link never leaves a broken-image icon. */
+.subject-card-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 /* The floating icon circle — half over the image, half over the body,
    ringed with the card's own background so it reads as sitting on top. */
 .subject-card::before {
@@ -338,6 +348,19 @@ body { font-family: 'Inter', sans-serif; }
   margin-top: 0.6rem;
 }
 .file-drop:hover { border-color: var(--cyan); color: var(--text); }
+
+/* ---------- Cover photo picker (Add/Edit subject modals) ---------- */
+.cover-picker { display: flex; align-items: center; gap: 12px; }
+.cover-preview {
+  width: 64px; height: 64px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  background-size: cover;
+  background-position: center;
+}
+.cover-picker-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
 .thumb-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 0.8rem; }
 .thumb { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); }
