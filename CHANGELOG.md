@@ -4,13 +4,39 @@ All notable changes, newest first. This is the historical record; for
 **current architecture, setup, and what's still pending**, see
 `PROJECT_PROGRESS.md`.
 
+## Round 21 — Profile & Search restyled
+- **Profile** — hero card polished: photo now gets a soft ring instead of a hardcoded-cyan border, stat numbers switched to the neutral text token, and the rank progress bar's track color (previously a hardcoded `rgba(255,255,255,.06)` that would've nearly vanished against the Soft Light background) now uses theme tokens and sits in its own subtly-shaded block.
+- **Search** — search bar restyled to a pill shape with card shadow instead of a sharp-cornered bordered box; each result category (Subjects/Teachers/Homework/Uploads/Classmates) now renders as a labeled rounded container with hairline-divided rows, matching Subjects/My Uploads/Homework/Leaderboard, instead of individually bordered floating result cards.
+
+## Round 20 — Homework & Leaderboard restyled
+- **Homework** — all three tabs (Classwork Uploads, Homework Uploads, Assignments) now use the same "large rounded parent container" layout as Subjects/My Uploads: one shell per tab holding hairline-divided rows instead of separate floating cards. Overdue-assignment red tint and checkbox colors switched from hardcoded values to shared theme tokens.
+- **Leaderboard** — same container treatment; the "you" row now gets a subtle highlighted background instead of a colored border/glow, and 2nd/3rd-place medal colors switched to theme-neutral tones so they read correctly in both Matte Dark and Soft Light instead of being tuned only for the old dark-cyan theme.
+
+## Round 19 — Subjects & My Uploads restyled, old-accent color cleanup
+- **Subjects** and **My Uploads** now use the "large rounded parent container" layout from the design brief — one `.glass` shell holding all rows, hairline dividers between them, instead of separate floating bordered cards per row. Subjects rows also got the same small circular subject icon used on the Dashboard cards.
+- Swept the whole codebase for the old hardcoded cyan accent (`rgba(34,211,238,…)` / `#22d3ee` / `#67e8f9`) that a few pages still had baked in directly instead of reading the shared tokens — found and retinted 9 spots: Chat's own-message bubble, Search's match highlight (now gold, reads better as a "highlighter" than monochrome would), the Settings toggle switch, three spots in School Selection, the type-pill selected state and drag-and-drop highlight in the upload modal, and two admin-panel button hover shadows. All now theme-correct in both Matte Dark and Soft Light.
+
+## Round 18 — Official design system foundation: Matte Dark + Soft Light (in progress)
+- **Theme system reduced to exactly two permanent themes** — "Matte Dark" (default) and "Soft Light" — replacing the previous four (Dark Cyan/Light/Monochrome/Premium). Same token names in `css/theme.css`, so nothing else needed to change to re-skin. Swatch rows updated everywhere they appear: Settings, Admin panel, and the Welcome wizard's Appearance step.
+- **Sidebar** is now a persistent floating rounded panel on desktop (≥901px) instead of an off-canvas-only drawer — matches the reference images. Below that width it's still the original slide-in drawer (`nav.js` untouched, just gated by a media query). Nav items are now pill-shaped with a solid active state instead of the old left-border-accent style.
+- **Topbar** flattened — no more frosted glass/border, sits directly on the page background per the reference.
+- **Dashboard subject cards** rebuilt to match the reference structure exactly: image strip on top (per-subject deterministic gradient, real photography still pending), a circular icon floating over the image's bottom edge, centered name/teacher/status/actions below. This replaces the old theme-conditional "Premium" card style — it's now the one default card design in both themes.
+- Because `css/theme.css` and `css/dashboard.css` are shared includes on every app page (`dashboard.html` through `search.html`), this sidebar/topbar/card treatment applies automatically across all 8 of those pages from these two file changes.
+
+**Explicitly NOT done yet in this round** (see PROJECT_PROGRESS.md → Pending for the full checklist):
+- Subjects, My Uploads, Homework, Leaderboard, Profile, Search, Activity/Chat pages still use their pre-existing page-specific layouts (they do inherit the new colors/sidebar/topbar automatically, but haven't had their own content restyled to the "large rounded parent container" treatment the brief describes)
+- Login, Welcome wizard steps beyond Appearance, and School Selection pages not yet redesigned
+- Admin panel's own dashboard/users/schools/uploads views not yet visually reworked (it does inherit the new 2-theme color tokens automatically)
+- Real per-subject photography (chemistry beakers, physics Newton's cradle, etc.) — currently deterministic gradient placeholders
+- Empty states, loading screens, and modals across the app not yet individually reviewed against the reference
+
 ## Round 17 — Chat routing, mandatory work-type tag, safer account reset, Premium Showcase theme
 - **PDF viewer bug diagnosed (no code fix needed)** — upload code already used Cloudinary's `/auto/upload` endpoint correctly. The "Failed to load PDF document" / HTTP 401 in the reported screenshot matches Cloudinary's account-level security default that blocks PDF/ZIP delivery unless explicitly allowed in the Cloudinary Console (Settings → Security). This is a one-time manual Cloudinary setting, not an app bug.
 - Topbar notification bell now links straight to `activity.html?tab=chat` on every page, instead of landing on the Activity Log tab. `activity.js` reads the `?tab=` query param on load and auto-selects the requested tab. Sidebar "Activity" link is unchanged (still opens the Log tab).
 - Confirmed 48-hour chat auto-expiry (`expireAt`, client-side filtered) was already correctly implemented in Round 16 — no change needed.
 - Classwork/Homework tagging on upload is now **mandatory**, not optional: the type pill selection no longer clears back to "none" on re-click, and the upload button blocks (with an inline message + shake animation) until one is picked.
 - Danger Zone account reset: replaced the two back-to-back native `confirm()` popups (which looked identical enough to click through blindly) with a single custom modal — a large glowing red headline for the irreversible reset, separated visually from a smaller boxed checkbox for "also delete my uploaded work" (unchecked by default, same behavior as before).
-- New **Premium Showcase** appearance theme (4th option alongside Dark Cyan/Light/Monochrome) — warm dark/amber token set in `css/theme.css` (and mirrored in the admin panel's self-contained inline styles for parity). Dashboard subject cards get a dedicated rounded/glowing/hover-zoom treatment under this theme, with a deterministic emoji "popped" above each card, modeled on the furniture-showcase reference image provided.
+- ~~New Premium Showcase appearance theme~~ — superseded by Round 18's two-theme design system.
 
 ## Round 16 — Milestone 3: PDF uploads, navbar redesign, unread badges, per-image management, admin cross-class browsing
 - PDF upload support alongside photos (drag-and-drop included). PDFs open in the browser's native viewer — no bundler in this stack, so a React PDF library wasn't applicable; the native viewer gives zoom/page-nav/download/fullscreen for free.

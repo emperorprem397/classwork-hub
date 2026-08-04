@@ -9,58 +9,34 @@
 <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --paper-bg:#05090c;--paper-card:rgba(18,30,34,.6);--paper2:rgba(34,54,60,.55);
-  --bg-glow-1:#0a2a30;--bg-glow-2:#062024;
-  --ink:#eaf6f8;--ink-soft:#9db3b8;--rule:rgba(103,232,249,.14);
-  --red:#f26d6d;--red2:rgba(242,109,109,.12);
-  --gold:#f5c451;--gold2:rgba(245,196,81,.14);
-  --green:#4ade80;--green2:rgba(74,222,128,.12);
-  --cyan:#22d3ee;--cyan-bright:#67e8f9;--cyan-dim:#0e7490;--cyan2:rgba(34,211,238,.12);
-  --on-accent:#04191c;
+  --paper-bg:#0a0a0a;--paper-card:#141414;--paper2:#1c1c1c;
+  --bg-glow-1:#0a0a0a;--bg-glow-2:#0a0a0a;
+  --ink:#f5f5f5;--ink-soft:#a3a3a3;--rule:rgba(255,255,255,.08);
+  --red:#ef4444;--red2:rgba(239,68,68,.12);
+  --gold:#eab308;--gold2:rgba(234,179,8,.14);
+  --green:#22c55e;--green2:rgba(34,197,94,.12);
+  --cyan:#ffffff;--cyan-bright:#ffffff;--cyan-dim:#d4d4d4;--cyan2:rgba(255,255,255,.08);
+  --on-accent:#0a0a0a;
   --font:'Inter',sans-serif;--font-h:'Zilla Slab',serif;
-  --sh:0 2px 14px rgba(0,0,0,.35);--shl:0 20px 50px -20px rgba(34,211,238,.15), 0 0 0 1px var(--rule);
-  --blur:blur(18px);
-  --nav-surface: rgba(13, 21, 24, 0.7);
+  --sh:0 2px 14px rgba(0,0,0,.5);--shl:0 20px 45px -20px rgba(0,0,0,.55), 0 0 0 1px var(--rule);
+  --blur:blur(0px);
+  --nav-surface: #111111;
 }
-/* Same three Appearance options as the student-facing Settings page — kept
-   as a separate token set (--paper-bg/--ink/--rule/etc.) since this file
-   is intentionally self-contained, but the theme *values* mirror css/theme.css
-   so "Light" and "Monochrome" look the same across both surfaces. */
+/* Same two official Appearance options as the student-facing Settings page
+   — Matte Dark (default) and Soft Light — kept as a separate token set
+   (--paper-bg/--ink/--rule/etc.) since this file is intentionally
+   self-contained, but the values mirror css/theme.css exactly. */
 :root[data-theme="light"]{
-  --paper-bg:#f3f6f7;--paper-card:rgba(255,255,255,.82);--paper2:rgba(224,241,243,.9);
-  --bg-glow-1:#e3f2f4;--bg-glow-2:#edf7f8;
-  --ink:#0b1e22;--ink-soft:#4b6267;--rule:rgba(14,116,144,.16);
-  --red:#c9392f;--red2:rgba(201,57,47,.12);
-  --gold:#a86a0c;--gold2:rgba(168,106,12,.14);
-  --green:#159146;--green2:rgba(21,145,70,.12);
-  --cyan:#0891b2;--cyan-bright:#0e7490;--cyan-dim:#0e7490;--cyan2:rgba(8,145,178,.12);
+  --paper-bg:#f2f2f2;--paper-card:#ffffff;--paper2:#f7f7f7;
+  --bg-glow-1:#f2f2f2;--bg-glow-2:#f2f2f2;
+  --ink:#111111;--ink-soft:#6b6b6b;--rule:rgba(0,0,0,.08);
+  --red:#dc2626;--red2:rgba(220,38,38,.12);
+  --gold:#b45309;--gold2:rgba(180,83,9,.14);
+  --green:#16a34a;--green2:rgba(22,163,74,.12);
+  --cyan:#111111;--cyan-bright:#000000;--cyan-dim:#333333;--cyan2:rgba(0,0,0,.06);
   --on-accent:#ffffff;
-  --sh:0 2px 14px rgba(15,40,45,.12);--shl:0 20px 40px -22px rgba(8,145,178,.18), 0 0 0 1px var(--rule);
-  --nav-surface: rgba(255, 255, 255, 0.88);
-}
-:root[data-theme="monochrome"]{
-  --paper-bg:#ffffff;--paper-card:rgba(246,246,247,.9);--paper2:rgba(230,230,231,.92);
-  --bg-glow-1:#f2f2f2;--bg-glow-2:#f8f8f8;
-  --ink:#111112;--ink-soft:#55565b;--rule:#e6e6e8;
-  --red:#7a3733;--red2:rgba(122,55,51,.12);
-  --gold:#6b6b6e;--gold2:rgba(107,107,110,.14);
-  --green:#38553f;--green2:rgba(56,85,63,.12);
-  --cyan:#111112;--cyan-bright:#2b2b2e;--cyan-dim:#3a3a3d;--cyan2:rgba(17,17,18,.08);
-  --on-accent:#ffffff;
-  --sh:0 2px 14px rgba(17,17,18,.1);--shl:0 16px 34px -20px rgba(17,17,18,.14), 0 0 0 1px var(--rule);
-  --nav-surface: rgba(255, 255, 255, 0.92);
-}
-:root[data-theme="premium"]{
-  --paper-bg:#1c1815;--paper-card:rgba(43,36,30,.75);--paper2:rgba(60,49,40,.85);
-  --bg-glow-1:#3a2a1a;--bg-glow-2:#24201c;
-  --ink:#f6efe4;--ink-soft:#cbbba7;--rule:rgba(242,163,95,.2);
-  --red:#e6584f;--red2:rgba(230,88,79,.14);
-  --gold:#f5c451;--gold2:rgba(245,196,81,.14);
-  --green:#6fbf73;--green2:rgba(111,191,115,.12);
-  --cyan:#e8823c;--cyan-bright:#f2a35f;--cyan-dim:#b9631f;--cyan2:rgba(232,130,60,.14);
-  --on-accent:#201409;
-  --sh:0 2px 14px rgba(0,0,0,.4);--shl:0 22px 50px -18px rgba(232,130,60,.32), 0 0 0 1px var(--rule);
-  --nav-surface: rgba(28, 24, 21, 0.92);
+  --sh:0 2px 14px rgba(0,0,0,.08);--shl:0 16px 34px -18px rgba(0,0,0,.1), 0 0 0 1px var(--rule);
+  --nav-surface: #ffffff;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{
@@ -80,7 +56,7 @@ body{
 .login-logo{font-family:var(--font-h);font-size:1.6rem;font-weight:700;text-align:center;margin-bottom:.2rem;color:var(--ink)}
 .login-sub{color:var(--ink-soft);text-align:center;font-size:.85rem;margin-bottom:1.8rem}
 .btn-google{width:100%;padding:.8rem;background:rgba(255,255,255,.04);border:1px solid var(--rule);color:var(--ink);border-radius:8px;font-family:var(--font);font-size:.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.6rem}
-.btn-google:hover{border-color:var(--cyan-bright);box-shadow:0 4px 20px rgba(34,211,238,.15)}
+.btn-google:hover{border-color:var(--cyan-bright);box-shadow:0 4px 20px rgba(0,0,0,.25)}
 .btn-google:disabled{opacity:.6;cursor:not-allowed}
 .err{color:var(--red);font-size:.82rem;text-align:center;margin-top:.8rem;min-height:1.2em}
 
@@ -155,7 +131,7 @@ select option{background:#0d1518;color:var(--ink)}
 .btn-red{background:var(--red2);border:1px solid rgba(242,109,109,.3);color:var(--red)}
 .btn-red:hover{background:rgba(242,109,109,.2)}
 .btn-cyan{background:linear-gradient(135deg,var(--cyan),var(--cyan-dim));border:none;color:var(--on-accent)}
-.btn-cyan:hover{box-shadow:0 6px 18px -6px rgba(34,211,238,.5)}
+.btn-cyan:hover{box-shadow:0 6px 18px -6px rgba(0,0,0,.4)}
 .btn-row{display:flex;gap:.5rem}
 
 .badge{display:inline-block;padding:.15rem .55rem;border-radius:20px;font-size:.7rem;font-weight:600}
@@ -180,10 +156,8 @@ select option{background:#0d1518;color:var(--ink)}
 .theme-swatch:hover{border-color:var(--cyan-dim)}
 .theme-swatch.active{border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan)}
 .theme-swatch-preview{display:block;width:100%;height:64px;border-radius:8px;border:1px solid rgba(0,0,0,.12)}
-.theme-preview-dark{background:linear-gradient(135deg,#05090c,#0a2a30 60%,#22d3ee 130%)}
-.theme-preview-light{background:linear-gradient(135deg,#f3f6f7,#e3f2f4 60%,#0891b2 130%)}
-.theme-preview-mono{background:linear-gradient(135deg,#ffffff,#f2f2f2 60%,#111112 130%)}
-.theme-preview-premium{background:linear-gradient(135deg,#1c1815,#3a2a1a 60%,#f2a35f 130%)}
+.theme-preview-dark{background:linear-gradient(135deg,#0a0a0a,#141414 60%,#ffffff 130%)}
+.theme-preview-light{background:linear-gradient(135deg,#f2f2f2,#ffffff 60%,#111111 130%)}
 .theme-swatch-label{font-size:.82rem;font-weight:600;color:var(--ink);text-align:left}
 .theme-swatch-label small{font-weight:400;color:var(--ink-soft)}
 </style>
@@ -338,19 +312,11 @@ select option{background:#0d1518;color:var(--ink)}
         <div class="theme-swatch-row" id="themeSwatchRow">
           <button class="theme-swatch" data-theme-choice="dark">
             <span class="theme-swatch-preview theme-preview-dark"></span>
-            <span class="theme-swatch-label">Dark Cyan<br><small>Default</small></span>
+            <span class="theme-swatch-label">Matte Dark<br><small>Default</small></span>
           </button>
           <button class="theme-swatch" data-theme-choice="light">
             <span class="theme-swatch-preview theme-preview-light"></span>
-            <span class="theme-swatch-label">Light</span>
-          </button>
-          <button class="theme-swatch" data-theme-choice="monochrome">
-            <span class="theme-swatch-preview theme-preview-mono"></span>
-            <span class="theme-swatch-label">Monochrome</span>
-          </button>
-          <button class="theme-swatch" data-theme-choice="premium">
-            <span class="theme-swatch-preview theme-preview-premium"></span>
-            <span class="theme-swatch-label">Premium Showcase<br><small>Glowing rounded cards</small></span>
+            <span class="theme-swatch-label">Soft Light</span>
           </button>
         </div>
       </div>

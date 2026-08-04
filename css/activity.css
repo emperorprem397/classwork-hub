@@ -103,7 +103,7 @@
   word-break: break-word;
   text-align: left;
 }
-.chat-msg.mine .chat-bubble { background: rgba(34, 211, 238, 0.14); border-color: var(--border-strong); }
+.chat-msg.mine .chat-bubble { background: var(--surface-hover); border-color: var(--border-strong); }
 
 .chat-meta-row {
   display: flex;

@@ -189,6 +189,24 @@ function subjectIcon(name) {
   for (let i = 0; i < str.length; i++) hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
   return SUBJECT_ICONS[hash % SUBJECT_ICONS.length];
 }
+// A per-subject two-tone cover gradient for the card's image strip — muted
+// enough to sit quietly behind the floating icon in both Matte Dark and
+// Soft Light. Deterministic (same subject → same cover) via the same hash
+// as the icon. Stands in until real subject photography is wired up.
+const SUBJECT_COVERS = [
+  "linear-gradient(135deg, #3a3a3a, #1a1a1a)",
+  "linear-gradient(135deg, #2d3a3a, #14211f)",
+  "linear-gradient(135deg, #3a352d, #211c14)",
+  "linear-gradient(135deg, #2d2d3a, #17171f)",
+  "linear-gradient(135deg, #3a2d35, #21141c)",
+  "linear-gradient(135deg, #303a2d, #1a2114)",
+];
+function subjectCover(name) {
+  const str = String(name || "");
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = (hash * 17 + str.charCodeAt(i)) >>> 0;
+  return SUBJECT_COVERS[hash % SUBJECT_COVERS.length];
+}
 
 function renderSubjectCard(subject, entry) {
   const card = document.createElement("div");
@@ -205,23 +223,24 @@ function renderSubjectCard(subject, entry) {
   const latest = uploaded && entry.uploads?.length ? entry.uploads[entry.uploads.length - 1] : null;
 
   card.innerHTML = `
-    <div class="subject-card-head">
-      <div>
+    <div class="subject-card-image" style="--subject-cover: ${subjectCover(subject.name)};"></div>
+    <button class="subject-edit-btn" data-action="edit-subject" title="Edit subject">✎</button>
+    <div class="subject-card-body">
+      <div class="subject-card-head">
         <div class="subject-name">${escapeHtml(subject.name)}</div>
         <div class="subject-teacher">${subject.teacher ? escapeHtml(subject.teacher) : "Teacher not set"}</div>
       </div>
-      <button class="subject-edit-btn" data-action="edit-subject" title="Edit subject">✎</button>
-    </div>
-    ${uploaded
-      ? `<span class="badge badge-green">✓ Uploaded by ${uploaderCount} classmate${uploaderCount > 1 ? "s" : ""}</span>`
-      : `<span class="badge badge-cyan">No upload yet today</span>`}
-    ${uploaderNames.length ? `<div class="subject-uploaders">${escapeHtml(uploaderNames.join(", "))}</div>` : ""}
-    ${latest?.title ? `<div class="subject-last-title">"${escapeHtml(latest.title)}"</div>` : ""}
-    <div class="card-actions">
-      <button class="btn btn-ghost btn-sm" data-action="view">${uploaded ? "View" : "Nothing yet"}</button>
-      <button class="btn btn-primary btn-sm" data-action="upload">
-        ${uploaded ? "Add more photos" : "Upload"}
-      </button>
+      ${uploaded
+        ? `<span class="badge badge-green">✓ Uploaded by ${uploaderCount} classmate${uploaderCount > 1 ? "s" : ""}</span>`
+        : `<span class="badge badge-cyan">No upload yet today</span>`}
+      ${uploaderNames.length ? `<div class="subject-uploaders">${escapeHtml(uploaderNames.join(", "))}</div>` : ""}
+      ${latest?.title ? `<div class="subject-last-title">"${escapeHtml(latest.title)}"</div>` : ""}
+      <div class="card-actions">
+        <button class="btn btn-ghost btn-sm" data-action="view">${uploaded ? "View" : "Nothing yet"}</button>
+        <button class="btn btn-primary btn-sm" data-action="upload">
+          ${uploaded ? "Add more photos" : "Upload"}
+        </button>
+      </div>
     </div>
   `;
 

@@ -1,20 +1,22 @@
 .field-label { font-size: 0.78rem; color: var(--text-soft); display: block; margin-bottom: 4px; }
 
-.hw-list { display: flex; flex-direction: column; gap: 0.7rem; }
+/* Rounded parent containers (browse-container, shared with Subjects/My
+   Uploads) hold each list; rows are hairline-divided instead of separate
+   floating cards. */
+.browse-container { padding: 0.3rem 1.3rem; }
+
+.hw-list { display: flex; flex-direction: column; }
 
 .hw-row {
   display: flex;
   align-items: flex-start;
   gap: 0.9rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 1rem 1.2rem;
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
+  padding: 1rem 0.2rem;
+  border-bottom: 1px solid var(--border);
 }
+.hw-row:last-child { border-bottom: none; }
 .hw-row.done { opacity: 0.55; }
-.hw-row.overdue { border-color: rgba(248, 113, 113, 0.45); }
+.hw-row.overdue { background: rgba(239, 68, 68, 0.04); }
 
 .hw-checkbox {
   width: 22px; height: 22px;
@@ -25,16 +27,16 @@
   flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   font-size: 0.85rem;
-  color: var(--cyan-bright);
+  color: var(--on-accent);
   margin-top: 2px;
 }
-.hw-checkbox.checked { background: var(--cyan-dim); border-color: var(--cyan-bright); }
+.hw-checkbox.checked { background: var(--cyan); border-color: var(--cyan); }
 
 .hw-body { flex: 1; min-width: 0; }
 .hw-subject { font-weight: 600; color: var(--text); font-size: 0.9rem; }
 .hw-desc { font-size: 0.85rem; color: var(--text-soft); margin-top: 2px; }
 .hw-meta { font-size: 0.75rem; color: var(--text-faint); margin-top: 6px; }
-.hw-meta.overdue-text { color: #f87171; }
+.hw-meta.overdue-text { color: var(--red); }
 
 /* ---------- Work page tabs (Assignments / Classwork / Homework uploads) ---------- */
 .work-tabs {
@@ -57,19 +59,16 @@
   white-space: nowrap;
 }
 .work-tab:hover { color: var(--text); }
-.work-tab.active { color: var(--cyan-bright); border-bottom-color: var(--cyan); }
+.work-tab.active { color: var(--text); border-bottom-color: var(--cyan); }
 .work-panel { display: none; }
 .work-panel.active { display: block; }
 
-.upload-feed { display: flex; flex-direction: column; gap: 0.8rem; }
+.upload-feed { display: flex; flex-direction: column; }
 .upload-feed-item {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 1rem 1.2rem;
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
+  padding: 1rem 0.2rem;
+  border-bottom: 1px solid var(--border);
 }
+.upload-feed-item:last-child { border-bottom: none; }
 .upload-feed-head {
   display: flex;
   align-items: center;
@@ -79,3 +78,7 @@
 }
 .upload-feed-subject { font-weight: 700; color: var(--text); font-size: 0.92rem; font-family: 'Zilla Slab', serif; }
 .upload-feed-meta { font-size: 0.75rem; color: var(--text-faint); margin-bottom: 6px; }
+
+@media (max-width: 640px) {
+  .browse-container { padding: 0.2rem 0.9rem; }
+}

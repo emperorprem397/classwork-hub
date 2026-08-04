@@ -22,7 +22,7 @@ const sbActivityBadge  = document.getElementById("sbActivityBadge");
 
 let currentUid = null;
 
-// ---------- Theme toggle — cycles Dark Cyan → Light → Monochrome → … ----------
+// ---------- Theme toggle — cycles Matte Dark → Soft Light → … ----------
 if (themeToggleBtn) {
   themeToggleBtn.addEventListener("click", () => {
     const ids = THEMES.map((t) => t.id);

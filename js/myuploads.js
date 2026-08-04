@@ -13,6 +13,7 @@ const userPhoto   = document.getElementById("userPhoto");
 const userNameEl  = document.getElementById("userName");
 const loadingMsg  = document.getElementById("loadingMsg");
 const uploadsList = document.getElementById("uploadsList");
+const uploadsContainer = document.getElementById("uploadsContainer");
 const emptyState  = document.getElementById("emptyState");
 const signOutBtn  = document.getElementById("signOutBtn");
 
@@ -43,6 +44,7 @@ async function loadUploads() {
   loadingMsg.hidden = false;
   loadingMsg.textContent = "Loading your uploads…";
   emptyState.hidden = true;
+  uploadsContainer.hidden = false;
   uploadsList.innerHTML = "";
 
   try {
@@ -50,7 +52,7 @@ async function loadUploads() {
     const snap = await getDocs(query(uploadsCol, orderBy("date", "desc")));
     loadingMsg.hidden = true;
 
-    if (snap.empty) { emptyState.hidden = false; return; }
+    if (snap.empty) { emptyState.hidden = false; uploadsContainer.hidden = true; return; }
 
     snap.forEach((docSnap) => {
       const d = docSnap.data();

@@ -1,153 +1,81 @@
 /* ==========================================================
    Classwork Hub — shared design tokens
-   Dark cyan glassmorphism theme
+   OFFICIAL GLOBAL DESIGN SYSTEM — exactly two permanent themes:
+   "dark" (Matte Dark, default) and "light" (Soft Light).
+   Every component reads only these custom properties, so the two
+   reference images drive the whole app from this one file.
    ========================================================== */
 :root {
-  --bg: #05090c;
-  --bg-glow-1: #0a2a30;
-  --bg-glow-2: #062024;
-  --surface: rgba(18, 30, 34, 0.55);
-  --surface-solid: #0d1518;
-  --surface-hover: rgba(34, 54, 60, 0.65);
-  --border: rgba(103, 232, 249, 0.14);
-  --border-strong: rgba(103, 232, 249, 0.3);
+  --bg: #0a0a0a;
+  --bg-glow-1: #0a0a0a;
+  --bg-glow-2: #0a0a0a;
+  --surface: #141414;
+  --surface-solid: #141414;
+  --surface-hover: #1c1c1c;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.18);
 
-  --text: #eaf6f8;
-  --text-soft: #9db3b8;
-  --text-faint: #5f7a80;
+  --text: #f5f5f5;
+  --text-soft: #a3a3a3;
+  --text-faint: #6b6b6b;
 
-  --cyan: #22d3ee;
-  --cyan-bright: #67e8f9;
-  --cyan-dim: #0e7490;
-  --gold: #f5c451;
-  --red: #f26d6d;
-  --green: #4ade80;
-  --on-accent: #04191c; /* text color used on top of the accent gradient (.btn-primary etc.) */
+  --cyan: #ffffff;
+  --cyan-bright: #ffffff;
+  --cyan-dim: #d4d4d4;
+  --gold: #eab308;
+  --red: #ef4444;
+  --green: #22c55e;
+  --on-accent: #0a0a0a;
 
-  --radius-lg: 20px;
+  --radius-lg: 22px;
   --radius-md: 14px;
-  --radius-sm: 9px;
+  --radius-sm: 10px;
 
-  --shadow-card: 0 24px 60px -24px rgba(0, 0, 0, 0.6);
-  --shadow-glow: 0 0 0 1px var(--border), 0 20px 50px -20px rgba(34, 211, 238, 0.15);
+  --shadow-card: 0 20px 45px -22px rgba(0, 0, 0, 0.65);
+  --shadow-glow: 0 0 0 1px var(--border), 0 20px 45px -20px rgba(0, 0, 0, 0.55);
 
-  --blur: blur(18px);
+  --blur: blur(0px);
 
-  /* Sidebar/topbar surface — was hardcoded dark rgba() before, which is why
-     switching to Light/Monochrome in Settings → Appearance left the nav
-     looking unchanged. Every theme block below now sets its own value. */
-  --nav-surface: rgba(11, 18, 21, 0.92);
-  --nav-surface-soft: rgba(13, 21, 24, 0.5);
+  --nav-surface: #111111;
+  --nav-surface-soft: #161616;
 }
 
 /* ==========================================================
-   Theme overrides — Appearance setting (Settings → Appearance,
-   and the equivalent tab in the admin panel). Every component
-   file only ever reads these custom properties, so swapping the
-   values here re-skins the entire app with no other CSS changes.
-   Applied as data-theme on <html>; "dark" (the default) needs no
-   block since :root above already holds those values.
+   Soft Light — the other permanent theme. Applied as
+   data-theme="light" on <html>. Same token names, so every
+   component re-skins with no other CSS changes.
    ========================================================== */
 :root[data-theme="light"] {
-  --bg: #f3f6f7;
-  --bg-glow-1: #e3f2f4;
-  --bg-glow-2: #edf7f8;
-  --surface: rgba(255, 255, 255, 0.78);
-  --surface-solid: #ffffff;
-  --surface-hover: rgba(224, 241, 243, 0.9);
-  --border: rgba(14, 116, 144, 0.16);
-  --border-strong: rgba(14, 116, 144, 0.32);
-
-  --text: #0b1e22;
-  --text-soft: #4b6267;
-  --text-faint: #7f979e;
-
-  --cyan: #0891b2;
-  --cyan-bright: #0e7490;
-  --cyan-dim: #0e7490;
-  --gold: #a86a0c;
-  --red: #c9392f;
-  --green: #159146;
-  --on-accent: #ffffff;
-
-  --shadow-card: 0 24px 50px -28px rgba(15, 40, 45, 0.22);
-  --shadow-glow: 0 0 0 1px var(--border), 0 20px 40px -22px rgba(8, 145, 178, 0.18);
-
-  --nav-surface: rgba(255, 255, 255, 0.92);
-  --nav-surface-soft: rgba(255, 255, 255, 0.75);
-}
-
-:root[data-theme="monochrome"] {
-  --bg: #ffffff;
+  --bg: #f2f2f2;
   --bg-glow-1: #f2f2f2;
-  --bg-glow-2: #f8f8f8;
-  --surface: rgba(246, 246, 247, 0.88);
-  --surface-solid: #f6f6f7;
-  --surface-hover: rgba(230, 230, 231, 0.92);
-  --border: #e6e6e8;
-  --border-strong: #c9c9cc;
+  --bg-glow-2: #f2f2f2;
+  --surface: #ffffff;
+  --surface-solid: #ffffff;
+  --surface-hover: #f7f7f7;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.16);
 
-  --text: #111112;
-  --text-soft: #55565b;
-  --text-faint: #95969c;
+  --text: #111111;
+  --text-soft: #6b6b6b;
+  --text-faint: #9c9c9c;
 
-  --cyan: #111112;
-  --cyan-bright: #2b2b2e;
-  --cyan-dim: #3a3a3d;
-  --gold: #6b6b6e;
-  --red: #7a3733;
-  --green: #38553f;
+  --cyan: #111111;
+  --cyan-bright: #000000;
+  --cyan-dim: #333333;
+  --gold: #b45309;
+  --red: #dc2626;
+  --green: #16a34a;
   --on-accent: #ffffff;
 
-  --shadow-card: 0 20px 40px -26px rgba(17, 17, 18, 0.18);
-  --shadow-glow: 0 0 0 1px var(--border), 0 16px 34px -20px rgba(17, 17, 18, 0.12);
+  --shadow-card: 0 16px 36px -20px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 0 1px var(--border), 0 16px 34px -18px rgba(0, 0, 0, 0.1);
 
-  --nav-surface: rgba(255, 255, 255, 0.94);
-  --nav-surface-soft: rgba(248, 248, 248, 0.8);
-}
-
-/* Premium Showcase — warm dark, amber glow, rounded pop-up card feel
-   (per the furniture-showcase reference image). Same token set as every
-   other theme, so anything already reading these variables re-skins for
-   free; the dashboard subject cards additionally get a dedicated
-   [data-theme="premium"] treatment in dashboard.css for the glowing
-   rounded pop-up look specifically. */
-:root[data-theme="premium"] {
-  --bg: #1c1815;
-  --bg-glow-1: #3a2a1a;
-  --bg-glow-2: #24201c;
-  --surface: rgba(43, 36, 30, 0.72);
-  --surface-solid: #2b241f;
-  --surface-hover: rgba(60, 49, 40, 0.85);
-  --border: rgba(242, 163, 95, 0.2);
-  --border-strong: rgba(242, 163, 95, 0.45);
-
-  --text: #f6efe4;
-  --text-soft: #cbbba7;
-  --text-faint: #8d7c6c;
-
-  --cyan: #e8823c;
-  --cyan-bright: #f2a35f;
-  --cyan-dim: #b9631f;
-  --gold: #f5c451;
-  --red: #e6584f;
-  --green: #6fbf73;
-  --on-accent: #201409;
-
-  --shadow-card: 0 28px 60px -22px rgba(0, 0, 0, 0.55);
-  --shadow-glow: 0 0 0 1px var(--border), 0 22px 50px -18px rgba(232, 130, 60, 0.32);
-
-  --nav-surface: rgba(28, 24, 21, 0.92);
-  --nav-surface-soft: rgba(30, 26, 22, 0.65);
+  --nav-surface: #ffffff;
+  --nav-surface-soft: #f7f7f7;
 }
 
 * { box-sizing: border-box; }
 
-/* Global link reset — several pages had stray browser-default underlines
-   on nav items, uploader links, etc. Anywhere an underline is actually
-   wanted (e.g. the "forgot password"-style helper links), that page's own
-   CSS sets text-decoration: underline on a specific class, which wins over
-   this plain-tag rule by specificity, so nothing intentional is lost. */
 a { text-decoration: none; color: inherit; }
 
 html, body {
@@ -160,24 +88,16 @@ html, body {
 }
 
 body {
-  background:
-    radial-gradient(1200px 600px at 15% -10%, var(--bg-glow-1), transparent 60%),
-    radial-gradient(900px 500px at 110% 20%, var(--bg-glow-2), transparent 55%),
-    var(--bg);
-  background-attachment: fixed;
+  background: var(--bg);
 }
 
-/* Reusable glass card */
 .glass {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
 }
 
-/* Reusable pill badge */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -188,20 +108,19 @@ body {
   font-weight: 600;
   letter-spacing: 0.02em;
 }
-.badge-cyan   { background: rgba(34, 211, 238, 0.12); color: var(--cyan-bright); }
-.badge-gold   { background: rgba(245, 196, 81, 0.14); color: var(--gold); }
-.badge-red    { background: rgba(242, 109, 109, 0.14); color: var(--red); }
-.badge-green  { background: rgba(74, 222, 128, 0.14); color: var(--green); }
-.badge-approved { background: rgba(74, 222, 128, 0.14); color: var(--green); }
+.badge-cyan   { background: var(--surface-hover); color: var(--text); }
+.badge-gold   { background: rgba(234, 179, 8, 0.14); color: var(--gold); }
+.badge-red    { background: rgba(239, 68, 68, 0.14); color: var(--red); }
+.badge-green  { background: rgba(34, 197, 94, 0.14); color: var(--green); }
+.badge-approved { background: rgba(34, 197, 94, 0.14); color: var(--green); }
 
-/* Reusable buttons */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   padding: 10px 18px;
-  border-radius: var(--radius-sm);
+  border-radius: 999px;
   border: 1px solid transparent;
   font-family: 'Inter', sans-serif;
   font-size: 14px;
@@ -213,10 +132,10 @@ body {
 .btn:disabled { opacity: 0.5; cursor: default; }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--cyan), var(--cyan-dim));
+  background: var(--cyan);
   color: var(--on-accent);
 }
-.btn-primary:hover { box-shadow: 0 8px 24px -8px rgba(34, 211, 238, 0.5); }
+.btn-primary:hover { box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.35); }
 
 .btn-ghost {
   background: transparent;
@@ -225,13 +144,13 @@ body {
 }
 .btn-ghost:hover { border-color: var(--border-strong); color: var(--text); }
 
-.btn-green { background: rgba(74, 222, 128, 0.12); color: var(--green); border-color: rgba(74,222,128,0.25); }
-.btn-green:hover { background: rgba(74, 222, 128, 0.2); }
+.btn-green { background: rgba(34, 197, 94, 0.12); color: var(--green); border-color: rgba(34, 197, 94, 0.25); }
+.btn-green:hover { background: rgba(34, 197, 94, 0.2); }
 
-.btn-red { background: rgba(242, 109, 109, 0.12); color: var(--red); border-color: rgba(242,109,109,0.25); }
-.btn-red:hover { background: rgba(242, 109, 109, 0.2); }
+.btn-red { background: rgba(239, 68, 68, 0.12); color: var(--red); border-color: rgba(239, 68, 68, 0.25); }
+.btn-red:hover { background: rgba(239, 68, 68, 0.2); }
 
-::selection { background: var(--cyan-dim); color: #fff; }
+::selection { background: var(--cyan-dim); color: var(--on-accent); }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }

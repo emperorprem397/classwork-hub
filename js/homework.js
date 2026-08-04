@@ -11,6 +11,7 @@ const userNameEl  = document.getElementById("userName");
 const classLabel  = document.getElementById("classLabel");
 const loadingMsg  = document.getElementById("loadingMsg");
 const hwList      = document.getElementById("hwList");
+const hwListContainer = document.getElementById("hwListContainer");
 const emptyState  = document.getElementById("emptyState");
 const signOutBtn  = document.getElementById("signOutBtn");
 const addHwBtn    = document.getElementById("addHwBtn");
@@ -34,12 +35,14 @@ const feedEls = {
   classwork: {
     loading: document.getElementById("classworkLoadingMsg"),
     feed:    document.getElementById("classworkFeed"),
+    container: document.getElementById("classworkFeedContainer"),
     empty:   document.getElementById("classworkEmptyState"),
     loaded:  false,
   },
   homework: {
     loading: document.getElementById("homeworkLoadingMsg"),
     feed:    document.getElementById("homeworkFeed"),
+    container: document.getElementById("homeworkFeedContainer"),
     empty:   document.getElementById("homeworkEmptyState"),
     loaded:  false,
   },
@@ -109,8 +112,9 @@ async function loadHomework() {
     const snap = await getDocs(query(hwCol, orderBy("dueDate", "asc")));
     loadingMsg.hidden = true;
 
-    if (snap.empty) { emptyState.hidden = false; hwList.innerHTML = ""; return; }
+    if (snap.empty) { emptyState.hidden = false; hwListContainer.hidden = true; hwList.innerHTML = ""; return; }
     emptyState.hidden = true;
+    hwListContainer.hidden = false;
 
     const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
@@ -219,12 +223,14 @@ async function loadUploadFeed(type) {
 
   els.loading.hidden = false;
   els.empty.hidden = true;
+  els.container.hidden = false;
   els.feed.innerHTML = "";
 
   try {
     if (subjects.length === 0) {
       els.loading.hidden = true;
       els.empty.hidden = false;
+      els.container.hidden = true;
       els.loaded = true;
       return;
     }
@@ -258,6 +264,7 @@ async function loadUploadFeed(type) {
 
     if (items.length === 0) {
       els.empty.hidden = false;
+      els.container.hidden = true;
       els.loaded = true;
       return;
     }

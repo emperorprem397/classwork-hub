@@ -10,6 +10,7 @@ const userNameEl = document.getElementById("userName");
 const classLabel = document.getElementById("classLabel");
 const loadingMsg = document.getElementById("loadingMsg");
 const lbList     = document.getElementById("lbList");
+const lbListContainer = document.getElementById("lbListContainer");
 const emptyState = document.getElementById("emptyState");
 const signOutBtn = document.getElementById("signOutBtn");
 
@@ -54,7 +55,8 @@ onAuthStateChanged(auth, async (user) => {
       .filter((d) => d.banned !== true && d.role !== "admin")
       .sort((a, b) => (b.xp ?? 0) - (a.xp ?? 0));
 
-    if (students.length === 0) { emptyState.hidden = false; return; }
+    if (students.length === 0) { emptyState.hidden = false; lbListContainer.hidden = true; return; }
+    lbListContainer.hidden = false;
 
     lbList.innerHTML = "";
     students.forEach((d, i) => {

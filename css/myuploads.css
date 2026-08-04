@@ -1,13 +1,14 @@
-.uploads-list { display: flex; flex-direction: column; gap: 0.8rem; }
+/* One large rounded parent container holding every upload row — same
+   pattern as Subjects (css/subjects.css) per the official design system. */
+.browse-container { padding: 0.4rem 1.4rem; }
+
+.uploads-list { display: flex; flex-direction: column; }
 
 .upload-row {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 1rem 1.2rem;
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
+  padding: 1.2rem 0.2rem;
+  border-bottom: 1px solid var(--border);
 }
+.upload-row:last-child { border-bottom: none; }
 
 .upload-row-head {
   display: flex;
@@ -21,10 +22,14 @@
 
 .upload-count-badge {
   font-size: 0.72rem;
-  color: var(--cyan-bright);
-  background: rgba(34, 211, 238, 0.1);
-  border: 1px solid var(--cyan-dim);
+  color: var(--text);
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
   border-radius: 999px;
   padding: 2px 10px;
   margin-left: 8px;
+}
+
+@media (max-width: 640px) {
+  .browse-container { padding: 0.2rem 0.9rem; }
 }

@@ -1,6 +1,6 @@
 # Classwork Hub — Project Progress
 
-**Version:** 1.1 (Round 17 — chat routing, mandatory work-type, safer reset, Premium theme)
+**Version:** 1.5 (Round 21 — Profile/Search restyled; Activity/Chat, Login, Admin still pending)
 **Live site:** https://classwork-hub.vercel.app/
 **Stack:** Plain HTML/CSS/JavaScript (ES modules, no bundler/framework) — Firebase Auth (Google popup) + Firestore + Cloudinary (images/PDFs) — hosted on GitHub, deployed on Vercel.
 
@@ -62,7 +62,7 @@ so it was kept as-is rather than churned for its own sake.
 - **Activity Log** — who added/edited/deleted a subject or made an upload, append-only, real profile names
 - **Class Chat** — real-time, edit/delete own message, typing indicator, 48h app-level auto-expiry; topbar bell deep-links straight to the Chat tab (`activity.html?tab=chat`)
 - **Universal Search** — subjects, uploads, dates
-- **Theming** — Dark Cyan / Light / Monochrome / **Premium Showcase** (warm amber glow, rounded pop-up dashboard cards), synced to Firestore, toggleable from the top navbar
+- **Theming** — exactly two official themes, Matte Dark (default) and Soft Light, synced to Firestore, toggleable from the top navbar or Settings/Admin → Appearance. Sidebar, topbar, and dashboard subject cards fully match the reference design; other pages inherit the color tokens but haven't had page-specific layout rework yet (see Pending below).
 - **Top navbar** — search shortcut, theme toggle, notification bell (unread dots for chat/activity/dashboard), profile dropdown
 - **Settings** — tabbed (Account/Appearance/Notifications/Privacy/About), avatar picker (Google photo/upload/colored initials), Contact Admin (WhatsApp/email/in-app), "Start Fresh" account reset
 - **Admin panel** — schools/classes/subjects/users management, Pending Schools approval, Messages inbox, Activity Log, Browse Classes (join-free browsing of any school/class's subjects/students/uploads), admin superpowers within a joined class (delete any upload, moderate any chat message)
@@ -132,12 +132,25 @@ To set this up on a fresh Cloudinary account: create an unsigned upload preset, 
 
 ## Pending / not built yet
 
+**Round 18–21 design-system rollout (in progress):**
+- [x] Sidebar, topbar, Dashboard subject cards
+- [x] Subjects and My Uploads restyled to the "large rounded parent container" layout
+- [x] Homework (all 3 tabs) and Leaderboard restyled to the same container layout
+- [x] Profile hero card polished; Search restyled to grouped rounded containers
+- [x] Old hardcoded cyan accent colors swept and retinted across the whole codebase to match the 2-theme token system
+- [ ] Activity/Chat page — inherits new colors/sidebar/topbar automatically, page-specific layout not yet reworked to the container style
+- [ ] Login (`index.html`) and School Selection pages — not yet on the shared token system at all (`index.html` uses its own standalone `css/style.css`)
+- [ ] Welcome wizard steps beyond the Appearance step
+- [ ] Admin panel's dashboard/users/schools/uploads views — inherit the 2-theme colors automatically, but not yet visually reworked to the new layout language
+- [ ] Real per-subject imagery (chemistry beakers, physics Newton's cradle, etc.) — currently deterministic gradient placeholders on the dashboard cards
+- [ ] Modals, empty states, and loading screens — individual pass against the reference not yet done
+
+**Other:**
 - Comments on uploads
 - In-app announcements (separate from the Activity Log)
 - Notebook viewer upgrade beyond "opens in new tab" — in-page zoom/fullscreen for images specifically
 - Leaderboard time filters (weekly/monthly/all-time)
 - Contribution calendar (GitHub-style heatmap on Profile)
-- Profile page redesign
 - Real per-file identity for pre-Round-16 legacy uploads
 - Precise unread counts (currently dot-only, by design)
 

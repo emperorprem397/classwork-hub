@@ -1,29 +1,32 @@
-.lb-list { display: flex; flex-direction: column; gap: 0.6rem; }
+.browse-container { padding: 0.3rem 1.3rem; }
+
+.lb-list { display: flex; flex-direction: column; }
 
 .lb-row {
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 0.9rem 1.2rem;
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
+  padding: 0.9rem 0.2rem;
+  border-bottom: 1px solid var(--border);
 }
-.lb-row.me { border-color: var(--border-strong); box-shadow: var(--shadow-glow); }
+.lb-row:last-child { border-bottom: none; }
+.lb-row.me { background: var(--surface-hover); border-radius: var(--radius-sm); margin: 0 -0.6rem; padding: 0.9rem 0.8rem; border-bottom: 1px solid var(--border); }
 
 .lb-pos { width: 28px; text-align: center; font-family: 'Zilla Slab', serif; font-weight: 700; color: var(--text-faint); flex-shrink: 0; }
 .lb-row:nth-child(1) .lb-pos { color: var(--gold); }
-.lb-row:nth-child(2) .lb-pos { color: #cbd5e1; }
-.lb-row:nth-child(3) .lb-pos { color: #d18a52; }
+.lb-row:nth-child(2) .lb-pos { color: var(--text-soft); }
+.lb-row:nth-child(3) .lb-pos { color: #b5834a; }
 
-.lb-photo { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--cyan-dim); flex-shrink: 0; }
+.lb-photo { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border); flex-shrink: 0; }
 
 .lb-info { flex: 1; min-width: 0; }
 .lb-name { font-weight: 600; color: var(--text); font-size: 0.92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lb-sub { font-size: 0.76rem; color: var(--text-faint); margin-top: 1px; }
 
 .lb-xp { text-align: right; flex-shrink: 0; }
-.lb-xp-num { font-family: 'Zilla Slab', serif; font-weight: 700; color: var(--cyan-bright); font-size: 1.05rem; }
+.lb-xp-num { font-family: 'Zilla Slab', serif; font-weight: 700; color: var(--text); font-size: 1.05rem; }
 .lb-xp-label { font-size: 0.65rem; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.04em; }
+
+@media (max-width: 640px) {
+  .browse-container { padding: 0.2rem 0.9rem; }
+}

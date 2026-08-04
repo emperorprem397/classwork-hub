@@ -10,10 +10,8 @@ import { doc, getDoc, updateDoc }
   from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 export const THEMES = [
-  { id: "dark", label: "Dark Cyan", sub: "Default" },
-  { id: "light", label: "Light" },
-  { id: "monochrome", label: "Monochrome" },
-  { id: "premium", label: "Premium Showcase" },
+  { id: "dark", label: "Matte Dark", sub: "Default" },
+  { id: "light", label: "Soft Light" },
 ];
 
 const STORAGE_KEY = "cwhTheme";

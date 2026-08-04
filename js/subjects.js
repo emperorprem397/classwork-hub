@@ -9,6 +9,7 @@ const userPhoto   = document.getElementById("userPhoto");
 const userNameEl  = document.getElementById("userName");
 const loadingMsg  = document.getElementById("loadingMsg");
 const listEl      = document.getElementById("subjectsBrowseList");
+const containerEl = document.getElementById("subjectsBrowseContainer");
 const emptyState  = document.getElementById("emptyState");
 const signOutBtn  = document.getElementById("signOutBtn");
 
@@ -55,7 +56,7 @@ async function loadSubjects() {
     const snap = await getDocs(query(subjectsCol, orderBy("name")));
     loadingMsg.hidden = true;
 
-    if (snap.empty) { emptyState.hidden = false; return; }
+    if (snap.empty) { emptyState.hidden = false; containerEl.hidden = true; return; }
 
     const subjects = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     listEl.innerHTML = "";
@@ -76,6 +77,17 @@ async function loadSubjects() {
   }
 }
 
+// Same deterministic per-subject icon as the Dashboard cards (js/dashboard.js)
+// — small, inline duplicate rather than a shared import since this page has
+// no other dependency on dashboard.js and the hash is tiny.
+const SUBJECT_ICONS = ["📘", "📗", "📙", "📕", "🧮", "🔬", "🎨", "🌍", "🎵", "⚗️", "📐", "🧪"];
+function subjectIcon(name) {
+  const str = String(name || "");
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
+  return SUBJECT_ICONS[hash % SUBJECT_ICONS.length];
+}
+
 function renderSubjectRow(subject, entrySnaps) {
   const card = document.createElement("div");
   card.className = "subject-browse-card";
@@ -94,7 +106,10 @@ function renderSubjectRow(subject, entrySnaps) {
   }).join("");
 
   card.innerHTML = `
-    <div class="subject-browse-name">${escapeHtml(subject.name)}</div>
+    <div class="subject-browse-head">
+      <span class="subject-browse-icon">${subjectIcon(subject.name)}</span>
+      <div class="subject-browse-name">${escapeHtml(subject.name)}</div>
+    </div>
     <div class="day-chip-row">${chips}</div>
   `;
 
