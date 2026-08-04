@@ -1,6 +1,6 @@
 # Classwork Hub — Project Progress
 
-**Version:** 1.6 (Round 22 — real subject cover photos + custom cover upload, profile photo crop/preview; Activity/Chat, Login, Admin still pending)
+**Version:** 1.7 (Round 23 — glassmorphic navbar, standardized confirm dialogs, per-subject "new" glow, onboarding race-condition bug fixed, gray-toned dark theme; subject coverflow carousel + editable hero section still pending)
 **Live site:** https://classwork-hub.vercel.app/
 **Stack:** Plain HTML/CSS/JavaScript (ES modules, no bundler/framework) — Firebase Auth (Google popup) + Firestore + Cloudinary (images/PDFs) — hosted on GitHub, deployed on Vercel.
 
@@ -140,11 +140,19 @@ To set this up on a fresh Cloudinary account: create an unsigned upload preset, 
 - [x] Old hardcoded cyan accent colors swept and retinted across the whole codebase to match the 2-theme token system
 - [x] Real per-subject imagery — keyword-matched default photos on the dashboard subject cards, plus a per-subject custom cover upload (square crop) in Add/Edit Subject
 - [x] Profile photo upload now goes through a preview + drag + zoom crop step (`js/cropper.js`) instead of squashing whatever ratio was picked — fixed in Settings and the Welcome wizard
+- [x] Navbar redesigned — glassmorphic sticky/blurred, search pill, message icon, Work shortcut, enlarged avatar
+- [x] All destructive confirmations standardized to one shared modal component (`js/confirm-dialog.js`) instead of a mix of custom modals and browser `confirm()`
+- [x] Dashboard subject cards show a "new activity" glow + badge for subjects with unseen uploads, on top of the existing sidebar dot
+- [x] Onboarding-skip-after-reset bug found (auth.js race condition) and fixed
+- [x] Matte Dark retoned — layered charcoal grays instead of near-flat black, subtle gradient wash
+- [ ] Subject cards as a coverflow/3D carousel (center-focused, hover-to-enlarge, beveled-light card treatment) — biggest remaining piece from the reference images
+- [ ] Editable hero section (minimalist hero image + typography-picker tagline) on the dashboard
 - [ ] Activity/Chat page — inherits new colors/sidebar/topbar automatically, page-specific layout not yet reworked to the container style
 - [ ] Login (`index.html`) and School Selection pages — not yet on the shared token system at all (`index.html` uses its own standalone `css/style.css`)
 - [ ] Welcome wizard steps beyond the Appearance step
 - [ ] Admin panel's dashboard/users/schools/uploads views — inherit the 2-theme colors automatically, but not yet visually reworked to the new layout language
 - [ ] Modals, empty states, and loading screens — individual pass against the reference not yet done
+- [ ] Mobile-specific pass on the Round 23 navbar/theme changes (built with a mobile breakpoint in the CSS, but not device-tested this round)
 
 **Other:**
 - Comments on uploads

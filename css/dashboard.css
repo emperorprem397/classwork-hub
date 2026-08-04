@@ -150,11 +150,15 @@ body { font-family: 'Inter', sans-serif; }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.1rem 0.2rem 1.4rem;
-  background: transparent;
+  padding: 0.9rem 1.8rem;
+  margin-bottom: 0.5rem;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--glass-border);
   position: sticky;
   top: 0;
-  z-index: 5;
+  z-index: 20;
 }
 
 .page-title {
@@ -166,7 +170,7 @@ body { font-family: 'Inter', sans-serif; }
 .page-sub { font-size: 0.8rem; color: var(--text-soft); margin-top: 2px; }
 
 .user-box { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; color: var(--text-soft); }
-.user-photo { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border); }
+.user-photo { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--border-strong); }
 
 .content { padding: 1.8rem; flex: 1; }
 
@@ -237,6 +241,19 @@ body { font-family: 'Inter', sans-serif; }
   border-color: var(--border-strong);
   box-shadow: var(--shadow-glow);
 }
+/* "New activity" state — set on cards for subjects that got an upload (or
+   other activity-log entry) since this person last opened the dashboard.
+   A quiet pulsing ring, not a jumpy animation; stops the moment the person
+   reopens the dashboard, since that's what clears lastSeenUploads. */
+.subject-card--new {
+  border-color: var(--cyan-dim);
+  animation: subjectNewPulse 2.2s ease-in-out 3;
+}
+@keyframes subjectNewPulse {
+  0%, 100% { box-shadow: var(--shadow-card); }
+  50% { box-shadow: 0 0 0 3px var(--cyan-dim), var(--shadow-glow); }
+}
+.subject-new-badge { margin-left: 6px; vertical-align: middle; padding: 2px 8px; font-size: 10px; }
 /* Image strip — a deterministic per-subject gradient stands in for real
    photography until subject-specific imagery is wired up (see Round 18
    checklist); it still reads as a distinct "cover" per subject. */
@@ -535,6 +552,29 @@ body { font-family: 'Inter', sans-serif; }
 }
 .icon-btn:hover { border-color: var(--border-strong); background: var(--surface-hover); color: var(--text); }
 
+/* Search — a soft rounded pill with a dimmed "Search" label rather than a
+   bare icon, so it reads as an affordance rather than just another button.
+   Clicking still just goes to search.html; the real input lives there. */
+.topbar-search {
+  display: flex; align-items: center; gap: 7px;
+  height: 38px;
+  padding: 0 14px 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-faint);
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+.topbar-search:hover { border-color: var(--border-strong); background: var(--surface-hover); color: var(--text-soft); }
+.topbar-search-icon { font-size: 0.9rem; line-height: 1; opacity: 0.85; }
+.topbar-search-label { white-space: nowrap; }
+@media (max-width: 640px) {
+  .topbar-search-label { display: none; }
+  .topbar-search { width: 38px; height: 38px; padding: 0; justify-content: center; border-radius: 999px; }
+}
+
 .notif-dot {
   position: absolute;
   top: 6px; right: 6px;
@@ -548,6 +588,7 @@ body { font-family: 'Inter', sans-serif; }
 .avatar-btn {
   border: none; background: none; padding: 0; cursor: pointer;
   display: flex; align-items: center; border-radius: 50%;
+  margin-left: 2px;
 }
 .avatar-btn .user-photo { display: block; }
 .profile-dropdown {

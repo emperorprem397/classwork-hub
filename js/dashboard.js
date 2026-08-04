@@ -3,7 +3,7 @@ import { syncThemeFromCloud } from "./theme.js";
 import { onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
-  doc, getDoc, updateDoc, deleteDoc, collection, getDocs, addDoc, query, orderBy, runTransaction, serverTimestamp
+  doc, getDoc, updateDoc, deleteDoc, collection, getDocs, addDoc, query, orderBy, where, limit, runTransaction, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 // NOTE: updateDoc above is reused for both the profile-sync background task
 // and the new "edit subject" feature below — no new imports needed.
@@ -13,6 +13,7 @@ import {
   uploadOneFile, fileThumbHtml, isPdfFile, getSubjectCoverImage
 } from "./helpers.js";
 import { openImageCropper } from "./cropper.js";
+import { confirmDialog } from "./confirm-dialog.js";
 
 const userPhoto     = document.getElementById("userPhoto");
 const userNameEl    = document.getElementById("userName");
@@ -237,15 +238,37 @@ async function loadSubjects() {
       )
     );
 
+    // Which subjects had activity (an upload, etc.) since this person last
+    // opened the dashboard — used to put a "new" glow on just those cards
+    // instead of a single generic sidebar dot. Best-effort: any failure
+    // here just means no cards glow this load, nothing else breaks.
+    const newSubjectNames = await getRecentlyActiveSubjectNames();
+
     subjects.forEach((subj, i) => {
       const entrySnap = entrySnaps[i];
       const entry = entrySnap.exists() ? entrySnap.data() : null;
-      subjectsGrid.appendChild(renderSubjectCard(subj, entry));
+      subjectsGrid.appendChild(renderSubjectCard(subj, entry, newSubjectNames.has(subj.name)));
     });
   } catch (err) {
     console.error(err);
     loadingMsg.hidden = false;
     loadingMsg.textContent = "Couldn't load your subjects — check your connection and refresh.";
+  }
+}
+
+async function getRecentlyActiveSubjectNames() {
+  try {
+    const { schoolId, classId } = currentProfile;
+    const lastSeen = currentProfile.lastSeenUploads?.toDate
+      ? currentProfile.lastSeenUploads.toDate()
+      : new Date(0);
+    const activityCol = collection(db, "schools", schoolId, "classes", classId, "activity");
+    const q = query(activityCol, where("createdAt", ">", lastSeen), limit(25));
+    const snap = await getDocs(q);
+    return new Set(snap.docs.map((d) => d.data().subjectName).filter(Boolean));
+  } catch (err) {
+    console.error("Recent-activity check failed:", err);
+    return new Set();
   }
 }
 
@@ -279,9 +302,9 @@ function subjectCover(name) {
   return SUBJECT_COVERS[hash % SUBJECT_COVERS.length];
 }
 
-function renderSubjectCard(subject, entry) {
+function renderSubjectCard(subject, entry, isNew) {
   const card = document.createElement("div");
-  card.className = "subject-card";
+  card.className = "subject-card" + (isNew ? " subject-card--new" : "");
   card.dataset.icon = subjectIcon(subject.name);
 
   const uploaded = !!entry && (entry.uploadedBy?.length || 0) > 0;
@@ -302,7 +325,7 @@ function renderSubjectCard(subject, entry) {
     <button class="subject-edit-btn" data-action="edit-subject" title="Edit subject">✎</button>
     <div class="subject-card-body">
       <div class="subject-card-head">
-        <div class="subject-name">${escapeHtml(subject.name)}</div>
+        <div class="subject-name">${escapeHtml(subject.name)}${isNew ? '<span class="badge badge-cyan subject-new-badge">New</span>' : ""}</div>
         <div class="subject-teacher">${subject.teacher ? escapeHtml(subject.teacher) : "Teacher not set"}</div>
       </div>
       ${uploaded
@@ -413,7 +436,12 @@ modalClose.addEventListener("click", closeModal);
 // Admin-only: remove any student's upload record straight from the "Already
 // shared today" list, no need to go through their own My Uploads page.
 async function adminDeleteUploadRecord(subjectId, recordId) {
-  if (!confirm("Delete this student's upload? This can't be undone.")) return;
+  const confirmed = await confirmDialog({
+    title: "Delete this upload?",
+    detail: "This removes the student's upload record for today. This can't be undone.",
+    confirmLabel: "Yes, delete upload",
+  });
+  if (!confirmed) return;
   const { schoolId, classId } = currentProfile;
   const entryRef = doc(db, "schools", schoolId, "classes", classId, "subjects", subjectId, "entries", TODAY);
 
@@ -602,9 +630,11 @@ editSubjectSubmit.addEventListener("click", async () => {
 if (deleteSubjectBtn) {
   deleteSubjectBtn.addEventListener("click", async () => {
     if (!editingSubjectId) return;
-    const confirmed = confirm(
-      `Delete "${editingSubjectName}"? This removes it (and its upload history) for the whole class. This can't be undone.`
-    );
+    const confirmed = await confirmDialog({
+      title: "Delete this subject?",
+      detail: `This removes <b>${escapeHtml(editingSubjectName)}</b> and its whole upload history for the entire class. This can't be undone.`,
+      confirmLabel: "Yes, delete subject",
+    });
     if (!confirmed) return;
 
     deleteSubjectBtn.disabled = true;

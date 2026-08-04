@@ -18,10 +18,22 @@ import {
 const loginBtns = Array.from(document.querySelectorAll(".google-signin-btn"));
 const statusEl = document.getElementById("login-status");
 
+// Guards against a race with the onAuthStateChanged listener below: the
+// instant signInWithPopup resolves, Firebase fires that listener too — and
+// its own getDoc() can catch a brand-new/just-reset account *before*
+// ensureUserProfile()'s setDoc() below has actually created the doc. That
+// listener would then see "no profile" and redirect straight to
+// school-select.html, winning the race against this handler's correct
+// redirect to welcome.html — silently skipping the profile-setup wizard.
+// Setting this flag while the button's own flow is in charge tells the
+// listener to sit out and let this handler make the one and only redirect.
+let signingInViaButton = false;
+
 loginBtns.forEach((btn) => {
   const originalLabel = btn.innerHTML;
   btn.addEventListener("click", async () => {
     setLoading(true, originalLabel);
+    signingInViaButton = true;
     try {
       // Popup-based sign-in — same approach already working reliably in
       // admin/index.html on both desktop and mobile. Turns out the earlier
@@ -40,6 +52,7 @@ loginBtns.forEach((btn) => {
         await signOut(auth);
         showStatus("This account has been blocked by an admin. Contact your school admin if you think this is a mistake.");
         setLoading(false, originalLabel);
+        signingInViaButton = false;
         return;
       }
       // First-ever sign-in gets the optional welcome/profile-setup wizard;
@@ -53,14 +66,17 @@ loginBtns.forEach((btn) => {
       console.error(err);
       showStatus(getFriendlyError(err.code));
       setLoading(false, originalLabel);
+      signingInViaButton = false;
     }
   });
 });
 
 // If already logged in (e.g. returning visit, session still valid), skip
 // straight past login — but re-check banned status first, in case they
-// were blocked after their last session started.
+// were blocked after their last session started. Sits out entirely while
+// the button-click handler above is mid-flow (see signingInViaButton).
 onAuthStateChanged(auth, async (user) => {
+  if (signingInViaButton) return;
   if (user) {
     const snap = await getDoc(doc(db, "users", user.uid));
     if (snap.exists() && snap.data().banned === true) {

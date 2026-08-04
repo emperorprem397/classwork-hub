@@ -1,0 +1,28 @@
+/* Shared confirm dialog — injected dynamically by js/confirm-dialog.js, so
+   this isn't linked from any <head> directly. Deliberately mirrors
+   css/settings.css's .reset-modal rules (same class names) so every
+   destructive confirmation across the app — delete subject, delete an
+   upload, reset account — reads as the same component instead of some
+   being a plain browser confirm() and others a polished modal. */
+.reset-modal { max-width: 420px; text-align: center; }
+.reset-modal-icon { font-size: 2.2rem; margin-bottom: 4px; }
+.reset-modal-title {
+  font-family: 'Zilla Slab', serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--red);
+  text-shadow: 0 0 22px rgba(242, 109, 109, 0.45);
+  margin: 0 0 10px;
+}
+.reset-modal-detail {
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  line-height: 1.5;
+  margin: 0 0 18px;
+}
+.reset-modal-actions { display: flex; gap: 10px; }
+.reset-confirm-btn {
+  box-shadow: 0 0 0 0 rgba(242, 109, 109, 0.5);
+  transition: box-shadow 0.25s ease, transform 0.1s ease, background 0.15s ease;
+}
+.reset-confirm-btn:hover { box-shadow: 0 0 20px 2px rgba(242, 109, 109, 0.5); }

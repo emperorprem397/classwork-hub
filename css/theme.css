@@ -6,14 +6,14 @@
    reference images drive the whole app from this one file.
    ========================================================== */
 :root {
-  --bg: #0a0a0a;
-  --bg-glow-1: #0a0a0a;
+  --bg: #0d0d0d;
+  --bg-glow-1: #1c1c1c;
   --bg-glow-2: #0a0a0a;
-  --surface: #141414;
-  --surface-solid: #141414;
-  --surface-hover: #1c1c1c;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.18);
+  --surface: #161616;
+  --surface-solid: #161616;
+  --surface-hover: #202020;
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.19);
 
   --text: #f5f5f5;
   --text-soft: #a3a3a3;
@@ -36,8 +36,14 @@
 
   --blur: blur(0px);
 
-  --nav-surface: #111111;
-  --nav-surface-soft: #161616;
+  --nav-surface: #131313;
+  --nav-surface-soft: #1a1a1a;
+
+  /* Glassmorphic navbar — translucent + blurred so the page shows through
+     softly instead of the topbar looking like a flat opaque bar. */
+  --glass-bg: rgba(20, 20, 20, 0.62);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: blur(18px) saturate(150%);
 }
 
 /* ==========================================================
@@ -46,9 +52,9 @@
    component re-skins with no other CSS changes.
    ========================================================== */
 :root[data-theme="light"] {
-  --bg: #f2f2f2;
-  --bg-glow-1: #f2f2f2;
-  --bg-glow-2: #f2f2f2;
+  --bg: #f0f0f0;
+  --bg-glow-1: #ffffff;
+  --bg-glow-2: #e8e8e8;
   --surface: #ffffff;
   --surface-solid: #ffffff;
   --surface-hover: #f7f7f7;
@@ -72,6 +78,10 @@
 
   --nav-surface: #ffffff;
   --nav-surface-soft: #f7f7f7;
+
+  --glass-bg: rgba(255, 255, 255, 0.66);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-blur: blur(18px) saturate(150%);
 }
 
 * { box-sizing: border-box; }
@@ -88,7 +98,15 @@ html, body {
 }
 
 body {
-  background: var(--bg);
+  /* Subtle layered gray tone instead of flat black/white — a soft radial
+     wash top-left plus a faint sheen bottom-right, both anchored on the
+     theme's own tokens so it re-skins automatically between Matte Dark
+     and Soft Light. Fixed attachment so it doesn't visibly scroll/repeat. */
+  background:
+    radial-gradient(1100px 700px at 12% -8%, var(--bg-glow-1) 0%, transparent 60%),
+    radial-gradient(900px 600px at 100% 100%, var(--bg-glow-2) 0%, transparent 55%),
+    var(--bg);
+  background-attachment: fixed;
 }
 
 .glass {

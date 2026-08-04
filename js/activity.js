@@ -8,6 +8,7 @@ import {
   onSnapshot, serverTimestamp, Timestamp,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { escapeHtml, ACTIVITY_META, timeAgo } from "./helpers.js";
+import { confirmDialog } from "./confirm-dialog.js";
 
 const userPhoto    = document.getElementById("userPhoto");
 const userNameEl   = document.getElementById("userName");
@@ -277,7 +278,12 @@ function beginEditMessage(id, wrap, currentText) {
 }
 
 async function deleteMessage(id) {
-  if (!confirm("Delete this message? This can't be undone.")) return;
+  const confirmed = await confirmDialog({
+    title: "Delete this message?",
+    detail: "This removes it from the class chat for everyone. This can't be undone.",
+    confirmLabel: "Yes, delete message",
+  });
+  if (!confirmed) return;
   try {
     await deleteDoc(doc(chatCol(), id));
   } catch (err) {

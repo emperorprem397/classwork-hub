@@ -8,6 +8,7 @@ import {
   escapeHtml, formatDateLabel, typeBadgeHtml, logActivity,
   fileThumbHtml, uploadOneFile, isPdfFile
 } from "./helpers.js";
+import { confirmDialog } from "./confirm-dialog.js";
 
 const userPhoto   = document.getElementById("userPhoto");
 const userNameEl  = document.getElementById("userName");
@@ -226,13 +227,18 @@ async function updateRecordFiles(deleteKey, newItems, myUploadDocData) {
   }
 }
 
-function handleRemoveFile(deleteKey, idx, myUploadDocData, currentItems) {
+async function handleRemoveFile(deleteKey, idx, myUploadDocData, currentItems) {
   const newItems = currentItems.slice();
   newItems.splice(idx, 1);
-  const confirmMsg = newItems.length === 0
-    ? "This is the last file in this upload — remove it and delete the whole upload?"
-    : "Remove this file from the upload? Can't be undone.";
-  if (!confirm(confirmMsg)) return;
+  const isLast = newItems.length === 0;
+  const confirmed = await confirmDialog({
+    title: isLast ? "Delete this whole upload?" : "Remove this file?",
+    detail: isLast
+      ? "This is the last file in this upload — removing it deletes the whole upload entry. This can't be undone."
+      : "This removes just this file from the upload. This can't be undone.",
+    confirmLabel: isLast ? "Yes, delete upload" : "Yes, remove file",
+  });
+  if (!confirmed) return;
   updateRecordFiles(deleteKey, newItems, myUploadDocData);
 }
 
