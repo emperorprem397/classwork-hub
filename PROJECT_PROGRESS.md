@@ -1,6 +1,6 @@
 # Classwork Hub — Project Progress
 
-**Version:** 1.8 (Round 24 — minimalist line icons for sidebar + navbar, live "Upload one" avatar preview; subject coverflow carousel + editable hero section still pending)
+**Version:** 1.9 (Round 25 — editable hero banner, subject coverflow carousel, scroll-reveal on dashboard)
 **Live site:** https://classwork-hub.vercel.app/
 **Stack:** Plain HTML/CSS/JavaScript (ES modules, no bundler/framework) — Firebase Auth (Google popup) + Firestore + Cloudinary (images/PDFs) — hosted on GitHub, deployed on Vercel.
 
@@ -147,8 +147,10 @@ To set this up on a fresh Cloudinary account: create an unsigned upload preset, 
 - [x] Matte Dark retoned — layered charcoal grays instead of near-flat black, subtle gradient wash
 - [x] Sidebar + navbar icons replaced with minimalist line-icon SVGs instead of emoji
 - [x] "Upload one" avatar tile now shows an actual live preview of the chosen photo (Welcome wizard + Settings), and Settings restores the correct active tile/preview on reload
-- [ ] Subject cards as a coverflow/3D carousel (center-focused, hover-to-enlarge, beveled-light card treatment) — biggest remaining piece from the reference images
-- [ ] Editable hero section (minimalist hero image + typography-picker tagline) on the dashboard
+- [x] Subject cards as a coverflow/3D carousel (center-focused, hover-to-enlarge, beveled-light card treatment) — done
+- [x] Editable hero section (minimalist hero image + typography-picker tagline) on the dashboard — done, class-shared like subjects
+- [x] Subtle scroll-reveal animation on the dashboard (hero, profile card, Today's Work) — fail-open by design
+- [ ] Scroll-reveal on other pages (currently dashboard-only)
 - [ ] Activity/Chat page — inherits new colors/sidebar/topbar automatically, page-specific layout not yet reworked to the container style
 - [ ] Login (`index.html`) and School Selection pages — not yet on the shared token system at all (`index.html` uses its own standalone `css/style.css`)
 - [ ] Welcome wizard steps beyond the Appearance step

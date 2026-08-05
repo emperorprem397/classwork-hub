@@ -224,6 +224,62 @@ body { font-family: 'Inter', sans-serif; }
   padding-top: 1.6rem;
 }
 
+/* ---------- Subject coverflow ----------
+   The "Today's Work" subject cards render as a 3D coverflow instead of a
+   flat grid: the focused card sits centered and full-size, its neighbors
+   shrink/rotate/fade away on either side. All positioning math lives in
+   dashboard.js (initCoverflow/renderCoverflow) — this CSS just establishes
+   the stacking context, card sizing, and a transition so JS-driven
+   transform changes animate smoothly instead of jumping. */
+.subjects-coverflow-wrap {
+  position: relative;
+  padding: 2.2rem 0.5rem 3.2rem;
+  perspective: 1600px;
+  overflow-x: hidden; /* side cards peek in and clip at the edge, standard coverflow behavior — keeps mobile from gaining a horizontal scrollbar */
+}
+.subjects-coverflow {
+  position: relative;
+  height: 380px;
+}
+.subjects-coverflow .subject-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(260px, 76vw);
+  margin: 0;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  transition: transform 0.45s cubic-bezier(0.22, 0.9, 0.3, 1), opacity 0.4s ease, box-shadow 0.22s ease, border-color 0.15s ease;
+}
+.subjects-coverflow .subject-card.is-coverflow-active { box-shadow: var(--shadow-glow); border-color: var(--border-strong); }
+.subjects-coverflow .subject-card:not(.is-coverflow-active) { cursor: pointer; }
+
+.coverflow-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-soft);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  z-index: 60;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.coverflow-nav:hover { background: var(--surface-hover); border-color: var(--border-strong); color: var(--text); }
+.coverflow-nav:disabled { opacity: 0.35; cursor: default; }
+.coverflow-nav:disabled:hover { background: var(--surface); border-color: var(--border); color: var(--text-soft); }
+.coverflow-nav-prev { left: 2px; }
+.coverflow-nav-next { right: 2px; }
+@media (max-width: 640px) {
+  .subjects-coverflow { height: 330px; }
+  .coverflow-nav { width: 34px; height: 34px; }
+  .coverflow-nav-prev { left: 0; }
+  .coverflow-nav-next { right: 0; }
+}
+
 /* ==========================================================
    Subject cards — official design system
    Image strip on top, a circular icon floating over its bottom
@@ -385,7 +441,68 @@ body { font-family: 'Inter', sans-serif; }
 }
 .cover-picker-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
+/* ---------- Editable hero banner ---------- */
+.dashboard-hero {
+  position: relative;
+  height: 230px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--surface-hover), var(--surface-solid));
+  margin-bottom: 1.6rem;
+  border: 1px solid var(--border);
+}
+.dashboard-hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.dashboard-hero-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.5) 70%, rgba(0,0,0,0.72) 100%);
+}
+.dashboard-hero-edit {
+  position: absolute; top: 14px; right: 14px; z-index: 5;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(20,20,20,0.55);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.18); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.dashboard-hero-edit:hover { background: rgba(20,20,20,0.78); }
+.dashboard-hero-text {
+  position: absolute; inset: 0;
+  display: flex; align-items: flex-end;
+  padding: 1.6rem 2rem;
+  z-index: 3;
+}
+.dashboard-hero-text[data-align="center"] { justify-content: center; text-align: center; }
+.dashboard-hero-text[data-align="left"] { justify-content: flex-start; text-align: left; }
+.dashboard-hero-text[data-align="right"] { justify-content: flex-end; text-align: right; }
+.dashboard-hero-tagline {
+  color: #fff;
+  font-size: clamp(1.25rem, 2.4vw, 2rem);
+  font-weight: 700;
+  margin: 0;
+  text-shadow: 0 2px 18px rgba(0,0,0,0.55);
+  max-width: 640px;
+  line-height: 1.25;
+}
+@media (max-width: 640px) {
+  .dashboard-hero { height: 165px; margin-bottom: 1.2rem; }
+  .dashboard-hero-text { padding: 1.1rem 1.2rem; }
+}
+
+.hero-align-row { display: flex; gap: 8px; }
+.hero-align-btn.active { border-color: var(--cyan); color: var(--text); box-shadow: 0 0 0 1px var(--cyan); }
+.hero-cover-preview { width: 96px; height: 56px; border-radius: 8px; }
+
 .thumb-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 0.8rem; }
+
+/* ---------- Lightweight scroll-reveal ----------
+   Deliberately opt-in via JS (reveal-armed), not opt-out: if JS fails to
+   run for any reason, .reveal-on-scroll elements stay fully visible by
+   default instead of silently getting stuck at opacity:0 forever. See
+   initScrollReveal() in dashboard.js. */
+.reveal-on-scroll.reveal-armed { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 0.9, 0.3, 1); }
+.reveal-on-scroll.reveal-armed.is-visible { opacity: 1; transform: none; }
 .thumb { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); }
 .thumb-preview { border-color: var(--cyan-dim); }
 

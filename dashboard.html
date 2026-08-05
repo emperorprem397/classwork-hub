@@ -6,9 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Dashboard — Classwork Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=Space+Grotesk:wght@500;600;700&family=DM+Serif+Display&family=Caveat:wght@600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/theme.css?v=20260823">
-<link rel="stylesheet" href="css/dashboard.css?v=20260824">
+<link rel="stylesheet" href="css/dashboard.css?v=20260825">
 </head>
 <body>
 
@@ -83,8 +83,22 @@
         </div>
       </section>
 
+      <!-- Editable hero banner — shared across the whole class, like
+           subjects. Anyone can personalize the tagline/photo/typography;
+           see openEditHeroModal() in dashboard.js. -->
+      <section id="dashboardHero" class="dashboard-hero reveal-on-scroll">
+        <img id="heroImage" class="dashboard-hero-img" src="" alt="" onerror="this.remove()" />
+        <div class="dashboard-hero-overlay"></div>
+        <button id="editHeroBtn" type="button" class="dashboard-hero-edit" title="Edit hero banner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>
+        </button>
+        <div class="dashboard-hero-text" id="heroTextWrap">
+          <p id="heroTagline" class="dashboard-hero-tagline"></p>
+        </div>
+      </section>
+
       <!-- Profile / XP summary -->
-      <section class="glass profile-card">
+      <section class="glass profile-card reveal-on-scroll">
         <img id="profilePhoto" class="profile-photo" src="" alt="" />
         <div class="profile-info">
           <div class="profile-name" id="profileName">—</div>
@@ -105,7 +119,7 @@
       </section>
 
       <!-- Today's work -->
-      <section>
+      <section class="reveal-on-scroll">
         <div class="section-head">
           <div>
             <h2>Today's Work</h2>
@@ -114,7 +128,15 @@
           <button id="addSubjectBtn" class="btn btn-ghost btn-sm">+ Add subject</button>
         </div>
 
-        <div id="subjectsGrid" class="subjects-grid"></div>
+        <div class="subjects-coverflow-wrap">
+          <button id="coverflowPrev" type="button" class="coverflow-nav coverflow-nav-prev" title="Previous subject" aria-label="Previous subject">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <div id="subjectsGrid" class="subjects-coverflow"></div>
+          <button id="coverflowNext" type="button" class="coverflow-nav coverflow-nav-next" title="Next subject" aria-label="Next subject">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
 
         <div id="emptyState" class="glass empty-state" hidden>
           <p class="empty-title">No subjects added for your class yet.</p>
@@ -228,8 +250,57 @@
   </div>
 </div>
 
+<!-- Edit hero banner modal -->
+<div id="editHeroModal" class="modal-overlay" hidden>
+  <div class="modal glass">
+    <button id="editHeroClose" class="modal-close" aria-label="Close">✕</button>
+    <h3 class="modal-title">Edit hero banner</h3>
+    <p class="modal-date">Visible to your whole class right away — pick a tagline, style, and photo.</p>
+
+    <div class="field-group">
+      <label class="field-label" for="heroTaglineInput">Tagline</label>
+      <input type="text" id="heroTaglineInput" class="text-input" maxlength="80" placeholder="By students, for students." />
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" for="heroFontSelect">Typography</label>
+      <select id="heroFontSelect" class="text-input">
+        <option value="zilla">Zilla Slab — classic serif</option>
+        <option value="playfair">Playfair Display — elegant serif</option>
+        <option value="dmserif">DM Serif Display — dramatic serif</option>
+        <option value="grotesk">Space Grotesk — modern sans</option>
+        <option value="caveat">Caveat — handwritten</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Placement</label>
+      <div class="hero-align-row" id="heroAlignRow">
+        <button type="button" class="btn btn-ghost btn-sm hero-align-btn" data-align="left">Left</button>
+        <button type="button" class="btn btn-ghost btn-sm hero-align-btn" data-align="center">Center</button>
+        <button type="button" class="btn btn-ghost btn-sm hero-align-btn" data-align="right">Right</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Banner photo</label>
+      <div class="cover-picker">
+        <div id="heroCoverPreview" class="cover-preview hero-cover-preview"></div>
+        <div class="cover-picker-actions">
+          <button type="button" id="heroCoverBtn" class="btn btn-ghost btn-sm">Change photo</button>
+          <button type="button" id="heroCoverClear" class="btn btn-ghost btn-sm" hidden>Use default</button>
+        </div>
+      </div>
+      <input type="file" id="heroCoverInput" accept="image/*" hidden />
+    </div>
+
+    <button id="editHeroSubmit" class="btn btn-primary" style="width:100%; margin-top: 0.6rem;">Save banner</button>
+    <p id="editHeroStatus" class="upload-status"></p>
+  </div>
+</div>
+
 <script type="module" src="js/firebase-config.js?v=20260806"></script>
-<script type="module" src="js/dashboard.js?v=20260824"></script>
+<script type="module" src="js/dashboard.js?v=20260825"></script>
 <script type="module" src="js/topbar.js?v=20260806"></script>
 <script src="js/nav.js?v=20260806"></script>
 </body>

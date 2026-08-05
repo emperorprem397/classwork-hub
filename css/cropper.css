@@ -22,6 +22,8 @@
 .cropper-title { font-family: 'Zilla Slab', serif; font-size: 1.1rem; font-weight: 700; color: var(--text); margin: 0 0 2px; }
 .cropper-sub { font-size: 0.8rem; color: var(--text-soft); margin: 0 0 1.1rem; }
 
+.cropper-box-wide { max-width: 380px; }
+
 .cropper-viewport {
   width: 260px; height: 260px;
   max-width: 100%;
@@ -36,6 +38,7 @@
 .cropper-viewport:active { cursor: grabbing; }
 .cropper-viewport.is-circle { border-radius: 50%; }
 .cropper-viewport.is-square { border-radius: var(--radius-md); }
+.cropper-viewport.is-banner { border-radius: var(--radius-md); }
 
 .cropper-img { position: absolute; user-select: none; pointer-events: none; max-width: none; max-height: none; }
 

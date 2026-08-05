@@ -3,13 +3,16 @@
 // person preview an uploaded photo, drag to reposition, and zoom before it
 // gets saved. Used by:
 //   - js/settings.js and js/welcome.js — avatar upload (circle preview)
-//   - js/dashboard.js — subject cover photo upload (square preview)
+//   - js/dashboard.js — subject cover photo upload (square preview) and
+//     the dashboard hero banner upload (wide "banner" preview)
 //
 // Fixes the "any ratio image gets pinched/stretched" issue: instead of
 // silently resizing whatever was picked, the person sees exactly what will
-// be saved (a proper square crop) before confirming.
+// be saved (a proper crop) before confirming.
 //
-// Usage: const blob = await openImageCropper(file, { shape: "circle" | "square", outputSize: 512 });
+// Usage:
+//   openImageCropper(file, { shape: "circle" | "square", outputSize: 512 })
+//   openImageCropper(file, { shape: "banner", outputWidth: 1400, outputHeight: 500 })
 // Resolves to a JPEG Blob on "Use this photo", or null if the person cancels.
 
 let stylesInjected = false;
@@ -26,18 +29,35 @@ function injectStyles() {
 
 export function openImageCropper(file, opts = {}) {
   injectStyles();
-  const shape = opts.shape === "square" ? "square" : "circle";
-  const outputSize = opts.outputSize || 512;
-  const viewport = 260; // px — the visible crop window, fixed regardless of source image size
+  const shape = opts.shape === "square" ? "square" : opts.shape === "banner" ? "banner" : "circle";
+
+  // Circle/square keep the original fixed 260x260 square viewport (and the
+  // simple single outputSize). Banner uses a wide rectangular viewport
+  // scaled down from the requested output aspect ratio, capped so it never
+  // overflows the modal on a small phone screen.
+  let viewportW, viewportH, outputW, outputH;
+  if (shape === "banner") {
+    outputW = opts.outputWidth || 1400;
+    outputH = opts.outputHeight || 500;
+    const maxViewportW = 320;
+    viewportW = maxViewportW;
+    viewportH = Math.round(maxViewportW * (outputH / outputW));
+  } else {
+    viewportW = viewportH = 260;
+    outputW = outputH = opts.outputSize || 512;
+  }
 
   return new Promise((resolve) => {
     const overlay = document.createElement("div");
     overlay.className = "cropper-overlay";
+    const subCopy = shape === "circle" ? "This is how your profile photo will look."
+      : shape === "banner" ? "This is how the banner will look at the top of the dashboard."
+      : "This is how the cover photo will look on the card.";
     overlay.innerHTML = `
-      <div class="cropper-box">
+      <div class="cropper-box${shape === "banner" ? " cropper-box-wide" : ""}">
         <h3 class="cropper-title">Move &amp; zoom</h3>
-        <p class="cropper-sub">${shape === "circle" ? "This is how your profile photo will look." : "This is how the cover photo will look on the card."}</p>
-        <div class="cropper-viewport ${shape === "circle" ? "is-circle" : "is-square"}">
+        <p class="cropper-sub">${subCopy}</p>
+        <div class="cropper-viewport ${shape === "circle" ? "is-circle" : shape === "banner" ? "is-banner" : "is-square"}" style="width:${viewportW}px;height:${viewportH}px;">
           <img class="cropper-img" draggable="false" alt="" />
         </div>
         <input type="range" class="cropper-zoom" min="0" max="100" value="0" aria-label="Zoom" />
@@ -62,8 +82,8 @@ export function openImageCropper(file, opts = {}) {
 
     function clamp() {
       const w = naturalW * scale, h = naturalH * scale;
-      left = Math.min(0, Math.max(viewport - w, left));
-      top  = Math.min(0, Math.max(viewport - h, top));
+      left = Math.min(0, Math.max(viewportW - w, left));
+      top  = Math.min(0, Math.max(viewportH - h, top));
     }
     function render() {
       imgEl.style.width  = `${naturalW * scale}px`;
@@ -76,10 +96,13 @@ export function openImageCropper(file, opts = {}) {
     imgEl.onload = () => {
       naturalW = imgEl.naturalWidth || 1;
       naturalH = imgEl.naturalHeight || 1;
-      minScale = viewport / Math.min(naturalW, naturalH);
+      // Fills the (possibly non-square) viewport on whichever axis is the
+      // tighter constraint, same "cover" behavior as before, generalized
+      // from a single viewport size to independent width/height.
+      minScale = Math.max(viewportW / naturalW, viewportH / naturalH);
       scale = minScale;
-      left = (viewport - naturalW * scale) / 2;
-      top  = (viewport - naturalH * scale) / 2;
+      left = (viewportW - naturalW * scale) / 2;
+      top  = (viewportH - naturalH * scale) / 2;
       clamp();
       render();
     };
@@ -92,7 +115,7 @@ export function openImageCropper(file, opts = {}) {
     function applyZoom(pct) {
       const t = Math.min(100, Math.max(0, pct)) / 100;
       const newScale = minScale * (1 + t * 2); // up to 3x the "fills viewport" scale
-      const cx = viewport / 2, cy = viewport / 2;
+      const cx = viewportW / 2, cy = viewportH / 2;
       const imgX = (cx - left) / scale;
       const imgY = (cy - top) / scale;
       scale = newScale;
@@ -137,13 +160,14 @@ export function openImageCropper(file, opts = {}) {
 
     saveBtn.addEventListener("click", () => {
       const canvas = document.createElement("canvas");
-      canvas.width = outputSize;
-      canvas.height = outputSize;
+      canvas.width = outputW;
+      canvas.height = outputH;
       const ctx = canvas.getContext("2d");
       const sx = -left / scale;
       const sy = -top / scale;
-      const sSize = viewport / scale;
-      ctx.drawImage(imgEl, sx, sy, sSize, sSize, 0, 0, outputSize, outputSize);
+      const sW = viewportW / scale;
+      const sH = viewportH / scale;
+      ctx.drawImage(imgEl, sx, sy, sW, sH, 0, 0, outputW, outputH);
       canvas.toBlob((blob) => {
         cleanup();
         resolve(blob);

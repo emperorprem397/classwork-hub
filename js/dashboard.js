@@ -3,7 +3,7 @@ import { syncThemeFromCloud } from "./theme.js";
 import { onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
-  doc, getDoc, updateDoc, deleteDoc, collection, getDocs, addDoc, query, orderBy, where, limit, runTransaction, serverTimestamp
+  doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, addDoc, query, orderBy, where, limit, runTransaction, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 // NOTE: updateDoc above is reused for both the profile-sync background task
 // and the new "edit subject" feature below — no new imports needed.
@@ -26,8 +26,168 @@ const statStreak    = document.getElementById("statStreak");
 const classLabel    = document.getElementById("classLabel");
 const todayDate     = document.getElementById("todayDate");
 const subjectsGrid  = document.getElementById("subjectsGrid");
+const coverflowPrevBtn = document.getElementById("coverflowPrev");
+const coverflowNextBtn = document.getElementById("coverflowNext");
 const emptyState    = document.getElementById("emptyState");
 const loadingMsg    = document.getElementById("loadingMsg");
+
+// ---------- Hero banner ----------
+const heroSection    = document.getElementById("dashboardHero");
+const heroImage      = document.getElementById("heroImage");
+const heroTextWrap   = document.getElementById("heroTextWrap");
+const heroTagline    = document.getElementById("heroTagline");
+const editHeroBtn    = document.getElementById("editHeroBtn");
+const editHeroModal  = document.getElementById("editHeroModal");
+const editHeroClose  = document.getElementById("editHeroClose");
+const heroTaglineInput = document.getElementById("heroTaglineInput");
+const heroFontSelect   = document.getElementById("heroFontSelect");
+const heroAlignRow     = document.getElementById("heroAlignRow");
+const heroCoverPreview = document.getElementById("heroCoverPreview");
+const heroCoverBtn     = document.getElementById("heroCoverBtn");
+const heroCoverClear   = document.getElementById("heroCoverClear");
+const heroCoverInput   = document.getElementById("heroCoverInput");
+const editHeroSubmit   = document.getElementById("editHeroSubmit");
+const editHeroStatus   = document.getElementById("editHeroStatus");
+
+const HERO_FONTS = {
+  zilla:    "'Zilla Slab', serif",
+  playfair: "'Playfair Display', serif",
+  dmserif:  "'DM Serif Display', serif",
+  grotesk:  "'Space Grotesk', sans-serif",
+  caveat:   "'Caveat', cursive",
+};
+const HERO_DEFAULT_TAGLINE = "By students, for students.";
+const HERO_DEFAULT_IMAGE = "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=1600&h=600&fit=crop&q=80";
+let heroData = { tagline: HERO_DEFAULT_TAGLINE, font: "zilla", align: "left", coverURL: null };
+let pendingHeroCoverBlob = null;
+let heroCoverRemoved = false;
+
+function heroDocRef() {
+  const { schoolId, classId } = currentProfile;
+  return doc(db, "schools", schoolId, "classes", classId, "meta", "hero");
+}
+
+async function loadHero() {
+  try {
+    const snap = await getDoc(heroDocRef());
+    if (snap.exists()) heroData = { ...heroData, ...snap.data() };
+    renderHero();
+  } catch (err) {
+    console.error("Hero load failed, using defaults:", err);
+    try { renderHero(); } catch (_) { /* give up quietly — defaults were already assigned */ }
+  }
+}
+
+function renderHero() {
+  heroImage.src = heroData.coverURL || HERO_DEFAULT_IMAGE;
+  heroTagline.textContent = heroData.tagline || HERO_DEFAULT_TAGLINE;
+  heroTagline.style.fontFamily = HERO_FONTS[heroData.font] || HERO_FONTS.zilla;
+  heroTextWrap.dataset.align = heroData.align || "left";
+}
+
+function openEditHeroModal() {
+  heroTaglineInput.value = heroData.tagline || HERO_DEFAULT_TAGLINE;
+  heroFontSelect.value = heroData.font || "zilla";
+  heroAlignRow.querySelectorAll(".hero-align-btn").forEach((b) =>
+    b.classList.toggle("active", b.dataset.align === (heroData.align || "left"))
+  );
+  pendingHeroCoverBlob = null;
+  heroCoverRemoved = false;
+  heroCoverPreview.style.backgroundImage = `url(${heroData.coverURL || HERO_DEFAULT_IMAGE})`;
+  heroCoverClear.hidden = !heroData.coverURL;
+  editHeroStatus.textContent = "";
+  editHeroModal.hidden = false;
+}
+function closeEditHeroModal() { editHeroModal.hidden = true; }
+
+editHeroBtn.addEventListener("click", openEditHeroModal);
+editHeroClose.addEventListener("click", closeEditHeroModal);
+editHeroModal.addEventListener("click", (e) => { if (e.target === editHeroModal) closeEditHeroModal(); });
+
+heroAlignRow.querySelectorAll(".hero-align-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    heroAlignRow.querySelectorAll(".hero-align-btn").forEach((b) => b.classList.toggle("active", b === btn));
+  });
+});
+
+heroCoverBtn.addEventListener("click", () => heroCoverInput.click());
+heroCoverInput.addEventListener("change", async () => {
+  const file = heroCoverInput.files?.[0];
+  heroCoverInput.value = "";
+  if (!file) return;
+  const cropped = await openImageCropper(file, { shape: "banner", outputWidth: 1600, outputHeight: 600 });
+  if (!cropped) return;
+  pendingHeroCoverBlob = cropped;
+  heroCoverRemoved = false;
+  heroCoverPreview.style.backgroundImage = `url(${URL.createObjectURL(cropped)})`;
+  heroCoverClear.hidden = false;
+});
+heroCoverClear.addEventListener("click", () => {
+  pendingHeroCoverBlob = null;
+  heroCoverRemoved = true;
+  heroCoverPreview.style.backgroundImage = `url(${HERO_DEFAULT_IMAGE})`;
+  heroCoverClear.hidden = true;
+});
+
+editHeroSubmit.addEventListener("click", async () => {
+  editHeroSubmit.disabled = true;
+  editHeroStatus.textContent = "Saving…";
+  try {
+    let coverURL = heroData.coverURL || null;
+    if (pendingHeroCoverBlob) {
+      editHeroStatus.textContent = "Uploading photo…";
+      const formData = new FormData();
+      formData.append("file", pendingHeroCoverBlob, "hero.jpg");
+      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+      formData.append("folder", "hero-banners");
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        { method: "POST", body: formData }
+      );
+      const result = await response.json();
+      if (!result.secure_url) throw new Error(result.error?.message || "Upload failed");
+      coverURL = result.secure_url;
+      editHeroStatus.textContent = "Saving…";
+    } else if (heroCoverRemoved) {
+      coverURL = null;
+    }
+
+    const activeAlignBtn = heroAlignRow.querySelector(".hero-align-btn.active");
+    const newHero = {
+      tagline: heroTaglineInput.value.trim() || HERO_DEFAULT_TAGLINE,
+      font: heroFontSelect.value,
+      align: activeAlignBtn ? activeAlignBtn.dataset.align : "left",
+      coverURL: coverURL || null,
+    };
+    await setDoc(heroDocRef(), newHero, { merge: true });
+    heroData = newHero;
+    renderHero();
+    closeEditHeroModal();
+  } catch (err) {
+    console.error(err);
+    editHeroStatus.textContent = "Couldn't save — check your connection and try again.";
+  } finally {
+    editHeroSubmit.disabled = false;
+  }
+});
+
+// ---------- Lightweight scroll-reveal ----------
+function initScrollReveal() {
+  if (!("IntersectionObserver" in window)) return; // fine — elements are visible by default until "armed"
+  const targets = document.querySelectorAll(".reveal-on-scroll");
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  targets.forEach((el) => {
+    el.classList.add("reveal-armed"); // opt in to the opacity:0 starting state right before observing it
+    observer.observe(el);
+  });
+}
 const signOutBtn    = document.getElementById("signOutBtn");
 const onboardingBanner  = document.getElementById("onboardingBanner");
 const onboardingDismiss = document.getElementById("onboardingDismiss");
@@ -172,6 +332,8 @@ onAuthStateChanged(auth, async (user) => {
 
   renderProfile();
   await loadSubjects();
+  await loadHero();
+  initScrollReveal();
 
   // Clears the "new activity" dot on the Dashboard sidebar item — best-effort,
   // never blocks the page if it fails.
@@ -249,6 +411,8 @@ async function loadSubjects() {
       const entry = entrySnap.exists() ? entrySnap.data() : null;
       subjectsGrid.appendChild(renderSubjectCard(subj, entry, newSubjectNames.has(subj.name)));
     });
+
+    initCoverflow();
   } catch (err) {
     console.error(err);
     loadingMsg.hidden = false;
@@ -270,6 +434,103 @@ async function getRecentlyActiveSubjectNames() {
     console.error("Recent-activity check failed:", err);
     return new Set();
   }
+}
+
+// ---------- Subject coverflow ----------
+// Positions every rendered .subject-card absolutely, centered, offset by
+// distance from coverflowActiveIndex — the classic "coverflow" look:
+// focused card full-size and centered, neighbors shrunk/rotated/faded on
+// either side. Re-initialized every time loadSubjects() rebuilds the grid
+// (add/edit/delete subject, today's rollover, etc.).
+let coverflowActiveIndex = 0;
+let coverflowResizeHandler = null;
+
+function initCoverflow() {
+  const cards = Array.from(subjectsGrid.children);
+  if (!cards.length) return;
+  cards.forEach((card, i) => { card.dataset.index = String(i); });
+
+  // Default focus to the first card with unseen activity (if any) — that's
+  // the one worth surfacing first — otherwise just the first subject.
+  const preferredStart = cards.findIndex((c) => c.classList.contains("subject-card--new"));
+  coverflowActiveIndex = preferredStart >= 0 ? preferredStart : 0;
+
+  renderCoverflow(cards);
+  wireCoverflowInteractions(cards);
+}
+
+function renderCoverflow(cards) {
+  const activeCard = cards[coverflowActiveIndex];
+  const cardWidth = activeCard ? activeCard.getBoundingClientRect().width : 260;
+  const step = Math.max(140, cardWidth * 0.82);
+
+  cards.forEach((card, i) => {
+    const offset = i - coverflowActiveIndex;
+    const abs = Math.abs(offset);
+    const dir = offset < 0 ? 1 : -1; // rotate the far side "away" from center, coverflow-style
+    let scale, opacity, z, rotate;
+    if (abs === 0)      { scale = 1;    opacity = 1;    z = 50; rotate = 0; }
+    else if (abs === 1) { scale = 0.82; opacity = 0.85; z = 40; rotate = dir * 16; }
+    else if (abs === 2) { scale = 0.68; opacity = 0.5;  z = 30; rotate = dir * 22; }
+    else                { scale = 0.6;  opacity = 0;    z = 10; rotate = dir * 22; }
+
+    card.style.transform = `translate(-50%, -50%) translateX(${offset * step}px) scale(${scale}) rotateY(${rotate}deg)`;
+    card.style.opacity = String(opacity);
+    card.style.zIndex = String(z);
+    card.style.pointerEvents = abs > 3 ? "none" : "auto";
+    card.classList.toggle("is-coverflow-active", offset === 0);
+  });
+
+  if (coverflowPrevBtn) coverflowPrevBtn.disabled = coverflowActiveIndex <= 0;
+  if (coverflowNextBtn) coverflowNextBtn.disabled = coverflowActiveIndex >= cards.length - 1;
+}
+
+function setCoverflowActive(idx, cards) {
+  coverflowActiveIndex = Math.min(cards.length - 1, Math.max(0, idx));
+  renderCoverflow(cards);
+}
+
+function wireCoverflowInteractions(cards) {
+  cards.forEach((card) => {
+    // Hovering a side card brings it to focus — matches "hover the other
+    // item and it becomes enlarged" from the reference design.
+    card.addEventListener("mouseenter", () => {
+      const idx = Number(card.dataset.index);
+      if (idx !== coverflowActiveIndex) setCoverflowActive(idx, cards);
+    });
+    // Tapping/clicking a side card (mobile has no hover) focuses it first;
+    // the tap that actually reaches "Upload"/edit/etc. is the *next* one,
+    // once that card is already centered — captured so it fires before the
+    // card's own inner button handlers.
+    card.addEventListener("click", (e) => {
+      const idx = Number(card.dataset.index);
+      if (idx !== coverflowActiveIndex) {
+        e.preventDefault();
+        e.stopPropagation();
+        setCoverflowActive(idx, cards);
+      }
+    }, true);
+  });
+
+  if (coverflowPrevBtn) coverflowPrevBtn.onclick = () => setCoverflowActive(coverflowActiveIndex - 1, cards);
+  if (coverflowNextBtn) coverflowNextBtn.onclick = () => setCoverflowActive(coverflowActiveIndex + 1, cards);
+
+  // Basic swipe for touch devices, since hover doesn't exist there.
+  let touchStartX = null;
+  subjectsGrid.addEventListener("touchstart", (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  subjectsGrid.addEventListener("touchend", (e) => {
+    if (touchStartX === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 40) setCoverflowActive(coverflowActiveIndex + (dx < 0 ? 1 : -1), cards);
+    touchStartX = null;
+  }, { passive: true });
+
+  // Re-space the cards if the viewport is resized (card width changes at
+  // the sm breakpoint). One handler at a time — loadSubjects() can rebuild
+  // the grid more than once per page view (add/edit/delete a subject).
+  if (coverflowResizeHandler) window.removeEventListener("resize", coverflowResizeHandler);
+  coverflowResizeHandler = () => renderCoverflow(cards);
+  window.addEventListener("resize", coverflowResizeHandler);
 }
 
 // A deterministic emoji per subject (same subject always gets the same
