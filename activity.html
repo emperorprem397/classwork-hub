@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/theme.css?v=20260823">
-<link rel="stylesheet" href="css/dashboard.css?v=20260823">
+<link rel="stylesheet" href="css/dashboard.css?v=20260824">
 <link rel="stylesheet" href="css/activity.css?v=20260806">
 </head>
 <body>
@@ -20,15 +20,15 @@
   <aside class="sidebar" id="sidebar">
     <div class="sb-logo"><span class="dot">📖</span> Classwork Hub</div>
     <nav class="sb-nav">
-      <a class="sb-item" href="dashboard.html">🏠 Dashboard<span class="sb-badge" id="sbDashboardBadge" hidden></span></a>
-      <a class="sb-item" href="search.html">🔍 Search</a>
-      <a class="sb-item" href="subjects.html">📚 Subjects</a>
-      <a class="sb-item" href="myuploads.html">📤 My Uploads</a>
-      <a class="sb-item" href="homework.html">🗂️ Work</a>
-      <a class="sb-item" href="leaderboard.html">🏆 Leaderboard</a>
-      <a class="sb-item active" href="activity.html">🔔 Activity<span class="sb-badge" id="sbActivityBadge" hidden></span></a>
-      <a class="sb-item" href="profile.html">👤 Profile</a>
-      <a class="sb-item" href="settings.html">⚙️ Settings</a>
+      <a class="sb-item" href="dashboard.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V9.5"/></svg> Dashboard<span class="sb-badge" id="sbDashboardBadge" hidden></span></a>
+      <a class="sb-item" href="search.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search</a>
+      <a class="sb-item" href="subjects.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5A2.5 2.5 0 016.5 2H20v17H6.5A2.5 2.5 0 004 16.5v-12z"/><path d="M4 16.5A2.5 2.5 0 016.5 19H20"/></svg> Subjects</a>
+      <a class="sb-item" href="myuploads.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg> My Uploads</a>
+      <a class="sb-item" href="homework.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg> Work</a>
+      <a class="sb-item" href="leaderboard.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 01-8 0V4z"/><path d="M8 5H5.5a2 2 0 000 4H8"/><path d="M16 5h2.5a2 2 0 010 4H16"/><path d="M12 13v3.5"/><path d="M9 20h6"/><path d="M9.7 16.5h4.6l.5 3.5H9.2z"/></svg> Leaderboard</a>
+      <a class="sb-item active" href="activity.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8.5a6 6 0 1112 0c0 4 1.5 5.2 2 5.9a.6.6 0 01-.5.9H4.5a.6.6 0 01-.5-.9c.5-.7 2-1.9 2-5.9z"/><path d="M10 19a2 2 0 004 0"/></svg> Activity<span class="sb-badge" id="sbActivityBadge" hidden></span></a>
+      <a class="sb-item" href="profile.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.5 3.5-6 8-6s8 2.5 8 6"/></svg> Profile</a>
+      <a class="sb-item" href="settings.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v2.4M12 18.6V21M4.2 12H1.8M22.2 12h-2.4M6.3 6.3l1.7 1.7M16 16l1.7 1.7M17.7 6.3L16 8M8 16l-1.7 1.7"/></svg> Settings</a>
     </nav>
     <div class="sb-foot">
     </div>
@@ -45,12 +45,12 @@
       </div>
       <div class="topbar-actions">
         <a href="search.html" class="topbar-search" title="Search">
-          <span class="topbar-search-icon">🔍</span><span class="topbar-search-label">Search</span>
+          <span class="topbar-search-icon"><svg class="topbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span><span class="topbar-search-label">Search</span>
         </a>
-        <a href="homework.html" class="icon-btn" title="Work">🗂️</a>
-        <button id="themeToggleBtn" type="button" class="icon-btn" title="Toggle theme">🌓</button>
+        <a href="homework.html" class="icon-btn" title="Work"><svg class="topbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg></a>
+        <button id="themeToggleBtn" type="button" class="icon-btn" title="Toggle theme"><svg class="topbar-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20 14.5A8.5 8.5 0 119.5 4a7 7 0 1010.5 10.5z"/></svg></button>
         <a href="activity.html?tab=chat" class="icon-btn" id="notifBell" title="Class Chat">
-          💬<span class="notif-dot" id="notifDot" hidden></span>
+          <svg class="topbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg><span class="notif-dot" id="notifDot" hidden></span>
         </a>
         <div class="profile-menu">
           <button id="profileAvatarBtn" type="button" class="avatar-btn" aria-label="Account menu" aria-expanded="false">
@@ -58,8 +58,8 @@
           </button>
           <div id="profileDropdown" class="profile-dropdown" hidden>
             <div class="pd-name" id="userName"></div>
-            <a href="profile.html">👤 Profile</a>
-            <a href="settings.html">⚙️ Settings</a>
+            <a href="profile.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.5 3.5-6 8-6s8 2.5 8 6"/></svg> Profile</a>
+            <a href="settings.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v2.4M12 18.6V21M4.2 12H1.8M22.2 12h-2.4M6.3 6.3l1.7 1.7M16 16l1.7 1.7M17.7 6.3L16 8M8 16l-1.7 1.7"/></svg> Settings</a>
             <button id="signOutBtn" class="pd-signout" type="button">Sign out</button>
           </div>
         </div>

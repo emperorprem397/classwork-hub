@@ -20,6 +20,8 @@ const nextNameBtn      = document.getElementById("nextNameBtn");
 
 const googlePhotoPreview = document.getElementById("googlePhotoPreview");
 const letterPreview      = document.getElementById("letterPreview");
+const uploadPhotoPreview = document.getElementById("uploadPhotoPreview");
+const uploadPhotoIcon    = document.getElementById("uploadPhotoIcon");
 const avatarFileInput    = document.getElementById("avatarFileInput");
 const avatarUploadStatus = document.getElementById("avatarUploadStatus");
 const colorPickerRow     = document.getElementById("colorPickerRow");
@@ -109,6 +111,14 @@ avatarFileInput.addEventListener("change", async () => {
   const cropped = await openImageCropper(file, { shape: "circle", outputSize: 512 });
   avatarFileInput.value = "";
   if (!cropped) { avatarMode = "google"; document.querySelector('[data-avatar-mode="google"]').click(); return; }
+
+  // Show the actual cropped photo on the "Upload one" tile right away —
+  // same as Google photo / Just initials already showing a live preview —
+  // instead of leaving the generic camera icon in place. Uses the local
+  // cropped blob, so it shows instantly without waiting on the network.
+  uploadPhotoPreview.src = URL.createObjectURL(cropped);
+  uploadPhotoPreview.hidden = false;
+  uploadPhotoIcon.hidden = true;
 
   avatarUploadStatus.textContent = "Uploading…";
   try {

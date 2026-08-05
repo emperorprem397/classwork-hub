@@ -34,6 +34,8 @@ const NOTIFY_KEYS = {
 // Avatar picker
 const googlePhotoPreview = document.getElementById("googlePhotoPreview");
 const letterPreview      = document.getElementById("letterPreview");
+const uploadPhotoPreview = document.getElementById("uploadPhotoPreview");
+const uploadPhotoIcon    = document.getElementById("uploadPhotoIcon");
 const avatarFileInput    = document.getElementById("avatarFileInput");
 const colorPickerRow     = document.getElementById("colorPickerRow");
 const avatarStatus       = document.getElementById("avatarStatus");
@@ -151,6 +153,13 @@ avatarFileInput.addEventListener("change", async () => {
   const cropped = await openImageCropper(file, { shape: "circle", outputSize: 512 });
   avatarFileInput.value = "";
   if (!cropped) return; // canceled — revert the mode selector back to whatever's currently active
+
+  // Show the actual cropped photo on the "Upload one" tile right away —
+  // same as Google photo / Just initials already showing a live preview —
+  // instead of leaving the generic camera icon in place.
+  uploadPhotoPreview.src = URL.createObjectURL(cropped);
+  uploadPhotoPreview.hidden = false;
+  uploadPhotoIcon.hidden = true;
 
   avatarStatus.textContent = "Uploading…";
   try {
@@ -329,6 +338,25 @@ onAuthStateChanged(auth, async (user) => {
   accountEmail.textContent = user.email || "";
   buildColorSwatches();
   renderLetterPreview();
+
+  // Reflect whichever avatar mode is actually active right now — most
+  // importantly, if the current photo is a previously-uploaded custom one
+  // (not Google's own photo, not a generated letter-avatar), show it on
+  // the "Upload one" tile and mark it active instead of leaving that tile
+  // on its generic camera icon while a custom photo is really in use.
+  const isLetterAvatar = (user.photoURL || "").startsWith("data:image/svg+xml");
+  if (user.photoURL && user.photoURL !== googleOriginalPhoto && !isLetterAvatar) {
+    uploadPhotoPreview.src = user.photoURL;
+    uploadPhotoPreview.hidden = false;
+    uploadPhotoIcon.hidden = true;
+    document.querySelectorAll("[data-avatar-mode]").forEach((b) =>
+      b.classList.toggle("active", b.dataset.avatarMode === "upload")
+    );
+  } else if (isLetterAvatar) {
+    document.querySelectorAll("[data-avatar-mode]").forEach((b) =>
+      b.classList.toggle("active", b.dataset.avatarMode === "letter")
+    );
+  }
 
   const snap = await getDoc(doc(db, "users", user.uid));
   if (!snap.exists()) { window.location.href = "school-select.html"; return; }

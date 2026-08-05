@@ -1,6 +1,6 @@
 # Classwork Hub — Project Progress
 
-**Version:** 1.7 (Round 23 — glassmorphic navbar, standardized confirm dialogs, per-subject "new" glow, onboarding race-condition bug fixed, gray-toned dark theme; subject coverflow carousel + editable hero section still pending)
+**Version:** 1.8 (Round 24 — minimalist line icons for sidebar + navbar, live "Upload one" avatar preview; subject coverflow carousel + editable hero section still pending)
 **Live site:** https://classwork-hub.vercel.app/
 **Stack:** Plain HTML/CSS/JavaScript (ES modules, no bundler/framework) — Firebase Auth (Google popup) + Firestore + Cloudinary (images/PDFs) — hosted on GitHub, deployed on Vercel.
 
@@ -145,6 +145,8 @@ To set this up on a fresh Cloudinary account: create an unsigned upload preset, 
 - [x] Dashboard subject cards show a "new activity" glow + badge for subjects with unseen uploads, on top of the existing sidebar dot
 - [x] Onboarding-skip-after-reset bug found (auth.js race condition) and fixed
 - [x] Matte Dark retoned — layered charcoal grays instead of near-flat black, subtle gradient wash
+- [x] Sidebar + navbar icons replaced with minimalist line-icon SVGs instead of emoji
+- [x] "Upload one" avatar tile now shows an actual live preview of the chosen photo (Welcome wizard + Settings), and Settings restores the correct active tile/preview on reload
 - [ ] Subject cards as a coverflow/3D carousel (center-focused, hover-to-enlarge, beveled-light card treatment) — biggest remaining piece from the reference images
 - [ ] Editable hero section (minimalist hero image + typography-picker tagline) on the dashboard
 - [ ] Activity/Chat page — inherits new colors/sidebar/topbar automatically, page-specific layout not yet reworked to the container style

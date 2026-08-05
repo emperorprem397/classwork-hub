@@ -109,6 +109,12 @@ body { font-family: 'Inter', sans-serif; }
 .sb-item.sb-soon { cursor: default; }
 .sb-item.sb-soon:hover { color: var(--text-soft); background: none; }
 
+/* Minimalist line-icon set — replaces emoji across the sidebar and topbar.
+   currentColor means they inherit whatever color state (default/hover/
+   active) the parent link/button is already in, no extra CSS needed. */
+.nav-icon { width: 18px; height: 18px; flex-shrink: 0; }
+.topbar-icon { width: 17px; height: 17px; flex-shrink: 0; display: block; }
+
 .soon {
   margin-left: auto;
   font-size: 0.62rem;

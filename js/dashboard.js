@@ -322,7 +322,7 @@ function renderSubjectCard(subject, entry, isNew) {
     <div class="subject-card-image" style="--subject-cover: ${subjectCover(subject.name)};">
       <img class="subject-card-photo" src="${coverUrl}" alt="" loading="lazy" onerror="this.remove()" />
     </div>
-    <button class="subject-edit-btn" data-action="edit-subject" title="Edit subject">✎</button>
+    <button class="subject-edit-btn" data-action="edit-subject" title="Edit subject"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>
     <div class="subject-card-body">
       <div class="subject-card-head">
         <div class="subject-name">${escapeHtml(subject.name)}${isNew ? '<span class="badge badge-cyan subject-new-badge">New</span>' : ""}</div>
