@@ -79,6 +79,25 @@ async function loadHero() {
 }
 
 function renderHero() {
+  // Defensive: earlier rounds had this <img> ship with src="" plus an
+  // inline onerror="this.remove()" in the HTML — an empty src fires the
+  // browser's error event immediately during page parse, which ran BEFORE
+  // this module's getElementById() call, so heroImage was already null by
+  // the time any of this code ran (that was the "Cannot set properties of
+  // null (setting 'src')" crash). The <img> no longer has src="" or an
+  // inline onerror, but we still guard here + attach the fallback in JS so
+  // a bad/expired photo URL degrades to the default image (and ultimately
+  // to the plain gradient) instead of ever crashing or vanishing again.
+  if (!heroImage) return;
+  heroImage.onerror = () => {
+    if (heroImage.src !== HERO_DEFAULT_IMAGE) {
+      heroImage.onerror = () => { heroImage.style.display = "none"; };
+      heroImage.src = HERO_DEFAULT_IMAGE;
+    } else {
+      heroImage.style.display = "none"; // gradient background shows through
+    }
+  };
+  heroImage.style.display = "";
   heroImage.src = heroData.coverURL || HERO_DEFAULT_IMAGE;
   heroTagline.textContent = heroData.tagline || HERO_DEFAULT_TAGLINE;
   heroTagline.style.fontFamily = HERO_FONTS[heroData.font] || HERO_FONTS.zilla;

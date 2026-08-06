@@ -158,6 +158,7 @@ body { font-family: 'Inter', sans-serif; }
   align-items: center;
   padding: 0.9rem 1.8rem;
   margin-bottom: 0.5rem;
+  min-height: 78px; /* pinned so .dashboard-hero below can reliably tuck a fixed amount up behind it, see --topbar-h */
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
@@ -444,25 +445,33 @@ body { font-family: 'Inter', sans-serif; }
 .cover-picker-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
 /* ---------- Editable hero banner ----------
-   Full-bleed: negative margins cancel out .content's own padding so the
-   photo runs edge-to-edge (flush with the sidebar and the topbar above
-   it) instead of sitting in a rounded card with visible gutters — the
-   translucent glass topbar (see .topbar) is what reads as "floating on
-   top of the canvas" once there's no gap or border between them. */
+   True full-bleed: the negative top margin cancels BOTH .content's own
+   padding-top AND the sticky .topbar's height + bottom margin (pinned via
+   .topbar's min-height above), pulling the hero all the way up so it
+   starts at the very top of .main — i.e. genuinely BEHIND the topbar, not
+   just flush beneath it. Because .topbar is `position: sticky` with
+   `z-index: 20` (its own stacking context) and this section has no
+   z-index of its own, the topbar always paints on top automatically —
+   its existing translucent .glass-bg + backdrop-blur is what shows the
+   hero photo softly through the nav, matching the reference layout. */
 .dashboard-hero {
   position: relative;
-  height: clamp(360px, 60vh, 600px);
+  height: clamp(420px, 70vh, 680px);
   overflow: hidden;
   background: linear-gradient(135deg, var(--surface-hover), var(--surface-solid));
-  margin: -1.8rem -1.8rem 1.8rem;
+  margin: calc(-78px - 2.3rem) -1.8rem 1.8rem;
 }
 .dashboard-hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .dashboard-hero-overlay {
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.45) 65%, rgba(0,0,0,0.7) 100%);
+  background: linear-gradient(180deg, rgba(0,0,0,0.32) 0%, rgba(0,0,0,0.08) 20%, rgba(0,0,0,0.45) 65%, rgba(0,0,0,0.72) 100%);
 }
 .dashboard-hero-edit {
-  position: absolute; top: 18px; right: 18px; z-index: 5;
+  /* Sits well below the topbar's own footprint (~78px), not at the very
+     top of the section — the section's top ~100px now render underneath
+     the sticky glass topbar, so a button placed at the old top:18px would
+     be covered and unclickable. */
+  position: absolute; top: 100px; right: 18px; z-index: 5;
   width: 36px; height: 36px; border-radius: 50%;
   background: rgba(20,20,20,0.55);
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
@@ -491,7 +500,8 @@ body { font-family: 'Inter', sans-serif; }
   line-height: 1.2;
 }
 @media (max-width: 720px) {
-  .dashboard-hero { height: clamp(280px, 46vh, 420px); margin: -1.2rem -1.2rem 1.4rem; }
+  .dashboard-hero { height: clamp(320px, 56vh, 460px); margin: calc(-70px - 1.7rem) -1.2rem 1.4rem; }
+  .dashboard-hero-edit { top: 92px; }
   .dashboard-hero-text { padding: 1.4rem 1.4rem; }
   .dashboard-hero-tagline { font-size: clamp(1.3rem, 6vw, 1.9rem); }
 }
@@ -539,7 +549,7 @@ body { font-family: 'Inter', sans-serif; }
 @media (max-width: 720px) {
   .sidebar { width: 82vw; max-width: 300px; }
   .content { padding: 1.2rem; }
-  .topbar { padding: 0.9rem 1.1rem; }
+  .topbar { padding: 0.9rem 1.1rem; min-height: 70px; }
   .user-box span { display: none; } /* keep just the photo on narrow screens */
 }
 
