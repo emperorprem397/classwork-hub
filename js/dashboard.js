@@ -491,13 +491,23 @@ function setCoverflowActive(idx, cards) {
 }
 
 function wireCoverflowInteractions(cards) {
+  // Hovering a side card brings it to focus, but with a short "hover
+  // intent" delay — without it, moving the mouse across several cards on
+  // the way to the one you actually want re-centers the layout under your
+  // cursor on every card you pass over, so it feels like the cards are
+  // sprinting away from you and you can never land on the one in the
+  // middle. Requiring the mouse to sit still on a card for ~160ms before
+  // it takes focus fixes that: a fast pass-through no longer triggers
+  // anything, only a deliberate hover does.
+  let hoverTimer = null;
   cards.forEach((card) => {
-    // Hovering a side card brings it to focus — matches "hover the other
-    // item and it becomes enlarged" from the reference design.
     card.addEventListener("mouseenter", () => {
       const idx = Number(card.dataset.index);
-      if (idx !== coverflowActiveIndex) setCoverflowActive(idx, cards);
+      if (idx === coverflowActiveIndex) return;
+      clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(() => setCoverflowActive(idx, cards), 160);
     });
+    card.addEventListener("mouseleave", () => clearTimeout(hoverTimer));
     // Tapping/clicking a side card (mobile has no hover) focuses it first;
     // the tap that actually reaches "Upload"/edit/etc. is the *next* one,
     // once that card is already centered — captured so it fires before the
@@ -507,6 +517,7 @@ function wireCoverflowInteractions(cards) {
       if (idx !== coverflowActiveIndex) {
         e.preventDefault();
         e.stopPropagation();
+        clearTimeout(hoverTimer);
         setCoverflowActive(idx, cards);
       }
     }, true);
@@ -533,16 +544,34 @@ function wireCoverflowInteractions(cards) {
   window.addEventListener("resize", coverflowResizeHandler);
 }
 
-// A deterministic emoji per subject (same subject always gets the same
-// icon, no storage needed) — used by the Premium Showcase theme's popped
-// icon-circle on each subject card. Purely cosmetic; every other theme
-// ignores data-icon entirely.
-const SUBJECT_ICONS = ["📘", "📗", "📙", "📕", "🧮", "🔬", "🎨", "🌍", "🎵", "⚗️", "📐", "🧪"];
-function subjectIcon(name) {
+// Minimalist line-icon per subject, matched by keyword — mirrors the
+// keyword logic in getSubjectCoverImage() (helpers.js) so a "Chemistry"
+// subject consistently gets both the flask photo AND the flask icon.
+// Falls back to a generic graduation-cap icon for anything unmatched,
+// same fallback shape every time (not hash-randomized) since an SVG icon
+// carries meaning — showing the wrong-category icon reads as more broken
+// than reading as generic.
+const SUBJECT_ICON_SVGS = [
+  { match: /chem/i, svg: '<path d="M9 3h6"/><path d="M10 3v6.5L4.5 19a2 2 0 001.7 3h11.6a2 2 0 001.7-3L14 9.5V3"/>' },
+  { match: /phys/i, svg: '<circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><ellipse cx="12" cy="12" rx="9" ry="3.5"/><ellipse cx="12" cy="12" rx="9" ry="3.5" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="3.5" transform="rotate(120 12 12)"/>' },
+  { match: /math/i, svg: '<rect x="5" y="2" width="14" height="20" rx="2"/><rect x="7.5" y="4.5" width="9" height="4" rx="1"/><circle cx="8.5" cy="13" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="13" r="1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="13" r="1" fill="currentColor" stroke="none"/><circle cx="8.5" cy="17" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="17" r="1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="17" r="1" fill="currentColor" stroke="none"/>' },
+  { match: /english|literat/i, svg: '<path d="M4 4.5A2.5 2.5 0 016.5 2H20v17H6.5A2.5 2.5 0 004 16.5v-12z"/><path d="M4 16.5A2.5 2.5 0 016.5 19H20"/>' },
+  { match: /bio/i, svg: '<path d="M5 21c0-9 6-15 15-15 0 9-6 15-15 15z"/><path d="M5 21c3-3 6-9 12-14"/>' },
+  { match: /computer|programming|\bit\b/i, svg: '<polyline points="8 6 3 12 8 18"/><polyline points="16 6 21 12 16 18"/>' },
+  { match: /hist/i, svg: '<path d="M4 21h16"/><path d="M6 21V10"/><path d="M10 21V10"/><path d="M14 21V10"/><path d="M18 21V10"/><path d="M3 10l9-6 9 6"/>' },
+  { match: /geog/i, svg: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c3 4 3 14 0 18"/><path d="M12 3c-3 4-3 14 0 18"/>' },
+  { match: /art|draw/i, svg: '<path d="M12 3a9 9 0 100 18c1.5 0 2-1 2-2s-.5-1.5-.5-2 1-1.5 2-1.5H17a4 4 0 004-4c0-5-4-8.5-9-8.5z"/><circle cx="8" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="8" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="16" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="9" r="1" fill="currentColor" stroke="none"/>' },
+  { match: /music/i, svg: '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>' },
+  { match: /econ|commerce|business/i, svg: '<path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/>' },
+  { match: /sanskrit|hindi/i, svg: '<path d="M4 4.5A2.5 2.5 0 016.5 2H20v17H6.5A2.5 2.5 0 004 16.5v-12z"/><path d="M4 16.5A2.5 2.5 0 016.5 19H20"/>' },
+  { match: /phy(sical)? ?ed|sports|\bpe\b/i, svg: '<circle cx="12" cy="6" r="3"/><path d="M12 9v6"/><path d="M8 12h8"/><path d="M9 21l3-6 3 6"/>' },
+];
+const SUBJECT_ICON_DEFAULT = '<path d="M12 3l10 5-10 5L2 8z"/><path d="M6 10.5V16c0 1.5 2.5 3 6 3s6-1.5 6-3v-5.5"/>';
+function subjectIconSvg(name) {
   const str = String(name || "");
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
-  return SUBJECT_ICONS[hash % SUBJECT_ICONS.length];
+  const found = SUBJECT_ICON_SVGS.find((s) => s.match.test(str));
+  const inner = found ? found.svg : SUBJECT_ICON_DEFAULT;
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
 }
 // A per-subject two-tone cover gradient for the card's image strip — muted
 // enough to sit quietly behind the floating icon in both Matte Dark and
@@ -566,7 +595,6 @@ function subjectCover(name) {
 function renderSubjectCard(subject, entry, isNew) {
   const card = document.createElement("div");
   card.className = "subject-card" + (isNew ? " subject-card--new" : "");
-  card.dataset.icon = subjectIcon(subject.name);
 
   const uploaded = !!entry && (entry.uploadedBy?.length || 0) > 0;
   const uploaderCount = uploaded ? (entry.uploadedBy?.length || 0) : 0;
@@ -583,6 +611,7 @@ function renderSubjectCard(subject, entry, isNew) {
     <div class="subject-card-image" style="--subject-cover: ${subjectCover(subject.name)};">
       <img class="subject-card-photo" src="${coverUrl}" alt="" loading="lazy" onerror="this.remove()" />
     </div>
+    <div class="subject-icon-badge">${subjectIconSvg(subject.name)}</div>
     <button class="subject-edit-btn" data-action="edit-subject" title="Edit subject"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>
     <div class="subject-card-body">
       <div class="subject-card-head">

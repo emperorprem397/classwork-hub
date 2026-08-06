@@ -1,6 +1,6 @@
 # Classwork Hub — Project Progress
 
-**Version:** 1.9 (Round 25 — editable hero banner, subject coverflow carousel, scroll-reveal on dashboard)
+**Version:** 1.10 (Round 26 — hero permissions bug diagnosed [needs manual Firestore rules step], full-bleed hero, coverflow hover fixed + bigger cards, subject line-icons)
 **Live site:** https://classwork-hub.vercel.app/
 **Stack:** Plain HTML/CSS/JavaScript (ES modules, no bundler/framework) — Firebase Auth (Google popup) + Firestore + Cloudinary (images/PDFs) — hosted on GitHub, deployed on Vercel.
 

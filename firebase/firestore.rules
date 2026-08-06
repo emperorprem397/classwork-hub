@@ -139,6 +139,18 @@ service cloud.firestore {
         }
 
         // ========================================================
+        // .../meta/{docId}  <- small class-level settings docs, e.g.
+        // meta/hero (the dashboard's editable hero banner: tagline, font,
+        // alignment, cover photo). Same trust boundary as subjects — any
+        // classmate can edit it, changes are visible to the whole class
+        // right away.
+        // ========================================================
+        match /meta/{docId} {
+          allow read: if inClass(schoolId, classId) || isAdmin();
+          allow write: if isAdmin() || inClass(schoolId, classId);
+        }
+
+        // ========================================================
         // .../activity/{activityId}  <- append-only class activity log.
         // Written alongside subject create/edit/delete and every upload
         // (see helpers.js logActivity()) so the whole class — admin
