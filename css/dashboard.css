@@ -129,25 +129,12 @@ body { font-family: 'Inter', sans-serif; }
 
 .sb-foot { padding: 1rem 1.2rem; border-top: 1px solid var(--border); }
 
-/* Persistent floating sidebar on desktop — matches the reference images.
-   Below the breakpoint it falls back to the original off-canvas drawer
-   (nav.js's toggle/overlay logic is untouched, just gated by width here). */
-@media (min-width: 901px) {
-  .nav-toggle, .nav-overlay { display: none; }
-  .shell { gap: 16px; padding: 16px 16px 16px 0; align-items: flex-start; }
-  .sidebar {
-    position: sticky;
-    top: 16px;
-    left: auto;
-    height: calc(100vh - 32px);
-    transform: none;
-    margin-left: 16px;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-card);
-    background: var(--nav-surface);
-  }
-}
+/* Sidebar is off-canvas (hidden by default, opened via the ⋮ toggle) at
+   every screen width now — including desktop. Previously desktop kept a
+   persistent floating sidebar; the drawer/overlay behavior above already
+   covers all widths on its own, and .main is simply full-width at every
+   breakpoint the same way it already was on mobile. nav.js's own
+   toggle/overlay logic needed no changes — it was never width-gated. */
 
 /* ---------- Main ---------- */
 .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
@@ -166,6 +153,32 @@ body { font-family: 'Inter', sans-serif; }
   position: sticky;
   top: 0;
   z-index: 20;
+}
+
+/* On the dashboard (the only page with a full-viewport hero), the topbar
+   starts fully transparent — just its individual icon "chips" floating
+   directly over the photo, no bar-shaped tint behind them — and only
+   picks up the glass background once the page has been scrolled a bit,
+   toggled via .topbar-solid (see initTopbarScrollEffect in dashboard.js).
+   The page title text has no chip of its own, so it needs an explicit
+   light color + shadow while riding over the photo. */
+.page-has-hero .topbar {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom-color: transparent;
+  transition: background 0.25s ease, backdrop-filter 0.25s ease, border-color 0.25s ease;
+}
+.page-has-hero .topbar.topbar-solid {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom-color: var(--glass-border);
+}
+.page-has-hero .topbar:not(.topbar-solid) .page-title,
+.page-has-hero .topbar:not(.topbar-solid) .page-sub {
+  color: #fff;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);
 }
 
 .page-title {
@@ -456,7 +469,9 @@ body { font-family: 'Inter', sans-serif; }
    hero photo softly through the nav, matching the reference layout. */
 .dashboard-hero {
   position: relative;
-  height: clamp(420px, 70vh, 680px);
+  height: 100vh;
+  height: 100svh; /* dynamic viewport height — ignores the mobile browser's collapsing URL bar so the hero doesn't jump on scroll */
+  min-height: 560px;
   overflow: hidden;
   background: linear-gradient(135deg, var(--surface-hover), var(--surface-solid));
   margin: calc(-78px - 2.3rem) -1.8rem 1.8rem;
@@ -500,7 +515,7 @@ body { font-family: 'Inter', sans-serif; }
   line-height: 1.2;
 }
 @media (max-width: 720px) {
-  .dashboard-hero { height: clamp(320px, 56vh, 460px); margin: calc(-70px - 1.7rem) -1.2rem 1.4rem; }
+  .dashboard-hero { height: 100vh; height: 100svh; min-height: 460px; margin: calc(-70px - 1.7rem) -1.2rem 1.4rem; }
   .dashboard-hero-edit { top: 92px; }
   .dashboard-hero-text { padding: 1.4rem 1.4rem; }
   .dashboard-hero-tagline { font-size: clamp(1.3rem, 6vw, 1.9rem); }

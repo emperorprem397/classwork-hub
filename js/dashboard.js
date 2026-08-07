@@ -191,6 +191,18 @@ editHeroSubmit.addEventListener("click", async () => {
   }
 });
 
+// ---------- Transparent-over-hero topbar, glass once scrolled ----------
+// Only relevant here (dashboard.html is the only page with a full-viewport
+// hero) — see the .page-has-hero CSS scoping in dashboard.css.
+function initTopbarScrollEffect() {
+  const topbar = document.querySelector(".topbar");
+  if (!topbar) return;
+  const SOLID_AT = 32; // px scrolled before the glass background kicks in
+  const update = () => topbar.classList.toggle("topbar-solid", window.scrollY > SOLID_AT);
+  document.addEventListener("scroll", update, { passive: true });
+  update(); // in case the page loads already scrolled (e.g. back-navigation)
+}
+
 // ---------- Lightweight scroll-reveal ----------
 function initScrollReveal() {
   if (!("IntersectionObserver" in window)) return; // fine — elements are visible by default until "armed"
@@ -355,6 +367,7 @@ onAuthStateChanged(auth, async (user) => {
   await loadSubjects();
   await loadHero();
   initScrollReveal();
+  initTopbarScrollEffect();
 
   // Clears the "new activity" dot on the Dashboard sidebar item — best-effort,
   // never blocks the page if it fails.

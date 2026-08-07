@@ -1,6 +1,6 @@
 # Classwork Hub — Project Progress
 
-**Version:** 1.12 (Round 28 — share feature: work/homework/assignments, class chat, dashboard)
+**Version:** 1.13 (Round 29 — OG/Twitter link-preview cards, sidebar off-canvas everywhere, full-viewport hero)
 **Live site:** https://classwork-hub.vercel.app/
 **Stack:** Plain HTML/CSS/JavaScript (ES modules, no bundler/framework) — Firebase Auth (Google popup) + Firestore + Cloudinary (images/PDFs) — hosted on GitHub, deployed on Vercel.
 
