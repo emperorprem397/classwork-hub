@@ -1,0 +1,87 @@
+/* ---------- Share sheet (WhatsApp / Email / Copy link / More) ---------- */
+.share-sheet-backdrop {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex; align-items: flex-end; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+.share-sheet-backdrop.open { opacity: 1; pointer-events: auto; }
+
+.share-sheet {
+  width: 100%; max-width: 420px;
+  background: var(--surface-solid);
+  border: 1px solid var(--border);
+  border-radius: 20px 20px 0 0;
+  padding: 1.3rem 1.3rem 1.5rem;
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.4);
+  transform: translateY(18px);
+  transition: transform 0.2s ease;
+}
+.share-sheet-backdrop.open .share-sheet { transform: translateY(0); }
+
+@media (min-width: 640px) {
+  .share-sheet-backdrop { align-items: center; }
+  .share-sheet { border-radius: 20px; }
+}
+
+.share-sheet-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.share-sheet-title { font-weight: 700; font-size: 1.05rem; color: var(--text); }
+.share-sheet-close {
+  background: none; border: none; color: var(--text-soft); cursor: pointer;
+  font-size: 0.95rem; padding: 6px; line-height: 1; border-radius: 50%;
+}
+.share-sheet-close:hover { background: var(--surface-hover); color: var(--text); }
+
+.share-sheet-options { display: flex; flex-direction: column; gap: 6px; }
+.share-option {
+  display: flex; align-items: center; gap: 12px;
+  padding: 0.8rem 0.85rem; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--text); cursor: pointer; text-align: left;
+  font-size: 0.92rem; font-weight: 500; font-family: inherit;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.share-option:hover { background: var(--surface-hover); border-color: var(--border-strong); }
+.share-option-icon {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface-hover); color: var(--text);
+}
+.share-option-icon svg { width: 16px; height: 16px; }
+
+.share-sheet-hint { margin: 1rem 0 0; font-size: 0.76rem; line-height: 1.45; color: var(--text-faint); }
+
+/* ---------- Inline share buttons dropped next to individual items ---------- */
+.item-share-btn {
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--text-soft); display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; padding: 0;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.item-share-btn:hover { background: var(--surface-hover); color: var(--text); border-color: var(--border-strong); }
+.item-share-btn svg { width: 14px; height: 14px; }
+
+/* Push the share button to the far edge in the two spots it's dropped
+   into — a wrapping flex head (upload feed) and a row with a flex:1 body
+   (assignments) — instead of it crowding whatever precedes it. */
+.upload-feed-head .item-share-btn { margin-left: auto; }
+.hw-row .item-share-btn { margin-top: 1px; }
+
+/* Slightly larger variant used for topbar "Share class" buttons — matches
+   the existing .icon-btn sizing exactly so it sits flush with the other
+   topbar icons (search, theme toggle, chat bell). */
+.icon-btn.share-topbar-btn svg { width: 17px; height: 17px; }
+
+/* Highlight pulse for the specific item a share link deep-links to, once
+   the destination page scrolls it into view (see js/share-target.js). */
+@keyframes shareTargetPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.55); }
+  70%  { box-shadow: 0 0 0 10px rgba(234, 179, 8, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); }
+}
+.share-target-highlight {
+  animation: shareTargetPulse 1.4s ease-out 2;
+  border-color: var(--gold) !important;
+}

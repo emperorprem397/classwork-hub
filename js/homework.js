@@ -5,6 +5,8 @@ import {
   doc, getDoc, setDoc, deleteDoc, collection, addDoc, query, orderBy, getDocs, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { escapeHtml, dateIdOffset, formatDateLabel, typeBadgeHtml } from "./helpers.js";
+import { openShareSheet, buildShareLink, shareButtonHtml } from "./share.js";
+import { highlightShareTarget, getShareParams } from "./share-target.js";
 
 const userPhoto   = document.getElementById("userPhoto");
 const userNameEl  = document.getElementById("userName");
@@ -76,9 +78,23 @@ onAuthStateChanged(auth, async (user) => {
   classLabel.textContent = `Class ${currentProfile.classId}`;
 
   await loadSubjects();
+  applySharedTabParam(); // switch to the tab a share link points at, before the feeds load
   await loadUploadFeed("classwork"); // now the default/active tab
   await loadHomework(); // assignments — loaded eagerly too since it's cheap
+  if (getShareParams().get("tab") === "homework") await loadUploadFeed("homework");
 });
+
+// A share link arrives as ?tab=classwork|homework|assignments (see
+// share-landing.js) — switch to that tab up front so the item being linked
+// to is visible without the visitor having to find + click it themselves.
+function applySharedTabParam() {
+  const tab = getShareParams().get("tab");
+  if (!tab || !panels[tab]) return;
+  const targetBtn = Array.from(tabButtons).find((b) => b.dataset.tab === tab);
+  if (!targetBtn) return;
+  tabButtons.forEach((b) => b.classList.toggle("active", b === targetBtn));
+  Object.entries(panels).forEach(([key, el]) => el.classList.toggle("active", key === tab));
+}
 
 // ---------- Tab switching ----------
 tabButtons.forEach((btn) => {
@@ -134,6 +150,7 @@ async function loadHomework() {
 
       const row = document.createElement("div");
       row.className = `hw-row ${done ? "done" : ""} ${overdue ? "overdue" : ""}`;
+      row.dataset.assignmentId = item.id;
       row.innerHTML = `
         <button class="hw-checkbox ${done ? "checked" : ""}" data-id="${item.id}">${done ? "✓" : ""}</button>
         <div class="hw-body">
@@ -143,10 +160,19 @@ async function loadHomework() {
             ${item.dueDate ? `Due ${item.dueDate}` : "No due date"}${overdue ? " · overdue" : ""}
           </div>
         </div>
+        ${shareButtonHtml()}
       `;
       row.querySelector(".hw-checkbox").addEventListener("click", () => toggleComplete(item.id, done));
+      row.querySelector(".item-share-btn").addEventListener("click", () => {
+        const { schoolId, classId } = currentProfile;
+        const label = `Assignment — ${subjectName}`;
+        const url = buildShareLink({ schoolId, classId, dest: "work", params: { tab: "assignments", assignment: item.id, label } });
+        openShareSheet({ title: label, url });
+      });
       hwList.appendChild(row);
     });
+
+    maybeOpenSharedAssignment();
   } catch (err) {
     console.error(err);
     loadingMsg.hidden = false;
@@ -252,7 +278,7 @@ async function loadUploadFeed(type) {
       const data = snap.data();
       (data.uploads || []).forEach((u) => {
         if (u.type === type) {
-          items.push({ ...u, subjectName: subject.name, dateId });
+          items.push({ ...u, subjectId: subject.id, subjectName: subject.name, dateId });
         }
       });
     });
@@ -270,10 +296,11 @@ async function loadUploadFeed(type) {
     }
 
     els.feed.innerHTML = items.map((item) => `
-      <div class="upload-feed-item">
+      <div class="upload-feed-item" data-subject="${escapeHtml(item.subjectId || "")}" data-date="${escapeHtml(item.dateId)}" data-upload="${escapeHtml(item.id || "")}">
         <div class="upload-feed-head">
           <span class="upload-feed-subject">${escapeHtml(item.subjectName)}</span>
           ${typeBadgeHtml(item.type)}
+          ${shareButtonHtml()}
         </div>
         <div class="upload-feed-meta">${escapeHtml(item.name || "Classmate")} · ${formatDateLabel(item.dateId)}</div>
         ${item.title ? `<div class="upload-group-title">"${escapeHtml(item.title)}"</div>` : ""}
@@ -285,10 +312,59 @@ async function loadUploadFeed(type) {
       </div>
     `).join("");
 
+    els.feed.querySelectorAll(".upload-feed-item").forEach((el) => {
+      const btn = el.querySelector(".item-share-btn");
+      if (!btn) return;
+      btn.addEventListener("click", () => {
+        const { schoolId, classId } = currentProfile;
+        const subjectId = el.dataset.subject;
+        const dateId = el.dataset.date;
+        const uploadId = el.dataset.upload;
+        const subjectName = el.querySelector(".upload-feed-subject")?.textContent || "Classwork";
+        const label = `${subjectName} — ${formatDateLabel(dateId)}`;
+        if (!uploadId) {
+          // Legacy record with no per-upload id — nothing precise to deep-link to.
+          openShareSheet({ title: label, url: buildShareLink({ schoolId, classId, dest: "work", params: { tab: type, subject: subjectId, date: dateId, label } }) });
+          return;
+        }
+        openShareSheet({
+          title: label,
+          url: buildShareLink({ schoolId, classId, dest: "work", params: { tab: type, subject: subjectId, date: dateId, upload: uploadId, label } }),
+        });
+      });
+    });
+
     els.loaded = true;
+    maybeOpenSharedWork(type);
   } catch (err) {
     console.error(err);
     els.loading.hidden = false;
     els.loading.textContent = "Couldn't load uploads — check your connection and refresh.";
   }
+}
+
+// ---------- Auto-open the item a share link points at ----------
+// share-landing.js redirects here with ?tab=<classwork|homework|assignments>
+// plus either (openSubject + openDate [+ openUpload]) or openAssignment.
+// Runs once per matching load — guarded per-call-site below.
+function maybeOpenSharedWork(type) {
+  const p = getShareParams();
+  const tab = p.get("tab");
+  if (tab !== type) return;
+  const subjectId = p.get("openSubject");
+  const dateId = p.get("openDate");
+  const uploadId = p.get("openUpload");
+  if (!subjectId || !dateId) return;
+  const selector = uploadId
+    ? `.upload-feed-item[data-subject="${CSS.escape(subjectId)}"][data-date="${CSS.escape(dateId)}"][data-upload="${CSS.escape(uploadId)}"]`
+    : `.upload-feed-item[data-subject="${CSS.escape(subjectId)}"][data-date="${CSS.escape(dateId)}"]`;
+  highlightShareTarget(selector);
+}
+
+function maybeOpenSharedAssignment() {
+  const p = getShareParams();
+  if (p.get("tab") !== "assignments") return;
+  const assignmentId = p.get("openAssignment");
+  if (!assignmentId) return;
+  highlightShareTarget(`.hw-row[data-assignment-id="${CSS.escape(assignmentId)}"]`);
 }

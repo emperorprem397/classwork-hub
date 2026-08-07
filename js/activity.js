@@ -9,6 +9,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { escapeHtml, ACTIVITY_META, timeAgo } from "./helpers.js";
 import { confirmDialog } from "./confirm-dialog.js";
+import { openShareSheet, buildShareLink } from "./share.js";
 
 const userPhoto    = document.getElementById("userPhoto");
 const userNameEl   = document.getElementById("userName");
@@ -56,6 +57,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   classLabel.textContent = `Class ${currentProfile.classId}`;
+  wireShareClassBtn();
   await loadActivity();
   startChatListener();
   startTypingListener();
@@ -67,6 +69,20 @@ onAuthStateChanged(auth, async (user) => {
     lastSeenChat: serverTimestamp(),
   }).catch((err) => console.error("lastSeen sync failed:", err));
 });
+
+// ---------- Share class chat ----------
+function wireShareClassBtn() {
+  const btn = document.getElementById("shareClassBtn");
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    const { schoolId, classId } = currentProfile;
+    const label = `Class ${classId} chat`;
+    openShareSheet({
+      title: label,
+      url: buildShareLink({ schoolId, classId, dest: "chat", params: { label } }),
+    });
+  });
+}
 
 // ---------- Tab switching ----------
 function switchToTab(tab) {

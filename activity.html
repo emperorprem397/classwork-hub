@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="css/theme.css?v=20260823">
 <link rel="stylesheet" href="css/dashboard.css?v=20260824">
 <link rel="stylesheet" href="css/activity.css?v=20260806">
+<link rel="stylesheet" href="css/share.css?v=20260827">
 </head>
 <body>
 
@@ -48,6 +49,9 @@
           <span class="topbar-search-icon"><svg class="topbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span><span class="topbar-search-label">Search</span>
         </a>
         <a href="homework.html" class="icon-btn" title="Work"><svg class="topbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg></a>
+        <button id="shareClassBtn" type="button" class="icon-btn share-topbar-btn" title="Invite classmates to chat">
+          <svg class="topbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.6" x2="15.4" y2="6.4"/><line x1="8.6" y1="13.4" x2="15.4" y2="17.6"/></svg>
+        </button>
         <button id="themeToggleBtn" type="button" class="icon-btn" title="Toggle theme"><svg class="topbar-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20 14.5A8.5 8.5 0 119.5 4a7 7 0 1010.5 10.5z"/></svg></button>
         <a href="activity.html?tab=chat" class="icon-btn" id="notifBell" title="Class Chat">
           <svg class="topbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg><span class="notif-dot" id="notifDot" hidden></span>
@@ -109,7 +113,7 @@
 </div>
 
 <script type="module" src="js/firebase-config.js?v=20260806"></script>
-<script type="module" src="js/activity.js?v=20260823"></script>
+<script type="module" src="js/activity.js?v=20260827"></script>
 <script type="module" src="js/topbar.js?v=20260806"></script>
 <script src="js/nav.js?v=20260806"></script>
 </body>

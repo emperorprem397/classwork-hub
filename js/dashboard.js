@@ -14,6 +14,7 @@ import {
 } from "./helpers.js";
 import { openImageCropper } from "./cropper.js";
 import { confirmDialog } from "./confirm-dialog.js";
+import { openShareSheet, buildShareLink } from "./share.js";
 
 const userPhoto     = document.getElementById("userPhoto");
 const userNameEl    = document.getElementById("userName");
@@ -350,6 +351,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   renderProfile();
+  wireShareClassBtn();
   await loadSubjects();
   await loadHero();
   initScrollReveal();
@@ -383,6 +385,20 @@ onAuthStateChanged(auth, async (user) => {
     }).catch((err) => console.error("Background profile sync failed:", err));
   }
 });
+
+// ---------- Share class ----------
+function wireShareClassBtn() {
+  const btn = document.getElementById("shareClassBtn");
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    const { schoolId, classId } = currentProfile;
+    const label = `Class ${classId}`;
+    openShareSheet({
+      title: label,
+      url: buildShareLink({ schoolId, classId, dest: "dashboard", params: { label } }),
+    });
+  });
+}
 
 function renderProfile() {
   profilePhoto.src = currentUser.photoURL || "";

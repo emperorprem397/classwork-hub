@@ -1,6 +1,6 @@
 # Classwork Hub — Project Progress
 
-**Version:** 1.11 (Round 27 — hero `<img>` null-reference crash actually fixed, hero now tucks behind the topbar)
+**Version:** 1.12 (Round 28 — share feature: work/homework/assignments, class chat, dashboard)
 **Live site:** https://classwork-hub.vercel.app/
 **Stack:** Plain HTML/CSS/JavaScript (ES modules, no bundler/framework) — Firebase Auth (Google popup) + Firestore + Cloudinary (images/PDFs) — hosted on GitHub, deployed on Vercel.
 
@@ -30,12 +30,13 @@ day one), with a lightweight XP/streak/rank system for engagement.
 ## Folder structure
 
 ```
-/                     — index.html (landing), welcome.html, school-select.html
+/                     — index.html (landing), welcome.html, school-select.html, share.html (share-link landing)
 /admin                — self-contained admin panel (own inline script, no
                          shared imports — deliberate, keeps it dependency-free)
 /css                  — one stylesheet per page + shared theme.css
 /js                   — one module per page + shared modules:
-                         firebase-config.js, helpers.js, theme.js, nav.js, topbar.js
+                         firebase-config.js, helpers.js, theme.js, nav.js, topbar.js,
+                         share.js, share-target.js, share-landing.js
 /firebase             — firestore.rules, storage.rules (Storage is unused —
                          locked to allow read,write: if false)
 PROJECT_PROGRESS.md   — this file (current state)
@@ -66,6 +67,7 @@ so it was kept as-is rather than churned for its own sake.
 - **Top navbar** — search shortcut, theme toggle, notification bell (unread dots for chat/activity/dashboard), profile dropdown
 - **Settings** — tabbed (Account/Appearance/Notifications/Privacy/About), avatar picker (Google photo/upload/colored initials), Contact Admin (WhatsApp/email/in-app), "Start Fresh" account reset
 - **Admin panel** — schools/classes/subjects/users management, Pending Schools approval, Messages inbox, Activity Log, Browse Classes (join-free browsing of any school/class's subjects/students/uploads), admin superpowers within a joined class (delete any upload, moderate any chat message)
+- **Share** — minimalist share icon on every Classwork/Homework upload, every Assignment, plus a "Share class" icon in Class Chat and the Dashboard topbar; WhatsApp/Email/Copy link bottom sheet. Links open `share.html` — a bare Google sign-in, no wizard — which quick-joins a brand-new visitor straight into the linked class (Google name/photo as defaults) and redirects them straight to the shared item.
 
 ---
 
