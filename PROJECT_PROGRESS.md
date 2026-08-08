@@ -1,6 +1,6 @@
 # Classwork Hub — Project Progress
 
-**Version:** 1.13 (Round 29 — OG/Twitter link-preview cards, sidebar off-canvas everywhere, full-viewport hero)
+**Version:** 1.14 (Round 30 — landing page premium redesign: matte black + cyan, real 3D notebook, real dark/light themes)
 **Live site:** https://classwork-hub.vercel.app/
 **Stack:** Plain HTML/CSS/JavaScript (ES modules, no bundler/framework) — Firebase Auth (Google popup) + Firestore + Cloudinary (images/PDFs) — hosted on GitHub, deployed on Vercel.
 
@@ -36,7 +36,7 @@ day one), with a lightweight XP/streak/rank system for engagement.
 /css                  — one stylesheet per page + shared theme.css
 /js                   — one module per page + shared modules:
                          firebase-config.js, helpers.js, theme.js, nav.js, topbar.js,
-                         share.js, share-target.js, share-landing.js
+                         share.js, share-target.js, share-landing.js, landing.js
 /firebase             — firestore.rules, storage.rules (Storage is unused —
                          locked to allow read,write: if false)
 PROJECT_PROGRESS.md   — this file (current state)
